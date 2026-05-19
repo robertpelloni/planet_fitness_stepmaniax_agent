@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4]
+- Concluded internal agent implementation cycles. Remaining tasks marked as blocked due to requiring external credentials (LinkedIn Sales Navigator) and manual data gathering.
+
 ## [0.1.3]
 - Implemented `pilot-mou.md` containing the Phase 4.1 Memorandum of Understanding template.
 - Updated TODO.md to mark Phase 4.1 as complete.
