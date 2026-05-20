@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6]
+- Created `scrape_leads.py` as a generic template to unblock Phase 2.1 data gathering.
+- Created `requirements.txt` to track new Python dependencies (requests, beautifulsoup4).
+- Updated `DEPLOY.md` to document the Python execution environment.
+- Added `.gitignore` and `.env.example` to enforce secret management and keep binaries out of version control.
+
 ## [0.1.5]
 - Unblocked Phase 1.1: Successfully extracted StepManiaX cabinet dimensions from stepmaniax.com.
 - Updated `pitch-deck.md` and `pilot-mou.md` to reflect real-world machine footprint dimensions, replacing placeholder estimates.

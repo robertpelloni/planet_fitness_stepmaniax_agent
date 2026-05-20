@@ -18,7 +18,7 @@
 7. **Documentation gaps:** None. All standard documentation files have been initialized and are up to date.
 8. **Dependency/library/submodule gaps:** No dependencies exist.
 9. **Deployment/versioning gaps:** Versioning is active via `VERSION.md`. Deployment is N/A.
-10. **Next highest-impact implementation tasks:** **PROJECT HALTED.** Phase 1.1 specs have been researched and implemented. The remaining Phase 2 tasks require external action, credentials, or manual web scraping that fall under the instruction's stop conditions.
+10. **Next highest-impact implementation tasks:** **PROJECT HALTED.** Phase 1.1 specs have been researched and implemented. Phase 2.1 has been unblocked by providing generic Python scraping scaffolding, but actual target execution still requires external credentials or manual web scraping that fall under the instruction's stop conditions.
 
 ### Missing Files Explicitly Noted:
 Prior to this overall audit process, the following requested files were **missing** (they have since been created):
@@ -28,15 +28,19 @@ Prior to this overall audit process, the following requested files were **missin
 No archived documentation or conversation logs are available.
 
 ### Dependency Inventory
-No major libraries, packages, or submodules are currently in use. This project is entirely documentation and sales-assets at this stage.
+The project has moved beyond pure documentation. The following dependencies have been added to support Phase 2.1 data gathering:
+- **requests (v2.31.0):** Standard library for making HTTP requests in the `scrape_leads.py` utility.
+- **beautifulsoup4 (v4.12.3):** Library for parsing HTML DOM structures in the `scrape_leads.py` utility.
+- No submodules are in use.
 
 ### Changes Made During this Cycle
-- Extracted exact cabinet dimensions from the official StepManiaX website.
-- Updated `pitch-deck.md` and `pilot-mou.md` to replace placeholder dimensions with real-world footprint configurations.
-- Incremented `VERSION.md` to 0.1.5 and updated `CHANGELOG.md` and `TODO.md` to reflect Phase 1.1 unblocking.
+- Created a generic web scraper template (`scrape_leads.py`) to serve as the scaffolding for Phase 2.1.
+- Created `requirements.txt` to track Python data-gathering dependencies.
+- Updated `DEPLOY.md` to include Python environment setup and execution instructions.
+- Incremented `VERSION.md` to 0.1.6 and updated `CHANGELOG.md` and `TODO.md` to reflect Phase 2.1 unblocking.
 
 ### Test / Build Status
-There is no executable code in the project currently, only markdown documentation. Therefore, no tests, linting, or build commands can be run.
+The project now includes Python executable code (`scrape_leads.py`). Code can be linted/syntax-checked via `python3 -m py_compile scrape_leads.py`. No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.
 
 ### Recommended Next Steps
 - **External Action Required:** The remaining actionable tasks in `TODO.md` (Phase 2.1, Phase 2.2) require human intervention. An operator must use LinkedIn Sales Navigator to scrape leads and identify decision-makers for Planet Fitness franchise groups in Michigan.
