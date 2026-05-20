@@ -42,6 +42,11 @@ The project has moved beyond pure documentation. The following dependencies have
 
 ### Test / Build Status
 The project includes Python executable code (`scrape_leads.py`) and a bash execution script (`pipeline.sh`). Both pass syntax checks (`bash -n pipeline.sh` and `python3 -m py_compile scrape_leads.py`). No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.
+- Implemented `kpi-tracker.md` to establish the tracking system for Agent Performance Metrics (Leads, Outreach, Discovery Calls).
+- Incremented `VERSION.md` to 0.1.7 and updated `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
+
+### Test / Build Status
+The project now includes Python executable code (`scrape_leads.py`). Code can be linted/syntax-checked via `python3 -m py_compile scrape_leads.py`. No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.
 
 ### Recommended Next Steps
 - **External Action Required:** The remaining actionable tasks in `TODO.md` (Phase 2.1, Phase 2.2) require human intervention. An operator must use LinkedIn Sales Navigator to scrape leads and identify decision-makers for Planet Fitness franchise groups in Michigan.
