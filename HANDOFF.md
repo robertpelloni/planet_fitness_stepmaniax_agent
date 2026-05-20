@@ -36,17 +36,12 @@ The project has moved beyond pure documentation. The following dependencies have
 - No submodules are in use.
 
 ### Changes Made During this Cycle
-- Implemented `pipeline.sh` to fully automate Python environment creation, dependency installation, and scraper execution.
-- Integrated the automation instructions into `README.md`.
-- Incremented `VERSION.md` to 0.2.0 and updated `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
+- Executed a major documentation overhaul, rewriting `README.md` from the original brainstorming text into a structured technical/strategic overview reflecting the hybrid B2B/Python architecture.
+- Ensured `README.md` explicitly defines the project's goal as an autonomous AI agent case study targeting the "Rogue Franchise Loophole."
+- Incremented `VERSION.md` to 0.3.0 and updated `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
 
 ### Test / Build Status
 The project includes Python executable code (`scrape_leads.py`) and a bash execution script (`pipeline.sh`). Both pass syntax checks (`bash -n pipeline.sh` and `python3 -m py_compile scrape_leads.py`). No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.
-- Implemented `kpi-tracker.md` to establish the tracking system for Agent Performance Metrics (Leads, Outreach, Discovery Calls).
-- Incremented `VERSION.md` to 0.1.7 and updated `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
-
-### Test / Build Status
-The project now includes Python executable code (`scrape_leads.py`). Code can be linted/syntax-checked via `python3 -m py_compile scrape_leads.py`. No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.
 
 ### Recommended Next Steps
 - **External Action Required:** The remaining actionable tasks in `TODO.md` (Phase 2.1, Phase 2.2) require human intervention. An operator must use LinkedIn Sales Navigator to scrape leads and identify decision-makers for Planet Fitness franchise groups in Michigan.

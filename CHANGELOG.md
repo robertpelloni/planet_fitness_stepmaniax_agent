@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0]
+- Major documentation overhaul: Rewrote `README.md` to reflect the actual repository architecture (hybrid B2B collateral workspace and Python data-gathering utility).
+- Updated README to clearly outline the overarching autonomous agent case-study goals and the 4-Phase SOP execution pipeline.
+
 ## [0.2.0]
 - Added `pipeline.sh` to automate the Python virtual environment setup, dependency installation, and execution of the lead scraping utility.
 - Updated `README.md` to include instructions for the new automated execution pipeline.
