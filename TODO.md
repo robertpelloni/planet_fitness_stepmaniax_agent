@@ -11,5 +11,4 @@ Ordered by priority:
 7. [x] **Phase 2.1 (Automation):** Implement `pipeline.sh` to automate environment setup and script execution.
 8. [ ] **BLOCKED - Phase 2.2:** Target Decision Makers (requires LinkedIn Sales Navigator credentials to collect leads).
 9. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-7. [ ] **BLOCKED - Phase 2.2:** Target Decision Makers (requires LinkedIn Sales Navigator credentials to collect leads).
-8. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+10. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
