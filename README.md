@@ -122,6 +122,19 @@ Here is a comprehensive, production-ready Standard Operating Procedure (SOP) and
 
 This plan is optimized for the franchisee loophole, bypassing corporate entirely and focusing on local/regional decision-makers near you in Michigan.
 
+Automated Pipeline Execution
+To accelerate Phase 2 (Lead Generation), this repository includes an automated Python scraping pipeline.
+
+Instead of manually configuring the environment, operators can run the entire technical setup and scraping process with a single command:
+`./pipeline.sh`
+
+This script will:
+1. Verify Python 3 installation.
+2. Build and activate a safe Python virtual environment (`venv`).
+3. Install the required web scraping dependencies (`requests`, `beautifulsoup4`).
+4. Check for the required `.env` secrets file (to prevent unauthenticated failure against directories like LinkedIn).
+5. Execute the `scrape_leads.py` utility.
+
 SOP: Commercial Placement Campaign – StepManiaX in Planet Fitness
 Objective: Secure a pilot placement contract for a StepManiaX (SMX) commercial unit within a regional Planet Fitness franchise group.
 
