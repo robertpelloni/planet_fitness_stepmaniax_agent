@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0]
+- Added `pipeline.sh` to automate the Python virtual environment setup, dependency installation, and execution of the lead scraping utility.
+- Updated `README.md` to include instructions for the new automated execution pipeline.
+
 ## [0.1.7]
 - Created `kpi-tracker.md` to track Agent Performance Metrics (Leads Generated, Outreach Volume, Discovery Calls).
 - Updated `TODO.md` to reflect the addition of the KPI tracking mechanism.
