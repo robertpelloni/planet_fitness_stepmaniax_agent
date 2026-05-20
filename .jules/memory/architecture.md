@@ -1,26 +1,27 @@
 # Project Architecture, Patterns, and Decisions Summary
 
-## 1. Project Nature & Architecture
-This repository functions exclusively as a **B2B sales and business development workspace**. There is no traditional executable software code. The architecture is composed of interconnected Markdown documents organized to manage a multi-phase sales pipeline, specifically targeting regional Planet Fitness Franchise Groups to deploy StepManiaX (SMX) commercial units.
+## 1. Repository Architecture & Purpose
+This project operates as a hybrid **B2B sales workspace and data-gathering utility**. The primary architecture consists of structured Markdown documents designed to manage a multi-phase sales pipeline. The target is regional Planet Fitness Franchise Groups to deploy StepManiaX (SMX) commercial cardio units. Secondary to the documentation, it contains Python-based utility scaffolding (`scrape_leads.py`) for automated B2B lead generation.
 
 ## 2. Core Strategic Decisions
-* **The "Rogue Franchise" Loophole:** A central strategic decision to bypass the impenetrable Planet Fitness corporate procurement process and exclusively target regional Franchise Groups with local operational leeway.
-* **Zero-Risk Pilot Framework:** The core sales offer revolves around proposing a 90-day, $0 hardware lease trial to track member retention and engagement metrics to prove value before attempting larger procurement contracts.
+* **The "Rogue Franchise" Loophole:** The foundational sales strategy bypasses the impenetrable Planet Fitness corporate procurement process and exclusively targets regional Franchise Groups that possess local operational leeway.
+* **Zero-Risk Pilot Framework:** The core B2B offer is a 90-day, $0 hardware lease trial designed to track member retention. This mitigates gym owner risk, solves immediate "maintenance/noise" objections upfront, and serves as a trigger for larger regional commercial contracts.
 
 ## 3. Communication Patterns & Terminology
-All assets and AI-generated content adhere to a strict corporate fitness tone:
-* **Banned Terminology:** "Arcade", "video game", "gamer".
-* **Preferred Terminology:** "Next-Generation Gamified HIIT", "Interactive Cardio", "Member Retention", "Low-Impact Cardio", "Commercial-Grade Kiosk".
-* **Tone:** Professional, B2B sales-oriented, focusing on ROI, member retention, and gym floor etiquette.
+All generated assets (pitch decks, outreach emails, MOUs) and internal documentation strictly adhere to a corporate fitness tone to align with gym executive expectations:
+* **Banned Terminology:** "Arcade," "video game," "gamer," and typical rhythm game jargon.
+* **Preferred Terminology:** "Next-Generation Gamified HIIT," "Interactive Cardio," "Member Retention," "Low-Impact Cardio," and "Commercial-Grade Kiosk."
+* **Tone:** Professional, B2B sales-oriented, highly focused on ROI, member retention, liability mitigation, and cardio floor etiquette.
 
-## 4. Documentation & File Structure Patterns
-The repository uses standard open-source documentation file structures, adapted for business development:
-* **Strategic Foundation:** `VISION.md` and `ROADMAP.md` define the long-term goal and the 4-Phase pipeline.
-* **Project Management:** `TODO.md` tracks actionable priorities, and `HANDOFF.md` rigorously records the current project state, completed work per cycle, missing files, and next immediate tasks.
-* **Assets / Deliverables:** Tangible business collateral is created as separate markdown files, such as `pitch-deck.md` (Phase 1) and `outreach-script.md` (Phase 3).
-* **AI Instruction Framework:** A central `AGENTS.md` file dictates universal rules (tone, versioning, secrets), with model-specific files (`CLAUDE.md`, `GPT.md`, etc.) inheriting from it, keeping behavioral instructions DRY (Don't Repeat Yourself).
+## 4. Documentation & State Management Patterns
+The repository relies on standard open-source documentation practices to manage its workflow:
+* **Strategic Foundation:** `VISION.md` and `ROADMAP.md` define the long-term goals and the 4-Phase execution pipeline.
+* **Project Management & Handoff:** `TODO.md` tracks actionable priorities. `HANDOFF.md` acts as a rigorous state-tracker, recording completed work per cycle, missing files, test status, dependencies, and immediate next tasks/blockers.
+* **Campaign Tracking:** `kpi-tracker.md` is utilized to monitor human and agent execution volume (Leads Generated, Outreach Volume, Discovery Calls).
+* **AI Instruction Framework (DRY):** A central `AGENTS.md` file dictates universal AI rules (tone, versioning, secrets management), with model-specific files inheriting from it to keep behavioral instructions DRY.
+* **Versioning:** `VERSION.md` is strictly maintained as the single source of truth (currently at `v0.1.7`), ensuring alignment with `CHANGELOG.md` and commit messages.
 
-## 5. Versioning & Deployment Decisions
-* **Single Source of Truth:** `VERSION.md` is strictly maintained as the single source of truth for the project version (currently at `0.1.2`), which must align with `CHANGELOG.md` and commit messages. 
-* **Deployment & Testing:** As there is no executable code, deployment and testing are currently non-applicable. Any future scripts must document their setup in `DEPLOY.md`.
-* **Secrets Management:** A strict rule prevents committing API keys. Any future secrets must use `.env.example` placeholders, as noted in `DEPLOY.md` and `AGENTS.md`.
+## 5. Security & Execution Boundaries
+* **Secrets Management:** A strict rule prevents committing API keys, credentials, or proprietary URLs. The project relies on `.env.example` placeholders, and operators must define secrets locally in an untracked `.env` file (enforced by `.gitignore`).
+* **Environment Integrity:** Python dependencies are tracked strictly in `requirements.txt`. The `.gitignore` file enforces that no compiled binaries (`__pycache__`) or local virtual environments (`venv`) are tracked.
+* **Autonomous Stop Conditions:** The agent is trained to proactively halt cycles and mark tasks as "BLOCKED" if a task becomes ambiguous, requires manual external human action, or requires unavailable credentials/API keys (such as LinkedIn Sales Navigator credentials). This ensures the agent does not hallucinate data for Phase 2 tasks.
