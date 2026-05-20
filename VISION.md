@@ -1,0 +1,9 @@
+# Vision Document
+
+## Long-term Product Goal
+The long-term goal of this project is to successfully persuade Planet Fitness to deploy StepManiaX (SMX) commercial units within their locations, transforming tedious cardio workouts into high-engagement, gamified High-Intensity Interval Training (HIIT) experiences.
+
+## Design Direction
+The strategy focuses on an initial "rogue franchise loophole"—bypassing the rigid and impenetrable corporate monopoly by targeting regional Franchise Group owners who have the operational leeway to experiment with amenities.
+
+The approach is strictly B2B and commercial. We must strip away arcade and gaming terminology, instead framing StepManiaX as a highly durable, zero-risk, high-retention fitness tool. The ultimate end-state is proving the concept via a 90-day pilot program, leveraging user engagement data to trigger a broader regional procurement contract.
