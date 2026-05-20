@@ -10,6 +10,7 @@
    - Implemented "Interactive Cardio" Pitch Deck (`pitch-deck.md`).
    - Implemented Outreach & Objection Handling Script (`outreach-script.md`).
    - Implemented Pilot Memorandum of Understanding (`pilot-mou.md`).
+   - Implemented Agent Performance Metrics KPI Tracker (`kpi-tracker.md`).
 2. **Partially implemented features:** None.
 3. **Backend features not wired to the frontend:** N/A
 4. **UI features that are missing, hidden, underrepresented, or unpolished:** N/A (No UI code exists yet).
@@ -34,10 +35,8 @@ The project has moved beyond pure documentation. The following dependencies have
 - No submodules are in use.
 
 ### Changes Made During this Cycle
-- Created a generic web scraper template (`scrape_leads.py`) to serve as the scaffolding for Phase 2.1.
-- Created `requirements.txt` to track Python data-gathering dependencies.
-- Updated `DEPLOY.md` to include Python environment setup and execution instructions.
-- Incremented `VERSION.md` to 0.1.6 and updated `CHANGELOG.md` and `TODO.md` to reflect Phase 2.1 unblocking.
+- Implemented `kpi-tracker.md` to establish the tracking system for Agent Performance Metrics (Leads, Outreach, Discovery Calls).
+- Incremented `VERSION.md` to 0.1.7 and updated `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
 
 ### Test / Build Status
 The project now includes Python executable code (`scrape_leads.py`). Code can be linted/syntax-checked via `python3 -m py_compile scrape_leads.py`. No formal unit tests exist yet for the scraper, as it is a generic template requiring target-specific implementation by the operator.

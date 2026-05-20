@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7]
+- Created `kpi-tracker.md` to track Agent Performance Metrics (Leads Generated, Outreach Volume, Discovery Calls).
+- Updated `TODO.md` to reflect the addition of the KPI tracking mechanism.
+
 ## [0.1.6]
 - Created `scrape_leads.py` as a generic template to unblock Phase 2.1 data gathering.
 - Created `requirements.txt` to track new Python dependencies (requests, beautifulsoup4).

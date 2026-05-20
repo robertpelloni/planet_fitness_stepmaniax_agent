@@ -9,3 +9,4 @@ Ordered by priority:
 5. [x] **Phase 1.1:** Gather Manufacturer Specs and Alignment details (Specs retrieved; dimensions added to assets).
 6. [x] **Phase 2.1:** Identify Local Franchise Powerhouses in target region (Generic python scraping scaffolding implemented; execution blocked pending target URLs).
 7. [ ] **BLOCKED - Phase 2.2:** Target Decision Makers (requires LinkedIn Sales Navigator credentials to collect leads).
+8. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
