@@ -30,7 +30,10 @@ StepManiaX (SMX) is the solution. It transforms tedious cardio into a gamified, 
 The SMX Kiosk is designed for the rigorous demands of commercial environments, completely distinct from older arcade hardware.
 
 - **Industrial-Grade Construction:** Built with heavy-duty steel and reinforced load cells capable of withstanding constant impact.
-- **Compact Footprint:** Requires minimal floor space (approx. 4' x 5') compared to traditional cardio equipment.
+- **Compact Footprint:** Available in three configurations to fit any cardio floor layout:
+  - 75" Width × 95" Depth × 95" Height
+  - 70" Width × 88" Depth × 95" Height
+  - 70" Width × 74" Depth × 84" Height
 - **Low Power Consumption:** Operates efficiently on standard 120V power.
 - **Sleek Interface:** Touchscreen UI designed for fast, intuitive user flow on the gym floor.
 - **Quiet Operation:** Can be configured to run exclusively via a standard 3.5mm headphone jack or Bluetooth sync, ensuring the gym floor remains undisturbed.

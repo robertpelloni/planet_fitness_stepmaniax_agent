@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5]
+- Unblocked Phase 1.1: Successfully extracted StepManiaX cabinet dimensions from stepmaniax.com.
+- Updated `pitch-deck.md` and `pilot-mou.md` to reflect real-world machine footprint dimensions, replacing placeholder estimates.
+
 ## [0.1.4]
 - Concluded internal agent implementation cycles. Remaining tasks marked as blocked due to requiring external credentials (LinkedIn Sales Navigator) and manual data gathering.
 
