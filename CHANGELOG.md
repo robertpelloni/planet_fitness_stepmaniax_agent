@@ -1,0 +1,44 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.3.0]
+- Major documentation overhaul: Rewrote `README.md` to reflect the actual repository architecture (hybrid B2B collateral workspace and Python data-gathering utility).
+- Updated README to clearly outline the overarching autonomous agent case-study goals and the 4-Phase SOP execution pipeline.
+
+## [0.2.0]
+- Added `pipeline.sh` to automate the Python virtual environment setup, dependency installation, and execution of the lead scraping utility.
+- Updated `README.md` to include instructions for the new automated execution pipeline.
+
+## [0.1.7]
+- Created `kpi-tracker.md` to track Agent Performance Metrics (Leads Generated, Outreach Volume, Discovery Calls).
+- Updated `TODO.md` to reflect the addition of the KPI tracking mechanism.
+
+## [0.1.6]
+- Created `scrape_leads.py` as a generic template to unblock Phase 2.1 data gathering.
+- Created `requirements.txt` to track new Python dependencies (requests, beautifulsoup4).
+- Updated `DEPLOY.md` to document the Python execution environment.
+- Added `.gitignore` and `.env.example` to enforce secret management and keep binaries out of version control.
+
+## [0.1.5]
+- Unblocked Phase 1.1: Successfully extracted StepManiaX cabinet dimensions from stepmaniax.com.
+- Updated `pitch-deck.md` and `pilot-mou.md` to reflect real-world machine footprint dimensions, replacing placeholder estimates.
+
+## [0.1.4]
+- Concluded internal agent implementation cycles. Remaining tasks marked as blocked due to requiring external credentials (LinkedIn Sales Navigator) and manual data gathering.
+
+## [0.1.3]
+- Implemented `pilot-mou.md` containing the Phase 4.1 Memorandum of Understanding template.
+- Updated TODO.md to mark Phase 4.1 as complete.
+
+## [0.1.2]
+- Implemented `outreach-script.md` containing the Phase 3 outreach email template and objection handling cheat sheet.
+- Updated TODO.md to mark Phase 3.1 as complete.
+
+## [0.1.1]
+- Implemented `pitch-deck.md` containing the Phase 1 B2B presentation copy.
+- Updated TODO.md to mark Phase 1.2 as complete.
+
+## [0.1.0] - Initial Setup
+- Initialized core repository documentation (VISION, ROADMAP, TODO, HANDOFF, etc.).
+- Established AI agent instructions and contribution guidelines.
