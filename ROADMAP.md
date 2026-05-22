@@ -3,8 +3,8 @@
 This roadmap outlines the major long-term plans to successfully pitch and place StepManiaX units in Planet Fitness locations via regional franchisees.
 
 ## Phase 1: Asset Preparation & Collateral Assembly
-- [ ] **Secure Manufacturer Alignment:** Obtain official commercial/fitness sales materials, hardware specs, footprint requirements, and warranty terms from Step Revolution.
-- [ ] **Build the Pitch Deck:** Design a B2B presentation focusing on "Gamified HIIT" and member retention, using fitness-industry terminology.
+- [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
+- [x] **Build the Pitch Deck:** Designed B2B presentation focusing on "Gamified HIIT" and member retention.
 
 ## Phase 2: Lead Generation & Target Mapping
 - [x] **Identify the Local Franchise Powerhouse:** Researched regional Franchise Groups (EPIC Fitness, NFP, OGP, etc.) and documented in `LEADS.md`.

@@ -1,23 +1,50 @@
-# Deployment Instructions
+# Deployment & Setup Instructions
 
-This project primarily consists of B2B sales collateral and documentation. However, it includes python utility scripts for data gathering (e.g., `scrape_leads.py`).
+## Overview
+The StepManiaX B2B Sales Agent consists of a document suite for collateral and a Python-based automation stack for lead generation, CRM management, and performance monitoring.
 
-## Setup Environment
-To run the lead generation tools locally, you must set up the Python environment:
+## 1. Automation Environment Setup
+The project uses a unified execution pipeline to manage dependencies and virtual environments.
 
-1. Ensure Python 3.8+ is installed.
-2. Create a virtual environment (optional but recommended):
-   `python3 -m venv venv`
-   `source venv/bin/activate`
-3. Install the dependencies:
-   `pip install -r requirements.txt`
+1. **System Requirements:** Python 3.8+, SQLite3, Bash.
+2. **One-Button Setup:**
+   ```bash
+   bash launch_campaign.sh
+   ```
+   This script will:
+   - Create a virtual environment (`venv/`).
+   - Install dependencies from `requirements.txt`.
+   - Initialize the CRM database (`crm.db`) if it doesn't exist.
+   - Run the automated lead generation and asset production sequence.
 
-## Running the Scraper
-To execute the generic web scraper for Phase 2.1:
-`python3 scrape_leads.py`
-*(Note: You must first edit `scrape_leads.py` to point to a valid target directory and implement the site-specific parsing logic).*
+## 2. Web Dashboard Deployment
+The Flask-based monitoring dashboard provides a real-time view of the sales funnel and equipment telemetry.
 
-## Secrets Management
-If API keys, authentication cookies, or secrets become necessary for scraping (e.g., LinkedIn tokens), they must never be hard-coded or committed.
-1. Create a `.env.example` file with placeholder variables.
-2. Instruct operators to copy it to `.env` and fill in their credentials locally.
+1. **Start the Dashboard:**
+   ```bash
+   python app.py
+   ```
+2. **Access:** Navigate to `http://localhost:5000` in your browser.
+3. **User Management:** Create a dashboard user via the CRM CLI:
+   ```bash
+   python crm_tool.py create-user <username> <password>
+   ```
+
+## 3. CRM Management (CLI)
+Interact with the lead database directly via `crm_tool.py`:
+- `list`: View all leads and their current status.
+- `add`: Manually add a new franchise group.
+- `log-outreach`: Record a contact attempt and update follow-up counters.
+- `analytics`: View aggregated ROI potential across the portfolio.
+
+## 4. Secrets Management
+The agent uses a `.env` file for sensitive configurations (e.g., LinkedIn tokens or Dashboard secret keys).
+1. Copy `.env.example` to `.env`.
+2. Populate the required variables.
+3. Never commit the `.env` file to version control.
+
+## 5. Directory Structure
+- `/outreach`: Tailored sales scripts and follow-up templates.
+- `/templates`: HTML layouts for the web dashboard.
+- `crm.db`: SQLite database (Auto-generated).
+- `analytics.py`: Core logic for LTV/ROI calculations.
