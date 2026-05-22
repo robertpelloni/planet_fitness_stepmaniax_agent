@@ -9,6 +9,7 @@ Ordered by priority:
 5. [x] **Phase 1.1:** Gather Manufacturer Specs and Alignment details (Specs retrieved; dimensions added to assets).
 6. [x] **Phase 2.1:** Identify Local Franchise Powerhouses in target region (Generic python scraping scaffolding implemented; execution blocked pending target URLs).
 7. [x] **Phase 2.1 (Automation):** Implement `pipeline.sh` to automate environment setup and script execution.
-8. [ ] **BLOCKED - Phase 2.2:** Target Decision Makers (requires LinkedIn Sales Navigator credentials to collect leads).
-9. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-10. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+8. [x] **Phase 2.1 (Research):** Identified major franchise groups and documented in `LEADS.md`.
+9. [ ] **Phase 2.2:** Target Decision Makers (Refine contact info for identified executives in `LEADS.md`).
+10. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+11. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.

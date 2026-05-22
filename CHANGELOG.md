@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0]
+- **Targeted Lead Research:** Identified major Planet Fitness Franchise Groups (National Fitness Partners, Grand Fitness Partners, Excel Fitness, United FP, Taymax Group) and their operational regions.
+- **Enhanced Scraper:** Updated `scrape_leads.py` with targeted URLs and basic parsing logic for franchise group team pages.
+- **Architectural Documentation:** Created `MEMORY.md` for internal architectural observations and `IDEAS.md` for creative feature expansions.
+- **KPI Initialization:** Populated initial lead counts in `kpi-tracker.md`.
+
 ## [0.3.0]
 - Major documentation overhaul: Rewrote `README.md` to reflect the actual repository architecture (hybrid B2B collateral workspace and Python data-gathering utility).
 - Updated README to clearly outline the overarching autonomous agent case-study goals and the 4-Phase SOP execution pipeline.

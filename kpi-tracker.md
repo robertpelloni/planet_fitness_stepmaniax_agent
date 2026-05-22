@@ -8,7 +8,7 @@ To ensure the commercial placement campaign is executing effectively, human oper
 
 | Metric | Target | Actual | Notes |
 | :--- | :--- | :--- | :--- |
-| **Leads Generated** | N/A (Maximize) | 0 | *Number of regional PF franchise executive contacts identified.* |
+| **Leads Generated** | N/A (Maximize) | 8 | *Identified major national groups and Michigan-specific targets like EPIC Fitness.* |
 | **Outreach Volume** | Minimum 15 / week | 0 | *Number of targeted executive touches (email, LinkedIn, etc.) per week.* |
 | **Discovery Calls** | N/A (Maximize) | 0 | *Number of phone/Zoom meetings secured with decision-makers.* |
 
