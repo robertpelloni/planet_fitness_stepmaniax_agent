@@ -12,6 +12,3 @@ env/
 
 # Secrets
 .env
-
-# Jules AI session logs (auto-generated)
-.jules/sessions/
