@@ -9,7 +9,7 @@ To ensure the commercial placement campaign is executing effectively, human oper
 | Metric | Target | Actual | Notes |
 | :--- | :--- | :--- | :--- |
 | **Leads Generated** | N/A (Maximize) | 8 | *Identified major national groups and Michigan-specific targets like EPIC Fitness.* |
-| **Outreach Volume** | Minimum 15 / week | 3 | *Prepared personalized outreach for EPIC, PF Michigan, and OGP.* |
+| **Outreach Volume** | Minimum 15 / week | 3 | *Prepared personalized outreach for EPIC, PF Michigan, and OGP. (In CRM: Ready for Outreach)* |
 | **Discovery Calls** | N/A (Maximize) | 0 | *Number of phone/Zoom meetings secured with decision-makers.* |
 
 ---

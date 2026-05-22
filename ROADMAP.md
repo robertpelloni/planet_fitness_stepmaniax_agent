@@ -12,8 +12,9 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch
 - [x] **Personalized Collateral:** Developed tailored outreach scripts for priority Michigan targets in `outreach/`.
+- [x] **Follow-up Infrastructure:** Established multi-touch follow-up cadence (Day 3, 7, 14) in `outreach/follow-ups.md`.
 - [ ] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot.
-- [ ] **Negotiation & Objection Handling:** Address concerns regarding noise, floor etiquette, and maintenance.
+- [x] **Negotiation & Objection Handling:** Drafted `maintenance-slas.md` to address technical and service-level concerns.
 
 ## Phase 4: Contract Negotiation & Deal Closure
 - [ ] **Memorandum of Understanding (MOU):** Draft a 90-day pilot agreement outlining term, cost ($0 hardware lease), liability, and data sharing.

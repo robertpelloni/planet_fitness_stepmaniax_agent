@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0]
+- **CRM Implementation:** Initialized `crm.json` to formally track the B2B outreach funnel and executive lead states.
+- **Strategic Cadence:** Developed a multi-touch follow-up framework in `outreach/follow-ups.md` (Day 3, 7, and 14).
+- **Service Assurance:** Drafted `maintenance-slas.md` providing technical reliability specs and a 48-hour service guarantee.
+- **KPI Synchronization:** Updated outreach metrics to reflect prepared personalized touches.
+
 ## [0.5.0]
 - **Repository Synchronization:** Performed comprehensive upstream sync and intelligent merge, reconciling all active feature branches into `main`.
 - **Contact Intelligence:** Refined `LEADS.md` with specific email patterns, LinkedIn URLs, and personalized notes for top franchise executives.
