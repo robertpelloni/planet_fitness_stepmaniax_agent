@@ -4,7 +4,7 @@
 set -e
 
 echo "==========================================================="
-echo "   StepManiaX B2B Campaign Launch Sequence (v1.4.0)"
+echo "   StepManiaX B2B Campaign Launch Sequence (v1.5.0)"
 echo "==========================================================="
 
 # 1. Database Initialization & Lead Migration

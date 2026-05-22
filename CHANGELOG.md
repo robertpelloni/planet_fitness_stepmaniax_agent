@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0]
+- **Data Quality Filtering:** Implemented `is_junk` heuristic in `scrape_leads.py` to filter out placeholders and web layout artifacts.
+- **Follow-up Automation:** Launched `cadence_trigger.py` to automatically identify leads due for contact based on a 7-day threshold.
+- **Portfolio Analytics:** Enhanced `crm_tool.py` with an `analytics` command to aggregate ROI potential across the entire lead database.
+- **CLI Refinement:** Standardized the CRM CLI output and improved outreach logging precision.
+
 ## [1.4.0]
 - **Analytical Consolidation:** Created `analytics.py` to house shared LTV and ROI logic, eliminating code duplication across the automation suite.
 - **CRM Schema Enhancement:** Added `follow_up_count` and `last_contact_date` to the CRM database to track outreach persistence.

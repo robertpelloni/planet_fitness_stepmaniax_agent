@@ -2,6 +2,7 @@ import sqlite3
 import argparse
 import sys
 from datetime import datetime
+from analytics import calculate_detailed_metrics
 
 DB_NAME = "crm.db"
 
@@ -52,16 +53,51 @@ def log_outreach(lead_id, channel, notes):
 
     # Fetch new count
     cursor.execute("SELECT follow_up_count FROM leads WHERE id = ?", (lead_id,))
-    new_count = cursor.fetchone()['follow_up_count']
+    res = cursor.fetchone()
+    if res:
+        new_count = res['follow_up_count']
 
-    # Insert log entry
-    cursor.execute("""
-    INSERT INTO outreach_logs (lead_id, date_sent, channel, notes)
-    VALUES (?, ?, ?, ?)
-    """, (lead_id, date_str, channel, notes))
+        # Insert log entry
+        cursor.execute("""
+        INSERT INTO outreach_logs (lead_id, date_sent, channel, notes)
+        VALUES (?, ?, ?, ?)
+        """, (lead_id, date_str, channel, notes))
 
-    print(f"Logged {channel} outreach for lead {lead_id} at {date_str} (Total Follow-ups: {new_count})")
+        print(f"Logged {channel} outreach for lead {lead_id} at {date_str} (Total Follow-ups: {new_count})")
+    else:
+        print(f"Error: Lead {lead_id} not found.")
+
     conn.commit()
+    conn.close()
+
+def show_portfolio_analytics():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM leads WHERE num_clubs IS NOT NULL")
+    leads = cursor.fetchall()
+
+    total_clubs = 0
+    total_annual_profit = 0
+
+    print("===========================================================")
+    print("   StepManiaX B2B Portfolio Analytics")
+    print("===========================================================")
+    print(f"{'Company':<25} | {'Clubs':<6} | {'Projected Annual Profit'}")
+    print("-" * 65)
+
+    for lead in leads:
+        metrics = calculate_detailed_metrics(
+            num_clubs=lead['num_clubs'],
+            retention_lift_percent=lead['retention_lift'] or 0.03,
+            avg_monthly_fee=lead['avg_monthly_fee'] or 15.0
+        )
+        total_clubs += lead['num_clubs']
+        total_annual_profit += metrics['annual_net_profit']
+        print(f"{lead['company']:<25} | {lead['num_clubs']:<6} | ${metrics['annual_net_profit']:,.2f}")
+
+    print("-" * 65)
+    print(f"{'TOTAL PORTFOLIO':<25} | {total_clubs:<6} | ${total_annual_profit:,.2f}")
+    print("===========================================================")
     conn.close()
 
 def main():
@@ -83,6 +119,9 @@ def main():
     log_parser.add_argument("--channel", default="Email", help="Communication channel")
     log_parser.add_argument("--notes", default="", help="Outreach notes")
 
+    # Analytics
+    subparsers.add_parser("analytics", help="Show total portfolio ROI potential")
+
     args = parser.parse_args()
 
     if args.command == "list":
@@ -91,6 +130,8 @@ def main():
         update_status(args.id, args.status)
     elif args.command == "log":
         log_outreach(args.id, args.channel, args.notes)
+    elif args.command == "analytics":
+        show_portfolio_analytics()
     else:
         parser.print_help()
 

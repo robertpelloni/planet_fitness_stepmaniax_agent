@@ -12,6 +12,7 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch
 - [x] **Personalized Collateral:** Developed tailored outreach scripts for priority Michigan targets in `outreach/`.
+- [x] **Follow-up Automation:** Launched `cadence_trigger.py` for automated cadence management.
 - [x] **Outreach Persistence:** Implemented follow-up tracking and automated counters in CRM.
 - [x] **CRM Database Architecture:** Migrated lead tracking to SQLite for scalable operations.
 - [x] **Automation:** Enhanced `generate_personalized_assets.py` for dynamic email and pitch deck generation from CRM DB.

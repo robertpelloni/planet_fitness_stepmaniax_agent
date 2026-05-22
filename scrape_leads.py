@@ -16,6 +16,28 @@ TARGET_GROUPS = [
 
 OUTPUT_FILE = "franchise_leads.csv"
 
+def is_junk(text):
+    """
+    Heuristic to filter out junk text, placeholders, and layout artifacts.
+    """
+    junk_keywords = [
+        "lorem", "ipsum", "dolor", "sit", "amet", # Standard placeholders
+        "locations totals", "loading details", "loading location", # Dynamic artifacts
+        "apply now", "join our team", "careers", # Recruitment CTA noise
+        "premier zone", "judgement free", "all rights reserved" # Slogans
+    ]
+    text_lower = text.lower()
+
+    # 1. Keyword check
+    if any(junk in text_lower for junk in junk_keywords):
+        return True
+
+    # 2. Length check (too short or too long for a name/title)
+    if len(text) < 3 or len(text) > 100:
+        return True
+
+    return False
+
 def scrape_leadership(group):
     """
     Scrapes a franchise group's leadership/team page.
@@ -43,16 +65,15 @@ def scrape_leadership(group):
         for person in soup.find_all(['h3', 'h4']):
             full_name = person.text.strip()
             title = person.find_next(['p', 'span']).text.strip() if person.find_next(['p', 'span']) else "Unknown"
-            if len(full_name.split()) > 1:
+            if not is_junk(full_name) and len(full_name.split()) > 1:
                 leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
     # Flynn Group Specific Parsing
     elif "flynn.com" in url:
-        # Looking for leadership names in premier zone
         for leader in soup.find_all('h4'):
             full_name = leader.text.strip()
             title = leader.find_next(['p']).text.strip() if leader.find_next(['p']) else "Unknown"
-            if full_name and title:
+            if not is_junk(full_name) and not is_junk(title):
                 leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
     # Generic Fallback
@@ -60,6 +81,8 @@ def scrape_leadership(group):
         print(f"No specific parser for {url}, using generic heuristic.")
         for item in soup.find_all(['h2', 'h3', 'h4']):
             text = item.text.strip()
+            if is_junk(text):
+                continue
             if any(key in text for key in ["Team", "Leadership", "Executive", "Mission"]):
                 continue
             leads.append({'Franchise Group': name, 'Name': text, 'Title': "Consult LEADS.md"})
