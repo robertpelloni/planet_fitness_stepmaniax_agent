@@ -8,7 +8,7 @@ To ensure the commercial placement campaign is executing effectively, human oper
 
 | Metric | Target | Actual | Notes |
 | :--- | :--- | :--- | :--- |
-| **Leads Generated** | N/A (Maximize) | 8 | *Identified major national groups and Michigan-specific targets like EPIC Fitness.* |
+| **Leads Generated** | N/A (Maximize) | 11 | *Identified major national groups and Michigan-specific targets. Expanded to Flynn Group and CDM.* |
 | **Outreach Volume** | Minimum 15 / week | 3 | *Automation/Analytics suite complete; CRM enriched with ROI projections.* |
 | **Discovery Calls** | N/A (Maximize) | 0 | *Full sales pipeline automated (v1.0.0 Release).* |
 

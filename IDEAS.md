@@ -1,13 +1,15 @@
 # Ideas
 
 ## Refactoring & Architecture
-- **API Integration:** Integrate with a B2B data API (like Apollo.io or Hunter.io) to automate email discovery once Franchise Groups are identified.
-- **CRM Lite:** Transition `LEADS.md` or `kpi-tracker.md` into a more robust local database (SQLite) to track the outreach funnel (Sent -> Opened -> Replied -> Meeting).
+- **Multi-Tenant Dashboard:** Refactor `app.py` to support multi-tenant views, allowing different regional managers to see only their specific club data.
+- **Headless Browser Integration:** Replace the basic `requests`-based scraper with Playwright or Selenium to handle JavaScript-heavy franchise portals and executive directories.
+- **Webhook Alerts:** Implement Discord/Slack webhooks for the CRM to notify the agent of new leads or high-priority follow-up triggers.
 
 ## Feature Expansions
-- **Dynamic Pitch Generator:** Create a script that populates the `pitch-deck.md` with location-specific data (e.g., "Grand Fitness Partners' California locations").
-- **ROI Calculator:** Add a spreadsheet or script that calculates potential ROI based on member retention lift and increased visit frequency.
-- **Video Demo:** Include a script or instructions for generating a high-quality "commercial" video of StepManiaX in a gym setting (non-arcade).
+- **Automated LinkedIn Outreach:** Integrate with a headless browser to automate personalized connection requests using the `outreach-script.md` logic.
+- **Live ROI Dashboard for Leads:** Create a "public" (password-protected) version of the dashboard that a lead can visit to see live ROI projections based on their specific number of clubs.
+- **Equipment Health API:** Mock or integrate a real API for SMX machines to populate the dashboard with actual uptime data and maintenance alerts.
 
-## Language Porting
-- Port the lead generation logic to Go or Rust if performance becomes a bottleneck for wide-scale scraping (unlikely for this specific use case but good for "autonomous agent" case study).
+## Strategic Pivots
+- **Secondary Brands target:** Adapt the collateral for other "HVLP" (High Value Low Price) gym chains like Crunch Fitness or YouFit, using the same "Rogue Franchise" methodology.
+- **Insurance Reimbursement Pitch:** Research and add a "Silver Sneakers" or insurance wellness pitch component to the ROI model, showing how SMX can attract older demographics or specialized wellness subsets.

@@ -22,3 +22,18 @@ class EquipmentMetric(db.Model):
     uptime_percent = db.Column(db.Float, default=100.0)
     total_scans = db.Column(db.Integer, default=0)
     last_service_date = db.Column(db.String(50))
+    avg_session_duration = db.Column(db.Float, default=0.0) # In minutes
+
+class Alert(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    severity = db.Column(db.String(20), nullable=False) # 'Critical', 'Warning', 'Info'
+    message = db.Column(db.String(250), nullable=False)
+    timestamp = db.Column(db.String(50), nullable=False)
+    is_resolved = db.Column(db.Boolean, default=False)
+
+class MemberSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_name = db.Column(db.String(100), nullable=False)
+    start_time = db.Column(db.String(50), nullable=False)
+    duration_minutes = db.Column(db.Integer, default=10)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'))

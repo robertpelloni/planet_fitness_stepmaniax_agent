@@ -1,7 +1,8 @@
 import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, EquipmentMetric
+from flask_wtf.csrf import CSRFProtect
+from models import db, User, EquipmentMetric, Alert, MemberSchedule
 import sqlite3
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
@@ -59,7 +61,17 @@ def dashboard():
     # 2. Fetch Equipment Metrics using SQLAlchemy
     metrics = EquipmentMetric.query.all()
 
-    return render_template('dashboard.html', crm_stats=crm_stats, metrics=metrics)
+    # 3. Fetch Alerts
+    alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
+
+    # 4. Fetch Schedules
+    schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
+
+    return render_template('dashboard.html',
+                           crm_stats=crm_stats,
+                           metrics=metrics,
+                           alerts=alerts,
+                           schedules=schedules)
 
 # Database Initialization Command
 @app.cli.command("init-db")

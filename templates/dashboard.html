@@ -3,32 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <title>StepManiaX - Agent Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; }
-        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
+        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
         .container { padding: 2rem; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h3 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; color: #495057; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; }
+        .card.alert-card { border-top-color: #dc3545; }
+        .card.schedule-card { border-top-color: #28a745; }
+        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #dee2e6; }
-        th { background-color: #f1f3f5; }
-        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+        th { background-color: #f8f9fa; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
         .status-ready { background-color: #d4edda; color: #155724; }
         .status-active { background-color: #fff3cd; color: #856404; }
+        .severity-Critical { color: #dc3545; font-weight: bold; }
+        .severity-Warning { color: #ffc107; font-weight: bold; }
+        .severity-Info { color: #17a2b8; font-weight: bold; }
         .uptime-good { color: #28a745; font-weight: bold; }
+        .chart-container { height: 300px; position: relative; }
+        .alert-item { padding: 0.75rem; border-bottom: 1px solid #f8d7da; background-color: #fff8f8; border-radius: 4px; margin-bottom: 0.5rem; }
+        .alert-item:last-child { border-bottom: none; }
+        .alert-meta { font-size: 0.75rem; color: #6c757d; margin-top: 0.25rem; }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <div style="font-weight: bold;">StepManiaX B2B Agent Dashboard</div>
-        <div>
-            Welcome, {{ current_user.username }} |
-            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none;">Logout</a>
+        <div style="font-size: 1.25rem; font-weight: bold;">StepManiaX B2B Management Dashboard</div>
+        <div style="font-size: 0.9rem;">
+            Welcome, <strong>{{ current_user.username }}</strong> |
+            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none; margin-left: 10px;">Logout</a>
         </div>
     </div>
     <div class="container">
         <div class="dashboard-grid">
+
+            <!-- Real-time Usage Metrics -->
+            <div class="card">
+                <h3>Real-time Usage Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- System Alerts -->
+            <div class="card alert-card">
+                <h3>System Alerts & Health</h3>
+                <div id="alerts-list">
+                    {% for alert in alerts %}
+                    <div class="alert-item">
+                        <span class="severity-{{ alert.severity }}">[{{ alert.severity }}]</span> {{ alert.message }}
+                        <div class="alert-meta">{{ alert.timestamp }}</div>
+                    </div>
+                    {% else %}
+                    <div style="text-align: center; color: #999; padding: 2rem;">All systems operational. No active alerts.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Member Booking Schedule -->
+            <div class="card schedule-card">
+                <h3>Member Booking Schedule</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Start Time</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in schedules %}
+                        <tr>
+                            <td>{{ schedule.member_name }}</td>
+                            <td>{{ schedule.start_time }}</td>
+                            <td>{{ schedule.duration_minutes }} min</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #999;">No bookings scheduled for today.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Equipment Monitoring -->
+            <div class="card">
+                <h3>Equipment Monitoring (Live Pilots)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th>Uptime</th>
+                            <th>Scans</th>
+                            <th>Avg Sess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in metrics %}
+                        <tr>
+                            <td>{{ metric.equipment_name }} ({{ metric.location }})</td>
+                            <td><span class="uptime-good">{{ metric.uptime_percent }}%</span></td>
+                            <td>{{ metric.total_scans }}</td>
+                            <td>{{ metric.avg_session_duration }}m</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">No active pilots monitored.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
             <!-- CRM Summary -->
             <div class="card">
                 <h3>Sales Funnel Status</h3>
@@ -50,35 +140,48 @@
                 </table>
             </div>
 
-            <!-- Equipment Metrics -->
+            <!-- Resources Card -->
             <div class="card">
-                <h3>Fitness Equipment Monitoring (Live Pilots)</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Equipment</th>
-                            <th>Location</th>
-                            <th>Uptime</th>
-                            <th>Total Scans</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for metric in metrics %}
-                        <tr>
-                            <td>{{ metric.equipment_name }}</td>
-                            <td>{{ metric.location }}</td>
-                            <td><span class="uptime-good">{{ metric.uptime_percent }}%</span></td>
-                            <td>{{ metric.total_scans }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">No active pilots monitored.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <h3>Technical Resources</h3>
+                <div style="font-size: 0.9rem; line-height: 1.6;">
+                    <strong>Manufacturer Specs:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.2rem; color: #666;">
+                        <li>Footprint: Compact All-In-One</li>
+                        <li>Power: Standard 110v Outlet</li>
+                        <li>SLA: 48hr Service Guarantee</li>
+                    </ul>
+                    <a href="/manufacturer-alignment.md" style="color: #007bff; text-decoration: none; font-weight: bold;">View Alignment Docs &rarr;</a>
+                </div>
             </div>
+
         </div>
     </div>
+
+    <script>
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        const usageChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for metric in metrics %}'{{ metric.location }}',{% endfor %}],
+                datasets: [{
+                    label: 'Total Scans (Engagement)',
+                    data: [{% for metric in metrics %}{{ metric.total_scans }},{% endfor %}],
+                    backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Total Session Scans' }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
