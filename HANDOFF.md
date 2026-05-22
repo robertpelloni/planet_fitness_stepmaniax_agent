@@ -1,21 +1,23 @@
 # Handoff
 
 ## Session Summary
-In this milestone session, I reached the **Version 1.0.0 "Official Case Study Release"** for the Planet Fitness StepManiaX B2B Sales Agent. I finalized the automation suite, integrated the entire sales lifecycle into a "one-button" launch script, and documented the strategic and technical architecture as a formal case study.
+In this optimization phase, I reached **Version 1.1.0**, focusing on refining the financial business case and automating the generation of high-impact sales assets. I successfully transitioned the ROI model to a Lifetime Value (LTV) framework, which demonstrates a significant multi-million dollar benefit for large franchise portfolios, and enhanced the personalization engine to dynamically generate both emails and summary pitch decks.
 
 ## Key Accomplishments
-- **Version Bump:** Incremented version to `1.0.0`.
-- **Full Pipeline Automation:** Launched `launch_campaign.sh`, which chains lead discovery, financial modeling, and asset generation into a single seamless sequence.
-- **Case Study Release:** Created `CASE_STUDY.md`, formalizing the "Rogue Franchise Loophole" methodology and technical architecture for future review.
-- **Workflow Maturity:** Updated `README.md` with an "Autonomous Agent Workflow" guide, providing clear instructions for production execution.
-- **Production Readiness:** Marked all foundational phases in `ROADMAP.md` and `TODO.md` as complete.
-- **Verification:** Successfully executed the entire `launch_campaign.sh` sequence, confirming system stability and production-ready output.
+- **Version Bump:** Incremented version to `1.1.0`.
+- **ROI Model Refinement:** Updated `roi_calculator.py` to use an LTV-based approach, projecting a 4.37x ROI for regional deployments.
+- **Dynamic Asset Generation:** Enhanced `generate_personalized_assets.py` to create lead-specific pitch decks (`pitch-[group].md`) containing custom ROI data calculated on-the-fly from CRM inputs.
+- **CRM Stabilization:** Corrected projected profit figures in `crm.json` to reflect the improved LTV model (converting negative projections into million-dollar gains).
+- **Documentation Updates:**
+    - Synchronized `ROADMAP.md` and `TODO.md` (marked Phase 3.5 as complete).
+    - Updated `CHANGELOG.md` to document the 1.1.0 milestone.
+- **Verification:** Successfully executed the full `launch_campaign.sh` sequence and verified the quality of generated pitch decks.
 
 ## Structural Shifts
-- The project is no longer just a "workspace"; it is a functional **Sales Automation Engine**.
-- All sales assumptions (ROI, retention) are now parameters in Python scripts, allowing for rapid strategy adjustment.
+- The sales pitch is now **LTV-Centric**, focusing on the long-term value of saved members rather than just monthly fees.
+- Assets are now split into `email-[group].md` and `pitch-[group].md` for a coordinated outreach approach.
 
 ## Future Recommendations
-- **Assumption Refinement:** In `roi_calculator.py`, consider modeling ROI based on higher-tier memberships (e.g., PF Black Card) or total Member Lifetime Value (LTV) to improve the financial pitch for low-cost franchises.
-- **CRM Migration:** As the lead volume scales, consider transitioning `crm.json` to a SQLite database for more complex query capabilities.
-- **Active Outreach:** The system is now ready for the AI agent to begin active, authenticated outreach via LinkedIn or SMTP integration.
+- **Interactive ROI:** Consider building a simple Streamlit or Gradio interface for the `roi_calculator.py` to allow live modeling during discovery calls.
+- **Visual Decks:** Transition the Markdown pitch decks into a slide-based format (e.g., using Marp or Pandoc) for a more professional visual presentation.
+- **Lead Expansion:** Use the enhanced scraper to identify 5-10 additional mid-sized franchise groups (20-40 locations) to populate the new LTV-based pipeline.
