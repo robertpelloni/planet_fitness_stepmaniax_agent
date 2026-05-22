@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0]
+- **Discovery Infrastructure:** Developed `discovery-call-script.md` and `pilot-faq.md` for structured decision-maker engagement.
+- **Commercial Framework:** Created `commercial-proposal-template.md` and `pilot-performance-report.md` to bridge pilot success with regional procurement contracts.
+- **Tone Refinement:** Standardized sales collateral with strict B2B corporate fitness terminology ("Gamified HIIT", "Member Retention Lift").
+
 ## [0.6.0]
 - **CRM Implementation:** Initialized `crm.json` to formally track the B2B outreach funnel and executive lead states.
 - **Strategic Cadence:** Developed a multi-touch follow-up framework in `outreach/follow-ups.md` (Day 3, 7, and 14).

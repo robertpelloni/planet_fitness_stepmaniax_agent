@@ -17,5 +17,6 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Negotiation & Objection Handling:** Drafted `maintenance-slas.md` to address technical and service-level concerns.
 
 ## Phase 4: Contract Negotiation & Deal Closure
-- [ ] **Memorandum of Understanding (MOU):** Draft a 90-day pilot agreement outlining term, cost ($0 hardware lease), liability, and data sharing.
-- [ ] **The "Land and Expand" Trigger:** Use 90-day pilot data to negotiate a commercial revenue-share model or a broader regional procurement contract.
+- [x] **Memorandum of Understanding (MOU):** Drafted 90-day pilot agreement (`pilot-mou.md`).
+- [x] **Performance Reporting:** Established `pilot-performance-report.md` for data-driven ROI presentation.
+- [x] **The "Land and Expand" Trigger:** Developed `commercial-proposal-template.md` detailing regional procurement models.

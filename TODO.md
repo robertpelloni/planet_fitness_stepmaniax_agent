@@ -13,5 +13,7 @@ Ordered by priority:
 9. [x] **Phase 2.2:** Target Decision Makers (Refined contact info and email patterns in `LEADS.md`).
 10. [x] **Phase 3.1 (Preparation):** Developed personalized outreach drafts in `outreach/`.
 11. [x] **Phase 3.2 (Infrastructure):** Established CRM-based lead tracking in `crm.json` and follow-up templates in `outreach/follow-ups.md`.
-12. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-13. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+12. [x] **Phase 3.3 (Call Prep):** Developed discovery scripts and pilot FAQs for executive engagement.
+13. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
+14. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
