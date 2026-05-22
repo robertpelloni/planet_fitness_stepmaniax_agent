@@ -1,33 +1,6 @@
 import sqlite3
 import os
-
-def calculate_roi_metrics(num_clubs, retention_lift, avg_monthly_fee):
-    """
-    Helper to calculate ROI metrics for the asset generator,
-    syncing with roi_calculator.py logic.
-    """
-    avg_member_lifetime_months = 18
-    smx_monthly_cost_per_club = 600.0
-    members_per_club = 6000 # Sample size
-    total_members = num_clubs * members_per_club
-
-    base_ltv = avg_monthly_fee * avg_member_lifetime_months
-    lifted_lifetime_months = avg_member_lifetime_months * (1 + retention_lift)
-    lifted_ltv = avg_monthly_fee * lifted_lifetime_months
-
-    total_portfolio_value_gain = (total_members * lifted_ltv) - (total_members * base_ltv)
-    annual_revenue_gain = total_portfolio_value_gain / (lifted_lifetime_months / 12)
-
-    total_annual_cost = num_clubs * smx_monthly_cost_per_club * 12
-    annual_net_profit = annual_revenue_gain - total_annual_cost
-    roi_multiple = annual_revenue_gain / total_annual_cost if total_annual_cost > 0 else 0
-
-    return {
-        "base_ltv": round(base_ltv, 2),
-        "lifted_ltv": round(lifted_ltv, 2),
-        "annual_net_profit": round(annual_net_profit, 2),
-        "roi_multiple": round(roi_multiple, 2)
-    }
+from analytics import calculate_detailed_metrics
 
 def generate_personalized_assets(db_name="crm.db", output_dir="outreach/generated"):
     """
@@ -121,9 +94,9 @@ We propose a trial placement at a priority {region} location to gather real-worl
             deck_filename = f"pitch-{lead['company'].lower().replace(' ', '-')}.md"
             deck_filepath = os.path.join(output_dir, deck_filename)
 
-            metrics = calculate_roi_metrics(
+            metrics = calculate_detailed_metrics(
                 num_clubs=lead['num_clubs'],
-                retention_lift=lead['retention_lift'] or 0.03,
+                retention_lift_percent=lead['retention_lift'] or 0.03,
                 avg_monthly_fee=lead['avg_monthly_fee'] or 15.0
             )
 

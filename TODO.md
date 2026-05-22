@@ -23,3 +23,4 @@ Ordered by priority:
 19. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
 20. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
 21. [x] **Phase 3.6 (Architecture):** Migrated CRM to SQLite and launched `crm_tool.py` for CLI-based lead management.
+22. [x] **Phase 3.7 (Refactoring):** Consolidated analytical logic into `analytics.py` and enhanced CRM schema for follow-up tracking.

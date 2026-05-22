@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0]
+- **Analytical Consolidation:** Created `analytics.py` to house shared LTV and ROI logic, eliminating code duplication across the automation suite.
+- **CRM Schema Enhancement:** Added `follow_up_count` and `last_contact_date` to the CRM database to track outreach persistence.
+- **Improved Lead Migration:** Refactored `initialize_crm_db.py` to handle incremental schema migrations while preserving lead state.
+- **CRM CLI Updates:** Enhanced `crm_tool.py` to support outreach logging with automatic follow-up tracking.
+
 ## [1.3.0]
 - **CRM Database Architecture:** Migrated lead tracking from JSON to a structured SQLite database (`crm.db`).
 - **Database Initialization:** Created `initialize_crm_db.py` to automate schema setup and data migration.

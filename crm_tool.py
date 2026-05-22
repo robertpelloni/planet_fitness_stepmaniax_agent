@@ -14,15 +14,15 @@ def list_leads(priority=None):
     conn = get_db()
     cursor = conn.cursor()
     if priority:
-        cursor.execute("SELECT id, company, contact_name, status, priority FROM leads WHERE priority = ?", (priority,))
+        cursor.execute("SELECT id, company, contact_name, status, priority, follow_up_count FROM leads WHERE priority = ?", (priority,))
     else:
-        cursor.execute("SELECT id, company, contact_name, status, priority FROM leads")
+        cursor.execute("SELECT id, company, contact_name, status, priority, follow_up_count FROM leads")
 
     leads = cursor.fetchall()
-    print(f"{'ID':<10} | {'Company':<25} | {'Contact':<20} | {'Status':<20} | {'Priority'}")
-    print("-" * 90)
+    print(f"{'ID':<10} | {'Company':<25} | {'Contact':<20} | {'Status':<20} | {'Prio':<6} | {'F/U'}")
+    print("-" * 105)
     for lead in leads:
-        print(f"{lead['id']:<10} | {lead['company']:<25} | {lead['contact_name']:<20} | {lead['status']:<20} | {lead['priority']}")
+        print(f"{lead['id']:<10} | {lead['company']:<25} | {lead['contact_name']:<20} | {lead['status']:<20} | {lead['priority']:<6} | {lead['follow_up_count']}")
     conn.close()
 
 def update_status(lead_id, status):
@@ -40,11 +40,27 @@ def log_outreach(lead_id, channel, notes):
     conn = get_db()
     cursor = conn.cursor()
     date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Update lead record
+    cursor.execute("""
+    UPDATE leads SET
+        follow_up_count = follow_up_count + 1,
+        last_contact_date = ?,
+        status = 'Outreach Active'
+    WHERE id = ?
+    """, (date_str, lead_id))
+
+    # Fetch new count
+    cursor.execute("SELECT follow_up_count FROM leads WHERE id = ?", (lead_id,))
+    new_count = cursor.fetchone()['follow_up_count']
+
+    # Insert log entry
     cursor.execute("""
     INSERT INTO outreach_logs (lead_id, date_sent, channel, notes)
     VALUES (?, ?, ?, ?)
     """, (lead_id, date_str, channel, notes))
-    print(f"Logged {channel} outreach for lead {lead_id} at {date_str}")
+
+    print(f"Logged {channel} outreach for lead {lead_id} at {date_str} (Total Follow-ups: {new_count})")
     conn.commit()
     conn.close()
 

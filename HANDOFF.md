@@ -1,26 +1,22 @@
 # Handoff
 
 ## Session Summary
-In this architectural optimization phase, I reached **Version 1.3.0**, focusing on scaling the Lead Management infrastructure. I successfully migrated the CRM from a static JSON file to a structured SQLite database (`crm.db`) and launched a CLI tool (`crm_tool.py`) to allow the autonomous agent to manage the sales funnel with greater precision. I also synchronized the automated asset generation pipeline to fetch data directly from the new database.
+In this comprehensive optimization and modularization phase, I reached **Version 1.4.0**, significantly improving the project's technical architecture and sales persistence tracking. I successfully consolidated all ROI and LTV logic into a shared analytical module, enhanced the CRM database to track follow-up history, and refined the automated outreach engine to be fully data-driven. I also improved repository hygiene by ensuring the SQLite database and generated artifacts are correctly excluded from version control.
 
 ## Key Accomplishments
-- **Version Bump:** Incremented version to `1.3.0`.
-- **CRM Database Architecture:** Migrated lead tracking to a structured SQLite database (`crm.db`) with tables for `leads` and `outreach_logs`.
-- **Database Automation:** Created `initialize_crm_db.py` to handle schema setup and idempotently migrate data from the legacy `crm.json`.
-- **CRM CLI Tool:** Launched `crm_tool.py`, providing a command-line interface to list leads by priority, update statuses, and log specific outreach touches.
-- **Pipeline Refactoring:**
-    - Updated `generate_personalized_assets.py` to fetch lead data and ROI metrics from the SQLite DB.
-    - Updated `launch_campaign.sh` to include DB initialization in the automated sequence.
-- **Documentation Updates:**
-    - Synchronized `ROADMAP.md` and `TODO.md` (marked Phase 3.6 as complete).
-    - Updated `CHANGELOG.md` with the 1.3.0 milestone.
-- **Verification:** Successfully executed the full `launch_campaign.sh` sequence using the new database architecture.
+- **Version Bump:** Incremented version to `1.4.0`.
+- **Analytical Consolidation:** Created `analytics.py` as the single source of truth for LTV and ROI calculation logic, eliminating code duplication across the pipeline.
+- **CRM Schema Enhancement:** Added `follow_up_count` and `last_contact_date` to the SQLite `crm.db` to track outreach persistence and automated lead prioritization.
+- **CLI Refinement:** Updated `crm_tool.py` to support outreach logging with automatic follow-up counters and status updates.
+- **Dynamic Asset Generation:** Refactored `generate_personalized_assets.py` to import logic from `analytics.py` and produce high-impact, lead-specific pitch decks based on real-time database state.
+- **Repository Hygiene:** Updated `.gitignore` to exclude the `crm.db` binary and cleaned up redundant generated assets in `outreach/generated/`.
+- **Verification:** Successfully executed the full `launch_campaign.sh` sequence, confirming system stability with the new modular architecture.
 
 ## Structural Shifts
-- The project has matured from "File-based Tracking" to "Database-backed Operations."
-- Outreach history is now formally tracked in the `outreach_logs` table, enabling future analysis of conversion rates.
+- **Modular Analytics:** ROI/LTV modeling is now an independent module (`analytics.py`), making it easier to refine the financial pitch globally.
+- **Sales Persistence:** The system now natively tracks how many times a lead has been contacted, allowing for automated follow-up cadences.
 
 ## Future Recommendations
-- **Outreach Dashboard:** Consider building a web-based dashboard using Flask or FastAPI to visualize the `crm.db` state.
-- **Advanced Scraping:** Implement the `LinkedIn` scraper logic using session cookies (stored in `.env`) to automate the extraction of executive names currently missing from public sites.
-- **Logic Consolidation:** (Refinement) Import ROI calculation logic directly from `roi_calculator.py` into the asset generator to eliminate code duplication.
+- **Lead Quality Filtering:** Refine the `scrape_leads.py` generic parser to filter out "Lorem Ipsum" and other HTML layout artifacts discovered during expansion.
+- **Visual Marp Integration:** Consider using a tool like Marp to automatically convert the Markdown pitch decks into professional PDF slide decks.
+- **Automated Cadence Trigger:** Implement a script that identifies leads due for follow-ups (e.g., "Ready for Follow-up 2") based on their `last_contact_date`.

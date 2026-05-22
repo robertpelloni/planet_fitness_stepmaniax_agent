@@ -8,11 +8,12 @@ JSON_FILE = "crm.json"
 def initialize_db():
     """
     Initializes the SQLite database and migrates data from crm.json.
+    Includes schema enhancements for follow-up tracking.
     """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # 1. Create Tables
+    # 1. Create Tables (Base Schema)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS leads (
         id TEXT PRIMARY KEY,
@@ -42,7 +43,19 @@ def initialize_db():
     )
     """)
 
-    # 2. Migrate Data from JSON
+    # 2. Schema Migrations (Add columns if missing)
+    cursor.execute("PRAGMA table_info(leads)")
+    columns = [column[1] for column in cursor.fetchall()]
+
+    if "follow_up_count" not in columns:
+        print("Adding follow_up_count column...")
+        cursor.execute("ALTER TABLE leads ADD COLUMN follow_up_count INTEGER DEFAULT 0")
+
+    if "last_contact_date" not in columns:
+        print("Adding last_contact_date column...")
+        cursor.execute("ALTER TABLE leads ADD COLUMN last_contact_date TEXT")
+
+    # 3. Migrate Data from JSON (Idempotent)
     if os.path.exists(JSON_FILE):
         with open(JSON_FILE, 'r') as f:
             data = json.load(f)
@@ -50,30 +63,47 @@ def initialize_db():
         for lead in data['leads']:
             roi = lead.get('roi_projection') or {}
 
-            cursor.execute("""
-            INSERT OR REPLACE INTO leads (
-                id, company, contact_name, title, email, region, status, priority, notes,
-                num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                lead['id'],
-                lead['company'],
-                lead['contact_name'],
-                lead['title'],
-                lead['email'],
-                lead['region'],
-                lead['status'],
-                lead['priority'],
-                lead['notes'],
-                roi.get('num_clubs'),
-                roi.get('retention_lift'),
-                roi.get('avg_monthly_fee'),
-                roi.get('projected_annual_profit')
-            ))
+            # Check if lead exists
+            cursor.execute("SELECT id FROM leads WHERE id = ?", (lead['id'],))
+            exists = cursor.fetchone()
 
-        print(f"Successfully migrated {len(data['leads'])} leads from {JSON_FILE} to {DB_NAME}.")
+            if exists:
+                cursor.execute("""
+                UPDATE leads SET
+                    company=?, contact_name=?, title=?, email=?, region=?, status=?, priority=?, notes=?,
+                    num_clubs=?, retention_lift=?, avg_monthly_fee=?, projected_annual_profit=?
+                WHERE id=?
+                """, (
+                    lead['company'], lead['contact_name'], lead['title'], lead['email'], lead['region'],
+                    lead['status'], lead['priority'], lead['notes'],
+                    roi.get('num_clubs'), roi.get('retention_lift'), roi.get('avg_monthly_fee'),
+                    roi.get('projected_annual_profit'), lead['id']
+                ))
+            else:
+                cursor.execute("""
+                INSERT INTO leads (
+                    id, company, contact_name, title, email, region, status, priority, notes,
+                    num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    lead['id'],
+                    lead['company'],
+                    lead['contact_name'],
+                    lead['title'],
+                    lead['email'],
+                    lead['region'],
+                    lead['status'],
+                    lead['priority'],
+                    lead['notes'],
+                    roi.get('num_clubs'),
+                    roi.get('retention_lift'),
+                    roi.get('avg_monthly_fee'),
+                    roi.get('projected_annual_profit')
+                ))
+
+        print(f"Successfully synchronized leads from {JSON_FILE} to {DB_NAME}.")
     else:
-        print(f"Warning: {JSON_FILE} not found. Initialized empty database.")
+        print(f"Warning: {JSON_FILE} not found. DB structure updated.")
 
     conn.commit()
     conn.close()
