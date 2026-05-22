@@ -6,9 +6,10 @@ This repository serves as a hybrid **B2B sales workspace and automated data-gath
 
 The overarching strategy relies on the **"Rogue Franchise Loophole"**: bypassing the rigid, exclusive corporate procurement contracts of Planet Fitness by directly targeting regional Franchise Group owners who possess local operational leeway. The core offering is a **Zero-Risk Pilot Framework**—a 90-day, $0 hardware lease trial designed to track member retention and serve as a trigger for larger commercial contracts.
 
-To execute this, the project architecture is split into two components:
+To execute this, the project architecture is split into three components:
 1. **Markdown Sales Collateral:** Professionally formatted, strictly corporate-toned B2B assets (pitch decks, outreach emails, MOUs) ready for dispatch.
 2. **Python Lead Generation:** Automated scripting frameworks to scrape B2B directories and identify high-value regional targets.
+3. **Sales Automation & Analytics:** Tools to model ROI (`roi_calculator.py`) and generate personalized outreach assets (`generate_personalized_assets.py`) dynamically from CRM data.
 
 *All generated content rigorously adheres to a strict corporate fitness tone. Words like "arcade" or "gamer" are banned in favor of "Next-Generation Gamified HIIT" and "Member Retention."*
 

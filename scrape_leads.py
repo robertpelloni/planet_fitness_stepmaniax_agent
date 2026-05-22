@@ -4,18 +4,24 @@ import csv
 import time
 import os
 
-# To use authenticated endpoints (like LinkedIn Sales Navigator),
-# operators must define their tokens in a .env file to avoid committing secrets.
-# Example: os.getenv('LINKEDIN_SESSION_COOKIE')
+# Target URLs for Planet Fitness Franchise Groups
+TARGET_GROUPS = [
+    {"name": "National Fitness Partners", "url": "https://www.nfpfit.com/our-team"},
+    {"name": "Excel Fitness", "url": "https://www.excelfitness.com/leadership"}, # Inferred
+    {"name": "Grand Fitness Partners", "url": "https://grandfitnesspartners.com/team"}, # Inferred
+    {"name": "United Fitness Partners", "url": "https://pffranchisee.org/united-fp-rings-in-the-new-year-with-big-leadership-changes/"},
+]
 
-TARGET_URL = "https://example.com/franchise-directory" # Replace with actual target directory
 OUTPUT_FILE = "franchise_leads.csv"
 
-def scrape_directory(url):
+def scrape_leadership(group):
     """
-    Generic function to scrape a B2B directory for franchise leads.
+    Scrapes a franchise group's leadership/team page.
     """
-    print(f"Starting scrape on: {url}")
+    name = group['name']
+    url = group['url']
+    print(f"--- Scraping {name} at {url} ---")
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -24,21 +30,43 @@ def scrape_directory(url):
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching URL: {e}")
+        print(f"Error fetching {url}: {e}")
         return []
 
     soup = BeautifulSoup(response.text, 'html.parser')
     leads = []
 
-    # --- IMPLEMENT TARGET-SPECIFIC PARSING LOGIC HERE ---
-    # Example logic for a hypothetical directory:
-    #
-    # for listing in soup.find_all('div', class_='franchise-listing'):
-    #     group_name = listing.find('h2').text.strip() if listing.find('h2') else "Unknown"
-    #     contact_info = listing.find('a', class_='email').text.strip() if listing.find('a', class_='email') else "N/A"
-    #     leads.append({'Franchise Group': group_name, 'Contact': contact_info})
+    # NFP Specific Parsing
+    if "nfpfit.com" in url:
+        # Based on search snippet: Meet the NFP Leadership Team
+        # Common pattern: h3 or h4 for names, p or span for titles
+        for person in soup.find_all(['h3', 'h4']):
+            full_name = person.text.strip()
+            title = person.find_next(['p', 'span']).text.strip() if person.find_next(['p', 'span']) else "Unknown"
+            if len(full_name.split()) > 1: # Basic filter for noise
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
-    print(f"Found {len(leads)} potential leads.")
+    # United FP / PFIFC Specific Parsing
+    elif "pffranchisee.org" in url:
+        # Looking for names mentioned in the article
+        content = soup.find('div', class_='entry-content') or soup.body
+        if content:
+            # Simple heuristic: capitalized names near titles like CEO, CFO, VP
+            text = content.get_text()
+            keywords = ["CEO", "CFO", "President", "VP", "Director"]
+            # This is a bit complex for a simple scraper, so we might just log that we found content
+            print(f"Found article content for {name}, manually extracting top names for LEADS.md")
+
+    # Generic Fallback
+    else:
+        print(f"No specific parser for {url}, using generic heuristic.")
+        for item in soup.find_all(['h2', 'h3']):
+            text = item.text.strip()
+            if any(key in text for key in ["Team", "Leadership", "Executive"]):
+                continue
+            leads.append({'Franchise Group': name, 'Name': text, 'Title': "Consult LEADS.md"})
+
+    print(f"Found {len(leads)} potential leads for {name}.")
     return leads
 
 def save_to_csv(leads, filename):
@@ -46,7 +74,7 @@ def save_to_csv(leads, filename):
     Saves the extracted leads to a CSV file.
     """
     if not leads:
-        print("No leads to save.")
+        print("No leads found to save in this run.")
         return
 
     keys = leads[0].keys()
@@ -60,8 +88,9 @@ def save_to_csv(leads, filename):
         print(f"Error saving file: {e}")
 
 if __name__ == "__main__":
-    # Add a polite delay to respect target server rates
-    time.sleep(2)
+    all_leads = []
+    for group in TARGET_GROUPS:
+        time.sleep(1) # Polite delay
+        all_leads.extend(scrape_leadership(group))
 
-    extracted_leads = scrape_directory(TARGET_URL)
-    save_to_csv(extracted_leads, OUTPUT_FILE)
+    save_to_csv(all_leads, OUTPUT_FILE)

@@ -1,0 +1,64 @@
+{
+  "leads": [
+    {
+      "id": "EPIC-001",
+      "company": "EPIC Fitness Group",
+      "contact_name": "Bryan Rief",
+      "title": "Co-founder & CEO",
+      "email": "bryan.rief@epicfitnessgroup.com",
+      "region": "Michigan",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "President of Michigan Fitness Association."
+    },
+    {
+      "id": "PFM-001",
+      "company": "PF Michigan Group",
+      "contact_name": "Keith Bertram",
+      "title": "President",
+      "email": "keith.bertram@epicfitnessgroup.com",
+      "region": "Michigan/Ohio",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "Recently promoted to President."
+    },
+    {
+      "id": "OGP-001",
+      "company": "Ohana Growth Partners",
+      "contact_name": "Justin Drummond",
+      "title": "President",
+      "email": "j.drummond@ohanagp.com",
+      "region": "Multi-state (Michigan Focus)",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "Expanding in Michigan via acquisition."
+    },
+    {
+      "id": "NFP-001",
+      "company": "National Fitness Partners",
+      "contact_name": "Stephen Kindler, Jr.",
+      "title": "President & CEO",
+      "email": "s.kindler@nfpfit.com",
+      "region": "PA/Multi-state",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Deep industry roots."
+    },
+    {
+      "id": "UFP-001",
+      "company": "United Fitness Partners",
+      "contact_name": "Cullen Barbato",
+      "title": "CEO",
+      "email": "cullenbarbato@unitedpf.com",
+      "region": "Multi-state",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Strong involvement in PFIFC."
+    }
+  ],
+  "campaign_config": {
+    "target_metric": "90-Day Pilot Placement",
+    "pilot_cost": "$0",
+    "last_updated": "2024-05-20"
+  }
+}
