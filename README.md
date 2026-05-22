@@ -13,14 +13,19 @@ To execute this, the project architecture is split into three components:
 
 *All generated content rigorously adheres to a strict corporate fitness tone. Words like "arcade" or "gamer" are banned in favor of "Next-Generation Gamified HIIT" and "Member Retention."*
 
-## Automated Pipeline Execution
+## Autonomous Agent Workflow: How to Use
 
-To accelerate Phase 2 (Lead Generation), this repository includes an automated Python scraping pipeline.
+This repository is optimized for autonomous execution. To launch the complete B2B campaign pipeline (Lead Gen -> ROI Analysis -> Asset Generation), execute:
 
-Operators (or autonomous agents with access to a shell) can run the entire technical setup and scraping process with a single command:
 ```bash
-./pipeline.sh
+bash launch_campaign.sh
 ```
+
+### Components of the Campaign:
+- **Lead Discovery:** `scrape_leads.py` targets regional franchise group directories.
+- **Financial Modeling:** `roi_calculator.py` projects membership retention lift benefits.
+- **Personalization:** `generate_personalized_assets.py` creates tailored emails in `outreach/generated/`.
+- **Governance:** State is tracked in `crm.json` and performance in `kpi-tracker.md`.
 
 This script will:
 1. Verify Python 3 installation.

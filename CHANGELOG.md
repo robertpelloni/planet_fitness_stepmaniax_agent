@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - Official Case Study Release
+- **Full Automation:** Launched `launch_campaign.sh` as the one-button execution sequence for the entire sales pipeline.
+- **Case Study Documentation:** Created `CASE_STUDY.md` documenting the "Rogue Franchise Loophole" strategy.
+- **Workflow Maturity:** Updated `README.md` with an autonomous agent workflow guide.
+- **Production Readiness:** Marked all foundational roadmap and todo items as complete for version 1.0.0.
+
 ## [0.9.0]
 - **Operational Onboarding:** Created `staff-training-manual.md` to guide club staff through the StepManiaX pilot.
 - **Strategic Scaling:** Drafted `regional-expansion-strategy.md` outlining the "Land and Expand" methodology for regional rollouts.
