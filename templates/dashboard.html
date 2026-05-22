@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StepManiaX - Agent Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; }
+        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; }
+        .container { padding: 2rem; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; color: #495057; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f1f3f5; }
+        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+        .status-ready { background-color: #d4edda; color: #155724; }
+        .status-active { background-color: #fff3cd; color: #856404; }
+        .uptime-good { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="font-weight: bold;">StepManiaX B2B Agent Dashboard</div>
+        <div>
+            Welcome, {{ current_user.username }} |
+            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none;">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- CRM Summary -->
+            <div class="card">
+                <h3>Sales Funnel Status</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Lead Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in crm_stats %}
+                        <tr>
+                            <td><span class="status-badge {% if row.status == 'Ready for Outreach' %}status-ready{% elif row.status == 'Outreach Active' %}status-active{% endif %}">{{ row.status }}</span></td>
+                            <td>{{ row.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Equipment Metrics -->
+            <div class="card">
+                <h3>Fitness Equipment Monitoring (Live Pilots)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Location</th>
+                            <th>Uptime</th>
+                            <th>Total Scans</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in metrics %}
+                        <tr>
+                            <td>{{ metric.equipment_name }}</td>
+                            <td>{{ metric.location }}</td>
+                            <td><span class="uptime-good">{{ metric.uptime_percent }}%</span></td>
+                            <td>{{ metric.total_scans }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">No active pilots monitored.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

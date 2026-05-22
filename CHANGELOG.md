@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0]
+- **Web Monitoring Dashboard:** Launched a Flask-based dashboard for visualizing lead status and equipment metrics.
+- **User Authentication:** Implemented a secure authentication module with hashed passwords and session management.
+- **CLI User Provisioning:** Updated `crm_tool.py` with a `create-user` command to manage dashboard access.
+- **Equipment Telemetry:** Defined `EquipmentMetric` schema to monitor live pilot uptime and scan data.
+
 ## [1.5.0]
 - **Data Quality Filtering:** Implemented `is_junk` heuristic in `scrape_leads.py` to filter out placeholders and web layout artifacts.
 - **Follow-up Automation:** Launched `cadence_trigger.py` to automatically identify leads due for contact based on a 7-day threshold.

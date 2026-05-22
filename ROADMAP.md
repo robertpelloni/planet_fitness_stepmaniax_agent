@@ -21,6 +21,7 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Negotiation & Objection Handling:** Drafted `maintenance-slas.md` to address technical and service-level concerns.
 
 ## Phase 4: Contract Negotiation & Deal Closure
+- [x] **Live Monitoring:** Launched web dashboard for real-time lead and equipment monitoring.
 - [x] **Memorandum of Understanding (MOU):** Drafted 90-day pilot agreement (`pilot-mou.md`).
 - [x] **Performance Reporting:** Established `pilot-performance-report.md` for data-driven ROI presentation.
 - [x] **Expansion Methodology:** Formalized `regional-expansion-strategy.md` for portfolio-wide scaling.

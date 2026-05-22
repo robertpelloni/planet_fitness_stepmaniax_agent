@@ -3,6 +3,7 @@ import argparse
 import sys
 from datetime import datetime
 from analytics import calculate_detailed_metrics
+from werkzeug.security import generate_password_hash
 
 DB_NAME = "crm.db"
 
@@ -100,6 +101,25 @@ def show_portfolio_analytics():
     print("===========================================================")
     conn.close()
 
+def create_user(username, password):
+    conn = get_db()
+    cursor = conn.cursor()
+    # Check if user table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user'")
+    if not cursor.fetchone():
+        print("Error: 'user' table not found. Please run 'flask init-db' first.")
+        return
+
+    password_hash = generate_password_hash(password)
+    try:
+        cursor.execute("INSERT INTO user (username, password_hash) VALUES (?, ?)", (username, password_hash))
+        print(f"Successfully created dashboard user: {username}")
+    except sqlite3.IntegrityError:
+        print(f"Error: User '{username}' already exists.")
+
+    conn.commit()
+    conn.close()
+
 def main():
     parser = argparse.ArgumentParser(description="StepManiaX B2B CRM CLI Tool")
     subparsers = parser.add_subparsers(dest="command")
@@ -122,6 +142,11 @@ def main():
     # Analytics
     subparsers.add_parser("analytics", help="Show total portfolio ROI potential")
 
+    # User Management
+    user_parser = subparsers.add_parser("create-user", help="Create a dashboard user")
+    user_parser.add_argument("username", help="Username")
+    user_parser.add_argument("password", help="Password")
+
     args = parser.parse_args()
 
     if args.command == "list":
@@ -132,6 +157,8 @@ def main():
         log_outreach(args.id, args.channel, args.notes)
     elif args.command == "analytics":
         show_portfolio_analytics()
+    elif args.command == "create-user":
+        create_user(username=args.username, password=args.password)
     else:
         parser.print_help()
 
