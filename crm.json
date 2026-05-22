@@ -13,7 +13,8 @@
       "roi_projection": {
         "num_clubs": 50,
         "retention_lift": 0.03,
-        "projected_annual_profit": -240000.0
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 1212815.55
       }
     },
     {
@@ -29,7 +30,8 @@
       "roi_projection": {
         "num_clubs": 24,
         "retention_lift": 0.02,
-        "projected_annual_profit": -115200.0
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 386560.1
       }
     },
     {
@@ -45,8 +47,55 @@
       "roi_projection": {
         "num_clubs": 10,
         "retention_lift": 0.03,
-        "projected_annual_profit": -48000.0
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 242563.11
       }
+    },
+    {
+      "id": "FLY-001",
+      "company": "Flynn Group",
+      "contact_name": "Stan DeMartinis Jr.",
+      "title": "President, Flynn Fitness",
+      "email": "s.demartinis@flynn.com",
+      "region": "Multi-state (VT, CT, RI, NJ, MD, MA)",
+      "status": "Identified",
+      "priority": "High",
+      "notes": "Acquired 37 clubs from Alder Partners.",
+      "roi_projection": {
+        "num_clubs": 37,
+        "retention_lift": 0.03,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 897483.5
+      }
+    },
+    {
+      "id": "CDM-001",
+      "company": "CDM Fitness Holdings",
+      "contact_name": "Lane Milliken",
+      "title": "Director of Operations",
+      "email": "l.milliken@fitearth.com",
+      "region": "New England / WA",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "88+ locations.",
+      "roi_projection": {
+        "num_clubs": 88,
+        "retention_lift": 0.02,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 1417387.0
+      }
+    },
+    {
+      "id": "ECP-001",
+      "company": "ECP-PF Holdings",
+      "contact_name": "Ryan Berk",
+      "title": "CEO",
+      "email": "r.berk@planetfitness.com",
+      "region": "Multi-state (CT, NY, TN)",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Owned by TowerBrook.",
+      "roi_projection": null
     },
     {
       "id": "NFP-001",

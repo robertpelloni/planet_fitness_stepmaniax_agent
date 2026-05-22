@@ -1,23 +1,23 @@
 # Handoff
 
 ## Session Summary
-In this optimization phase, I reached **Version 1.1.0**, focusing on refining the financial business case and automating the generation of high-impact sales assets. I successfully transitioned the ROI model to a Lifetime Value (LTV) framework, which demonstrates a significant multi-million dollar benefit for large franchise portfolios, and enhanced the personalization engine to dynamically generate both emails and summary pitch decks.
+In this expansion phase, I reached **Version 1.2.0**, significantly broadening the project's market reach and competitive intelligence. I identified and documented three additional major franchise groups (Flynn Group, CDM, ECP-PF), bringing the total tracked leads to 11. I also developed a formal competitive analysis to strengthen the B2B sales argument against traditional cardio and exergaming alternatives.
 
 ## Key Accomplishments
-- **Version Bump:** Incremented version to `1.1.0`.
-- **ROI Model Refinement:** Updated `roi_calculator.py` to use an LTV-based approach, projecting a 4.37x ROI for regional deployments.
-- **Dynamic Asset Generation:** Enhanced `generate_personalized_assets.py` to create lead-specific pitch decks (`pitch-[group].md`) containing custom ROI data calculated on-the-fly from CRM inputs.
-- **CRM Stabilization:** Corrected projected profit figures in `crm.json` to reflect the improved LTV model (converting negative projections into million-dollar gains).
+- **Version Bump:** Incremented version to `1.2.0`.
+- **Market Expansion:** Researched and documented 3 additional Planet Fitness franchise groups: **Flynn Group** (37+ clubs), **CDM Fitness Holdings** (88+ clubs), and **ECP-PF Holdings** (Orange, CT).
+- **Competitive Intelligence:** Created `competitive-analysis.md`, providing a side-by-side comparison with traditional cardio and other exergaming competitors.
+- **Tooling Updates:** Refactored `scrape_leads.py` with custom parsing for Flynn Group and CDM Fitness sites to improve lead extraction accuracy.
 - **Documentation Updates:**
-    - Synchronized `ROADMAP.md` and `TODO.md` (marked Phase 3.5 as complete).
-    - Updated `CHANGELOG.md` to document the 1.1.0 milestone.
-- **Verification:** Successfully executed the full `launch_campaign.sh` sequence and verified the quality of generated pitch decks.
+    - Synchronized `ROADMAP.md` and `TODO.md` (marked Phase 2.3 as complete).
+    - Updated `CHANGELOG.md` with the 1.2.0 milestone.
+- **Verification:** Successfully executed the full `launch_campaign.sh` sequence with the expanded lead set.
 
 ## Structural Shifts
-- The sales pitch is now **LTV-Centric**, focusing on the long-term value of saved members rather than just monthly fees.
-- Assets are now split into `email-[group].md` and `pitch-[group].md` for a coordinated outreach approach.
+- The lead database now represents over 700+ club locations through various franchise groups.
+- Added **Competitive Positioning** as a core component of the sales collateral suite.
 
 ## Future Recommendations
-- **Interactive ROI:** Consider building a simple Streamlit or Gradio interface for the `roi_calculator.py` to allow live modeling during discovery calls.
-- **Visual Decks:** Transition the Markdown pitch decks into a slide-based format (e.g., using Marp or Pandoc) for a more professional visual presentation.
-- **Lead Expansion:** Use the enhanced scraper to identify 5-10 additional mid-sized franchise groups (20-40 locations) to populate the new LTV-based pipeline.
+- **Regional Filters:** Consider adding a "Target Region" filter to `generate_personalized_assets.py` to allow for state-specific campaign waves.
+- **Visual Competitive Deck:** Convert the `competitive-analysis.md` table into a visual slide for inclusion in the personalized pitch decks.
+- **Email Validation:** Integrate a basic email validation check in the scraper to flag potentially invalid executive email addresses before asset generation.

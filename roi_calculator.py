@@ -1,58 +1,64 @@
 """
-StepManiaX B2B ROI Calculator
+StepManiaX B2B ROI Calculator (v1.2.0)
 Calculates the potential financial impact of deploying StepManiaX units based on
-member retention lift and increased visit frequency.
+Member Lifetime Value (LTV), retention lift, and tiered membership models.
 """
 
 def calculate_roi(
     num_clubs=1,
     members_per_club=5000,
-    monthly_membership_fee=10.0,
-    retention_lift_percent=0.02, # e.g., 2% increase in retention
+    avg_monthly_fee=15.0, # Blended rate between Classic and Black Card
+    retention_lift_percent=0.03, # Increase in average member lifetime
     avg_member_lifetime_months=18,
-    smx_monthly_cost_per_club=500.0 # Estimated lease/maintenance cost
+    smx_monthly_cost_per_club=600.0 # Lease + Maintenance + Software
 ):
     """
-    Calculates monthly and annual ROI for a StepManiaX deployment.
+    Calculates portfolio-wide ROI using Member Lifetime Value (LTV).
     """
     total_members = num_clubs * members_per_club
 
-    # 1. Retention Impact
-    # Number of members saved from cancelling per month (hypothetical)
-    # Average monthly churn is 1 / member_lifetime
-    base_monthly_churn_rate = 1.0 / avg_member_lifetime_months
-    members_saved_per_month = total_members * (base_monthly_churn_rate * retention_lift_percent)
+    # 1. Base LTV Analysis
+    base_ltv = avg_monthly_fee * avg_member_lifetime_months
+    base_total_portfolio_value = total_members * base_ltv
 
-    # Monthly revenue saved
-    revenue_saved_per_month = members_saved_per_month * monthly_membership_fee
+    # 2. Lifted LTV Analysis
+    # Retention lift increases the average lifetime (in months)
+    lifted_lifetime_months = avg_member_lifetime_months * (1 + retention_lift_percent)
+    lifted_ltv = avg_monthly_fee * lifted_lifetime_months
+    lifted_total_portfolio_value = total_members * lifted_ltv
 
-    # 2. Costs
+    # 3. Financial Gain
+    total_portfolio_value_gain = lifted_total_portfolio_value - base_total_portfolio_value
+    annual_revenue_gain = total_portfolio_value_gain / (lifted_lifetime_months / 12)
+
+    # 4. Costs
     total_monthly_cost = num_clubs * smx_monthly_cost_per_club
+    total_annual_cost = total_monthly_cost * 12
 
-    # 3. Final ROI
-    monthly_net_profit = revenue_saved_per_month - total_monthly_cost
-    annual_net_profit = monthly_net_profit * 12
+    # 5. Final Metrics
+    annual_net_profit = annual_revenue_gain - total_annual_cost
+    roi_multiple = annual_revenue_gain / total_annual_cost if total_annual_cost > 0 else 0
 
     return {
         "total_members": total_members,
-        "members_saved_per_year": round(members_saved_per_month * 12),
-        "monthly_revenue_saved": round(revenue_saved_per_month, 2),
-        "monthly_net_profit": round(monthly_net_profit, 2),
+        "base_ltv": round(base_ltv, 2),
+        "lifted_ltv": round(lifted_ltv, 2),
+        "annual_revenue_gain": round(annual_revenue_gain, 2),
         "annual_net_profit": round(annual_net_profit, 2),
-        "roi_multiple": round(revenue_saved_per_month / total_monthly_cost, 2) if total_monthly_cost > 0 else 0
+        "roi_multiple": round(roi_multiple, 2)
     }
 
 if __name__ == "__main__":
-    # Example: 10 Club Regional Deployment
+    # Example: 10 Club Regional Deployment with 3% Retention Lift
     results = calculate_roi(num_clubs=10, members_per_club=6000, retention_lift_percent=0.03)
 
     print("===========================================================")
-    print("   StepManiaX Regional ROI Projection (10 Clubs)")
+    print("   StepManiaX Regional ROI Projection (LTV Model)")
     print("===========================================================")
     print(f"Total Portfolio Members: {results['total_members']}")
-    print(f"Members Saved Per Year (via 3% Retention Lift): {results['members_saved_per_year']}")
-    print(f"Monthly Revenue Saved: ${results['monthly_revenue_saved']}")
-    print(f"Monthly Net Profit (After Costs): ${results['monthly_net_profit']}")
-    print(f"Annual Net Profit: ${results['annual_net_profit']}")
+    print(f"Base Member LTV: ${results['base_ltv']}")
+    print(f"Lifted Member LTV (3% Lift): ${results['lifted_ltv']}")
+    print(f"Projected Annual Revenue Gain: ${results['annual_revenue_gain']}")
+    print(f"Projected Annual Net Profit: ${results['annual_net_profit']}")
     print(f"ROI Multiple: {results['roi_multiple']}x")
     print("===========================================================")

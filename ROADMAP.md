@@ -7,7 +7,7 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Build the Pitch Deck:** Designed B2B presentation focusing on "Gamified HIIT" and member retention.
 
 ## Phase 2: Lead Generation & Target Mapping
-- [x] **Identify the Local Franchise Powerhouse:** Researched regional Franchise Groups (EPIC Fitness, NFP, OGP, etc.) and documented in `LEADS.md`.
+- [x] **Identify the Local Franchise Powerhouse:** Expanded research to 11 major regional Franchise Groups (Flynn Group, CDM, ECP-PF, etc.) in `LEADS.md`.
 - [x] **Target the Decision-Makers:** Refined contact info, email patterns, and LinkedIn URLs for key executives in `LEADS.md`.
 
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch

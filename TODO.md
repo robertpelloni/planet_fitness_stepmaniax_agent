@@ -12,11 +12,13 @@ Ordered by priority:
 8. [x] **Phase 2.1 (Automation):** Implement `pipeline.sh` to automate environment setup and script execution.
 9. [x] **Phase 2.1 (Research):** Identified major franchise groups and documented in `LEADS.md`.
 10. [x] **Phase 2.2:** Target Decision Makers (Refined contact info and email patterns in `LEADS.md`).
-11. [x] **Phase 3.1 (Preparation):** Developed personalized outreach drafts in `outreach/`.
-12. [x] **Phase 3.2 (Infrastructure):** Established CRM-based lead tracking in `crm.json` and follow-up templates in `outreach/follow-ups.md`.
-13. [x] **Phase 3.3 (Call Prep):** Developed discovery scripts and pilot FAQs for executive engagement.
-14. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
-15. [x] **Phase 4.3 (Operations):** Developed `staff-training-manual.md` and `regional-expansion-strategy.md`.
-16. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-17. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
-18. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+11. [x] **Phase 2.3 (Expansion):** Identified and documented 3 additional major franchise groups (Flynn, CDM, ECP-PF).
+12. [x] **Phase 3.1 (Preparation):** Developed personalized outreach drafts in `outreach/`.
+13. [x] **Phase 3.2 (Infrastructure):** Established CRM-based lead tracking in `crm.json` and follow-up templates in `outreach/follow-ups.md`.
+14. [x] **Phase 3.3 (Call Prep):** Developed discovery scripts and pilot FAQs for executive engagement.
+15. [x] **Phase 3.5 (Refinement):** Refined ROI models to use LTV and automated lead-specific pitch decks.
+16. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
+17. [x] **Phase 4.3 (Operations):** Developed `staff-training-manual.md` and `regional-expansion-strategy.md`.
+18. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+19. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
+20. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.

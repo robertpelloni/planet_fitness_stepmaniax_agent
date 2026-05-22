@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0]
+- **Market Expansion:** Identified and documented 3 additional major franchise groups: Flynn Group, CDM Fitness Holdings, and ECP-PF Holdings.
+- **Lead Database Growth:** Expanded `crm.json` and `LEADS.md` with prioritized executive contact data and ROI projections.
+- **Competitive Intelligence:** Created `competitive-analysis.md` comparing SMX with traditional cardio and exergaming competitors.
+- **Tooling Enhancement:** Updated `scrape_leads.py` with custom parsers for the new target franchise websites.
+
+## [1.1.0]
+- **ROI Model Refinement:** Switched `roi_calculator.py` to a Lifetime Value (LTV) model, providing a more robust financial case for franchisees.
+- **Dynamic Sales Assets:** Enhanced `generate_personalized_assets.py` to create lead-specific pitch decks with custom ROI projections.
+- **Enhanced Outreach:** Automated the generation of both tailored emails and summary pitch decks from `crm.json`.
+
 ## [1.0.0] - Official Case Study Release
 - **Full Automation:** Launched `launch_campaign.sh` as the one-button execution sequence for the entire sales pipeline.
 - **Case Study Documentation:** Created `CASE_STUDY.md` documenting the "Rogue Franchise Loophole" strategy.
