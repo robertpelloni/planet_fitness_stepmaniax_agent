@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0]
+- **CRM Database Architecture:** Migrated lead tracking from JSON to a structured SQLite database (`crm.db`).
+- **Database Initialization:** Created `initialize_crm_db.py` to automate schema setup and data migration.
+- **CRM CLI Tool:** Launched `crm_tool.py` providing a command-line interface for lead management and outreach logging.
+- **Refactored Automation:** Updated `generate_personalized_assets.py` to utilize the new database-backed lead storage.
+
 ## [1.2.0]
 - **Market Expansion:** Identified and documented 3 additional major franchise groups: Flynn Group, CDM Fitness Holdings, and ECP-PF Holdings.
 - **Lead Database Growth:** Expanded `crm.json` and `LEADS.md` with prioritized executive contact data and ROI projections.

@@ -1,4 +1,4 @@
-import json
+import sqlite3
 import os
 
 def calculate_roi_metrics(num_clubs, retention_lift, avg_monthly_fee):
@@ -29,15 +29,16 @@ def calculate_roi_metrics(num_clubs, retention_lift, avg_monthly_fee):
         "roi_multiple": round(roi_multiple, 2)
     }
 
-def generate_personalized_assets(crm_file="crm.json", output_dir="outreach/generated"):
+def generate_personalized_assets(db_name="crm.db", output_dir="outreach/generated"):
     """
-    Generates personalized outreach emails and pitch decks based on lead data in crm.json.
+    Generates personalized outreach emails and pitch decks based on lead data in SQLite DB.
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    with open(crm_file, 'r') as f:
-        data = json.load(f)
+    conn = sqlite3.connect(db_name)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
 
     email_template = """# Personalized Outreach: {company}
 
@@ -96,50 +97,53 @@ We propose a trial placement at a priority {region} location to gather real-worl
 *Contact us to schedule a brief introductory call.*
 """
 
-    for lead in data['leads']:
-        if lead['status'] == "Ready for Outreach":
-            # Generate Email
-            email_filename = f"email-{lead['company'].lower().replace(' ', '-')}.md"
-            email_filepath = os.path.join(output_dir, email_filename)
+    cursor.execute("SELECT * FROM leads WHERE status = 'Ready for Outreach'")
+    leads = cursor.fetchall()
 
-            email_content = email_template.format(
-                company=lead['company'],
-                contact_name=lead['contact_name'],
-                title=lead['title'],
-                email=lead['email'],
-                region=lead['region']
+    for lead in leads:
+        # Generate Email
+        email_filename = f"email-{lead['company'].lower().replace(' ', '-')}.md"
+        email_filepath = os.path.join(output_dir, email_filename)
+
+        email_content = email_template.format(
+            company=lead['company'],
+            contact_name=lead['contact_name'],
+            title=lead['title'],
+            email=lead['email'],
+            region=lead['region']
+        )
+
+        with open(email_filepath, 'w') as out:
+            out.write(email_content)
+
+        # Generate Pitch Deck (if ROI data is present)
+        if lead['num_clubs']:
+            deck_filename = f"pitch-{lead['company'].lower().replace(' ', '-')}.md"
+            deck_filepath = os.path.join(output_dir, deck_filename)
+
+            metrics = calculate_roi_metrics(
+                num_clubs=lead['num_clubs'],
+                retention_lift=lead['retention_lift'] or 0.03,
+                avg_monthly_fee=lead['avg_monthly_fee'] or 15.0
             )
 
-            with open(email_filepath, 'w') as out:
-                out.write(email_content)
+            deck_content = deck_template.format(
+                company=lead['company'],
+                region=lead['region'],
+                num_clubs=lead['num_clubs'],
+                lift_pct=int((lead['retention_lift'] or 0.03) * 100),
+                base_ltv=metrics['base_ltv'],
+                lifted_ltv=metrics['lifted_ltv'],
+                annual_net_profit=metrics['annual_net_profit'],
+                roi_multiple=metrics['roi_multiple']
+            )
 
-            # Generate Pitch Deck (if ROI data is present)
-            if lead.get('roi_projection'):
-                deck_filename = f"pitch-{lead['company'].lower().replace(' ', '-')}.md"
-                deck_filepath = os.path.join(output_dir, deck_filename)
+            with open(deck_filepath, 'w') as out:
+                out.write(deck_content)
 
-                roi_data = lead['roi_projection']
-                metrics = calculate_roi_metrics(
-                    num_clubs=roi_data.get('num_clubs', 1),
-                    retention_lift=roi_data.get('retention_lift', 0.03),
-                    avg_monthly_fee=roi_data.get('avg_monthly_fee', 15.0)
-                )
+        print(f"Generated assets from DB for: {lead['company']}")
 
-                deck_content = deck_template.format(
-                    company=lead['company'],
-                    region=lead['region'],
-                    num_clubs=roi_data.get('num_clubs', 1),
-                    lift_pct=int(roi_data.get('retention_lift', 0.03) * 100),
-                    base_ltv=metrics['base_ltv'],
-                    lifted_ltv=metrics['lifted_ltv'],
-                    annual_net_profit=metrics['annual_net_profit'],
-                    roi_multiple=metrics['roi_multiple']
-                )
-
-                with open(deck_filepath, 'w') as out:
-                    out.write(deck_content)
-
-            print(f"Generated assets for: {lead['company']}")
+    conn.close()
 
 if __name__ == "__main__":
     generate_personalized_assets()

@@ -22,3 +22,4 @@ Ordered by priority:
 18. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
 19. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
 20. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+21. [x] **Phase 3.6 (Architecture):** Migrated CRM to SQLite and launched `crm_tool.py` for CLI-based lead management.

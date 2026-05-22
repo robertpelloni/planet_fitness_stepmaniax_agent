@@ -4,26 +4,30 @@
 set -e
 
 echo "==========================================================="
-echo "   StepManiaX B2B Campaign Launch Sequence (v1.0.0)"
+echo "   StepManiaX B2B Campaign Launch Sequence (v1.3.0)"
 echo "==========================================================="
 
-# 1. Lead Generation Phase
-echo "[1/4] Starting Regional Lead Discovery..."
+# 1. Database Initialization & Lead Migration
+echo "[1/5] Initializing CRM Database..."
+python3 initialize_crm_db.py
+
+# 2. Lead Generation Phase
+echo "[2/5] Starting Regional Lead Discovery..."
 bash pipeline.sh
 
-# 2. Financial Modeling Phase
-echo "[2/4] Executing ROI Projections..."
+# 3. Financial Modeling Phase
+echo "[3/5] Executing ROI Projections..."
 python3 roi_calculator.py
 
-# 3. Asset Generation Phase
-echo "[3/4] Generating Personalized Sales Collateral..."
+# 4. Asset Generation Phase
+echo "[4/5] Generating Personalized Sales Collateral from CRM DB..."
 python3 generate_personalized_assets.py
 
-# 4. Final Verification
-echo "[4/4] Finalizing Campaign Assets..."
+# 5. Final Verification
+echo "[5/5] Finalizing Campaign Assets..."
 ls -R outreach/generated/
 
 echo "==========================================================="
 echo "   Campaign Launch Sequence Complete."
-echo "   Ready for Outreach Execution."
+echo "   Use 'python3 crm_tool.py list' to view targets."
 echo "==========================================================="
