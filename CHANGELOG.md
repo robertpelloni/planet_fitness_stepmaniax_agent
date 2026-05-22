@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0]
+- **Repository Synchronization:** Performed comprehensive upstream sync and intelligent merge, reconciling all active feature branches into `main`.
+- **Contact Intelligence:** Refined `LEADS.md` with specific email patterns, LinkedIn URLs, and personalized notes for top franchise executives.
+- **Personalized Outreach:** Created `outreach/` directory with tailored sales scripts for EPIC Fitness Group, PF Michigan Group, and Ohana Growth Partners.
+- **Protocol Adherence:** Verified all structural documentation and execution scripts following the repository refresh.
+
 ## [0.4.0]
 - **Targeted Lead Research:** Identified major Planet Fitness Franchise Groups (National Fitness Partners, Grand Fitness Partners, Excel Fitness, United FP, Taymax Group) and their operational regions.
 - **Enhanced Scraper:** Updated `scrape_leads.py` with targeted URLs and basic parsing logic for franchise group team pages.

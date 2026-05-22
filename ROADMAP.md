@@ -8,9 +8,10 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 
 ## Phase 2: Lead Generation & Target Mapping
 - [x] **Identify the Local Franchise Powerhouse:** Researched regional Franchise Groups (EPIC Fitness, NFP, OGP, etc.) and documented in `LEADS.md`.
-- [ ] **Target the Decision-Makers:** Refine contact info for COOs and VPs identified in `LEADS.md` (e.g., Bryan Rief, Stephen Kindler Jr.).
+- [x] **Target the Decision-Makers:** Refined contact info, email patterns, and LinkedIn URLs for key executives in `LEADS.md`.
 
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch
+- [x] **Personalized Collateral:** Developed tailored outreach scripts for priority Michigan targets in `outreach/`.
 - [ ] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot.
 - [ ] **Negotiation & Objection Handling:** Address concerns regarding noise, floor etiquette, and maintenance.
 

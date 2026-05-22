@@ -8,6 +8,8 @@ This document tracks major regional Planet Fitness Franchise Groups, their opera
 - **CEO:** Stephen Kindler, Jr.
 - **Key Execs:**
     - Stephen Kindler, Jr. (President & CEO)
+- **Email Domain:** nfpfit.com
+- **LinkedIn:** https://www.linkedin.com/in/stephenkindlerjr
 - **Website:** https://www.nfpfit.com/
 - **Notes:** One of the largest franchise groups. CEO has deep roots in the family-owned fitness business.
 
@@ -25,6 +27,8 @@ This document tracks major regional Planet Fitness Franchise Groups, their opera
     - Cullen Barbato (CEO)
     - Milli Hawkins (SVP Strategy & Growth)
     - Desiree Bennett (Chief People Officer)
+- **Email Format:** {firstname}{lastname}@unitedpf.com (e.g., cullenbarbato@unitedpf.com)
+- **LinkedIn:** https://www.linkedin.com/in/cullenbarbato
 - **Notes:** Strong involvement in the Planet Fitness Independent Franchisee Council (PFIFC).
 
 ## 4. Excel Fitness
@@ -46,6 +50,7 @@ This document tracks major regional Planet Fitness Franchise Groups, their opera
 - **Base:** Northville, MI
 - **Scale:** 50 locations in Michigan.
 - **CEO:** Bryan Rief (Co-founder & CEO)
+- **Email Pattern:** {first}.{last}@epicfitnessgroup.com (Likely: bryan.rief@epicfitnessgroup.com)
 - **Notes:** High-priority target for Michigan-based outreach. Bryan Rief is also President of the Michigan Fitness Association.
 
 ## 7. PF Michigan Group
@@ -53,11 +58,16 @@ This document tracks major regional Planet Fitness Franchise Groups, their opera
 - **Key Execs:**
     - Keith Bertram (President)
     - Michele Dussault (Controller)
+- **Email Pattern:** {first}.{last}@epicfitnessgroup.com (Note: Keith Bertram is President at EPIC Fitness Group dba Planet Fitness)
 - **Notes:** Recently promoted Keith Bertram to President.
 
 ## 8. Ohana Growth Partners (OGP)
 - **Base:** Timonium, MD
 - **Scale:** One of the largest franchisees; recently acquired 10 Michigan clubs from JP Fitness.
+- **President:** Justin Drummond
+- **Director of Marketing:** Peter Hall
+- **Email Domain:** ohanagp.com
+- **LinkedIn:** https://www.linkedin.com/company/ohanagp
 - **Notes:** Expanding footprint in Michigan.
 
 ---

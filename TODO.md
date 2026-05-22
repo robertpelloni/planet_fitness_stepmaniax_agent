@@ -10,6 +10,7 @@ Ordered by priority:
 6. [x] **Phase 2.1:** Identify Local Franchise Powerhouses in target region (Generic python scraping scaffolding implemented; execution blocked pending target URLs).
 7. [x] **Phase 2.1 (Automation):** Implement `pipeline.sh` to automate environment setup and script execution.
 8. [x] **Phase 2.1 (Research):** Identified major franchise groups and documented in `LEADS.md`.
-9. [ ] **Phase 2.2:** Target Decision Makers (Refine contact info for identified executives in `LEADS.md`).
-10. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-11. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+9. [x] **Phase 2.2:** Target Decision Makers (Refined contact info and email patterns in `LEADS.md`).
+10. [x] **Phase 3.1 (Preparation):** Developed personalized outreach drafts in `outreach/`.
+11. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+12. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
