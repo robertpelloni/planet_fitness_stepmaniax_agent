@@ -20,4 +20,6 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 ## Phase 4: Contract Negotiation & Deal Closure
 - [x] **Memorandum of Understanding (MOU):** Drafted 90-day pilot agreement (`pilot-mou.md`).
 - [x] **Performance Reporting:** Established `pilot-performance-report.md` for data-driven ROI presentation.
+- [x] **Expansion Methodology:** Formalized `regional-expansion-strategy.md` for portfolio-wide scaling.
+- [x] **Operational Readiness:** Developed `staff-training-manual.md` for club-level onboarding.
 - [x] **The "Land and Expand" Trigger:** Developed `commercial-proposal-template.md` detailing regional procurement models.

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0]
+- **Operational Onboarding:** Created `staff-training-manual.md` to guide club staff through the StepManiaX pilot.
+- **Strategic Scaling:** Drafted `regional-expansion-strategy.md` outlining the "Land and Expand" methodology for regional rollouts.
+- **CRM Enrichment:** Enhanced `crm.json` with `roi_projection` data to track potential portfolio impact per lead.
+- **Workflow Maturity:** Updated `ROADMAP.md` and `TODO.md` to reflect full readiness for Phase 3 and Phase 4 execution.
+
 ## [0.8.0]
 - **ROI Analytics:** Launched `roi_calculator.py` to model the financial impact of retention lift for franchisees.
 - **Outreach Automation:** Implemented `generate_personalized_assets.py` for dynamic, CRM-driven sales collateral generation.

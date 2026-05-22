@@ -9,7 +9,12 @@
       "region": "Michigan",
       "status": "Ready for Outreach",
       "priority": "High",
-      "notes": "President of Michigan Fitness Association."
+      "notes": "President of Michigan Fitness Association.",
+      "roi_projection": {
+        "num_clubs": 50,
+        "retention_lift": 0.03,
+        "projected_annual_profit": -240000.0
+      }
     },
     {
       "id": "PFM-001",
@@ -20,7 +25,12 @@
       "region": "Michigan/Ohio",
       "status": "Ready for Outreach",
       "priority": "High",
-      "notes": "Recently promoted to President."
+      "notes": "Recently promoted to President.",
+      "roi_projection": {
+        "num_clubs": 24,
+        "retention_lift": 0.02,
+        "projected_annual_profit": -115200.0
+      }
     },
     {
       "id": "OGP-001",
@@ -31,7 +41,12 @@
       "region": "Multi-state (Michigan Focus)",
       "status": "Ready for Outreach",
       "priority": "High",
-      "notes": "Expanding in Michigan via acquisition."
+      "notes": "Expanding in Michigan via acquisition.",
+      "roi_projection": {
+        "num_clubs": 10,
+        "retention_lift": 0.03,
+        "projected_annual_profit": -48000.0
+      }
     },
     {
       "id": "NFP-001",
@@ -42,7 +57,8 @@
       "region": "PA/Multi-state",
       "status": "Identified",
       "priority": "Medium",
-      "notes": "Deep industry roots."
+      "notes": "Deep industry roots.",
+      "roi_projection": null
     },
     {
       "id": "UFP-001",
@@ -53,7 +69,8 @@
       "region": "Multi-state",
       "status": "Identified",
       "priority": "Medium",
-      "notes": "Strong involvement in PFIFC."
+      "notes": "Strong involvement in PFIFC.",
+      "roi_projection": null
     }
   ],
   "campaign_config": {

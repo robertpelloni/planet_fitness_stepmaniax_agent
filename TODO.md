@@ -15,6 +15,7 @@ Ordered by priority:
 11. [x] **Phase 3.2 (Infrastructure):** Established CRM-based lead tracking in `crm.json` and follow-up templates in `outreach/follow-ups.md`.
 12. [x] **Phase 3.3 (Call Prep):** Developed discovery scripts and pilot FAQs for executive engagement.
 13. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
-14. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
-15. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
-16. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+14. [x] **Phase 4.3 (Operations):** Developed `staff-training-manual.md` and `regional-expansion-strategy.md`.
+15. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
+16. [x] **Phase 3.4 (Automation):** Implement `generate_personalized_assets.py` and `roi_calculator.py` for data-driven sales.
+17. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
