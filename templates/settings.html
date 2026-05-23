@@ -82,6 +82,30 @@
                 </tbody>
             </table>
         </div>
+
+        {% if current_user.role == 'Admin' %}
+        <div class="card" style="border-top-color: #dc3545;">
+            <h3>User Management (Admin Only)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Franchise ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.franchise_id or 'Global' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

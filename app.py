@@ -1,6 +1,7 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from functools import wraps
 from flask_wtf.csrf import CSRFProtect
 from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog
 from datetime import datetime
@@ -25,6 +26,21 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return login_manager.unauthorized()
+            if current_user.role not in roles:
+                if current_user.role == 'Member':
+                    flash("Access restricted to management only.")
+                    return redirect(url_for('member_dashboard'))
+                abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 # Routes
 @app.route('/')
@@ -119,6 +135,7 @@ def telemetry():
 
 @app.route('/update_lead_status', methods=['POST'])
 @login_required
+@role_required(['Admin', 'Franchisee'])
 def update_lead_status():
     lead_id = request.form.get('lead_id')
     new_status = request.form.get('status')
@@ -135,6 +152,7 @@ def update_lead_status():
 
 @app.route('/resources/<path:filename>')
 @login_required
+@role_required(['Admin', 'Franchisee'])
 def serve_resources(filename):
     # Restrict to technical/alignment docs directory for security
     return send_from_directory('technical_docs', filename)
@@ -178,6 +196,7 @@ def member_onboarding():
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
+@role_required(['Admin', 'Franchisee'])
 def settings():
     if request.method == 'POST':
         url = request.form.get('url')
@@ -195,13 +214,16 @@ def settings():
 
     if current_user.role == 'Admin':
         webhooks = Webhook.query.all()
+        users = User.query.all()
     else:
         webhooks = Webhook.query.filter_by(franchise_id=current_user.franchise_id).all()
+        users = []
 
-    return render_template('settings.html', webhooks=webhooks)
+    return render_template('settings.html', webhooks=webhooks, users=users)
 
 @app.route('/generate_report/<int:unit_id>')
 @login_required
+@role_required(['Admin', 'Franchisee'])
 def generate_unit_report(unit_id):
     filepath = generate_report(unit_id)
     if filepath:
@@ -212,6 +234,7 @@ def generate_unit_report(unit_id):
 
 @app.route('/dashboard')
 @login_required
+@role_required(['Admin', 'Franchisee'])
 def dashboard():
     # Multi-tenant logic: Filter by franchise_id if user is not an Admin
     franchise_id = current_user.franchise_id
