@@ -3,20 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Member Dashboard - StepManiaX Pilot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
         .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 2rem; max-width: 800px; margin: 0 auto; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; margin-bottom: 1.5rem; }
-        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; }
+        .container { padding: 2rem; max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; }
+        .full-width { grid-column: span 2; }
+        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
         .form-group { margin-bottom: 1.25rem; }
         label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
-        input { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #ced4da; box-sizing: border-box; font-size: 1rem; }
-        button { padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        input, select { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #ced4da; box-sizing: border-box; font-size: 1rem; }
+        button { padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
         button:hover { background-color: #0056b3; }
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background-color: #e9ecef; color: #495057; }
         .status-completed { background-color: #d4edda; color: #155724; }
-        .flash { background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #bee5eb; }
+        .flash { background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #bee5eb; grid-column: span 2; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+        .stat-item { text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #007bff; }
+        .stat-label { font-size: 0.75rem; color: #666; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { color: #666; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -37,44 +46,119 @@
         {% endwith %}
 
         <div class="card">
-            <h3>Pilot Participation Status</h3>
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <div style="font-size: 0.9rem; color: #666;">Onboarding Progress:</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; margin-top: 5px;">{{ member.onboarding_status }}</div>
+            <h3>Pilot Stats <span class="status-badge {% if member.onboarding_status == 'Completed' %}status-completed{% endif %}">{{ member.onboarding_status }}</span></h3>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value">{{ member.points }}</div>
+                    <div class="stat-label">Engagement Points</div>
                 </div>
-                <span class="status-badge {% if member.onboarding_status == 'Completed' %}status-completed{% endif %}">
-                    {{ member.onboarding_status }}
-                </span>
+                <div class="stat-item">
+                    <div class="stat-value">{{ "%.1f"|format(member.engagement_score * 100) }}%</div>
+                    <div class="stat-label">Retention Score</div>
+                </div>
             </div>
             <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #666;">
-                Registered on: {{ member.registration_date }}<br>
-                Assigned Club: {{ member.franchise_id }}
+                <strong>Club:</strong> {{ member.franchise_id }}<br>
+                <strong>Member Since:</strong> {{ member.registration_date }}
             </div>
         </div>
 
         <div class="card">
-            <h3>Modify Membership Details</h3>
-            <form method="POST">
+            <h3>Book a Session</h3>
+            <form action="{{ url_for('member_book_session') }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="name" value="{{ member.name }}" required>
+                    <label>Select Equipment</label>
+                    <select name="equipment_id" required>
+                        {% for unit in equipment %}
+                        <option value="{{ unit.id }}">{{ unit.equipment_name }} ({{ unit.location }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Email Address (Username)</label>
-                    <input type="email" value="{{ member.email }}" disabled style="background-color: #f8f9fa;">
-                    <small style="color: #999;">Email address cannot be changed.</small>
+                    <label>Start Time</label>
+                    <input type="datetime-local" name="start_time" required>
                 </div>
-                <button type="submit">Update Profile</button>
+                <button type="submit">Reserve Slot</button>
             </form>
         </div>
 
-        <div class="card" style="border-top-color: #17a2b8;">
-            <h3>Pilot Feedback</h3>
-            <p style="font-size: 0.9rem; color: #666;">We'd love to hear about your StepManiaX experience! Feedback helps us improve member retention.</p>
-            <button style="background-color: #17a2b8; opacity: 0.6; cursor: not-allowed;">Share Feedback (Coming Soon)</button>
+        <div class="card full-width">
+            <h3>My Upcoming Sessions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment</th>
+                        <th>Time</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in upcoming_sessions %}
+                    <tr>
+                        <td>{{ session.equipment_name }}</td>
+                        <td>{{ session.start_time }}</td>
+                        <td>{{ session.duration_minutes }} min</td>
+                        <td><span class="status-badge">{{ session.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #999; padding: 2rem;">No upcoming sessions scheduled.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card full-width">
+            <h3>My Progress</h3>
+            <canvas id="engagementChart" height="100"></canvas>
+        </div>
+
+        <div class="card full-width">
+            <h3>Profile Settings</h3>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" value="{{ member.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" value="{{ member.email }}" disabled style="background-color: #f8f9fa;">
+                    </div>
+                </div>
+                <button type="submit" style="width: auto; padding: 0.75rem 2rem;">Save Changes</button>
+            </form>
         </div>
     </div>
+
+    <script>
+        const ctx = document.getElementById('engagementChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|tojson }},
+                datasets: [{
+                    label: 'Scans / Activity',
+                    data: {{ chart_data|tojson }},
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

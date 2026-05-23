@@ -41,12 +41,4 @@ For any hardware failures or persistent software issues:
 - **SLA:** We guarantee on-site service within **48 hours**.
 
 ---
-
-## 7. The Staff Dashboard
-Staff can monitor unit health in real-time via the **Staff Portal**.
-- **Metrics View:** Displays live scan counts and current session duration.
-- **Real-time Analytics:** View the 'Hourly Usage Distribution' to identify peak usage times and optimize floor staff presence.
-- **Maintenance View:** Flags units that require calibration or cleaning.
-- **Alerts:** Critical uptime drops or usage anomalies (unusual spikes or drops) will trigger a visual alert on the dashboard. Usage anomalies often indicate either a hardware sensor issue or a significant shift in member behavior.
-
 **Remember:** You are the face of this pilot. Your enthusiasm and assistance will directly impact the data we collect on member retention.

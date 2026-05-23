@@ -39,10 +39,12 @@ class Alert(db.Model):
 
 class MemberSchedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
     member_name = db.Column(db.String(100), nullable=False)
     start_time = db.Column(db.String(50), nullable=False)
     duration_minutes = db.Column(db.Integer, default=10)
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'))
+    status = db.Column(db.String(20), default='Scheduled') # 'Scheduled', 'Completed', 'No-show'
 
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,6 +54,8 @@ class Member(db.Model):
     onboarding_status = db.Column(db.String(50), default='Registered') # 'Registered', 'In Progress', 'Completed'
     registration_date = db.Column(db.String(50), nullable=False)
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    points = db.Column(db.Integer, default=0)
+    engagement_score = db.Column(db.Float, default=0.0)
 
 class Lead(db.Model):
     __tablename__ = 'leads'
@@ -71,7 +75,6 @@ class Lead(db.Model):
     follow_up_count = db.Column(db.Integer, default=0)
     last_contact_date = db.Column(db.String(50))
     public_token = db.Column(db.String(100), unique=True)
-    propensity_score = db.Column(db.Integer, default=50)
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'
@@ -90,5 +93,6 @@ class Webhook(db.Model):
 class TelemetryHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'), nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
     timestamp = db.Column(db.String(50), nullable=False)
     scans_count = db.Column(db.Integer, default=0)

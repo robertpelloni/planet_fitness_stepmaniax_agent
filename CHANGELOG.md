@@ -2,18 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.0] - Real-time Analytics & Operational Intelligence Milestone
-- **Real-time Analytics Dashboard:** Integrated an 'Hourly Usage Distribution' chart into the Staff Dashboard for peak-usage identification.
-- **Operational Anomaly Detection:** Enhanced the Health Monitor with `detect_usage_anomaly` to automatically flag unusual usage spikes or drops.
-- **Staff Intelligence:** Updated the Staff Portal to provide live metrics polling via HTMX for improved facility awareness.
-- **Enhanced Financial Models:** Added hourly usage trend ingestion to support more granular regional expansion proposals.
+## [3.2.0] - Member Engagement & Tracking Milestone
+- **Member Dashboard v2:** Launched a reactive portal for pilot participants with session booking and engagement visualization.
+- **Engagement Scoring:** Implemented an automated tracking system calculating points and retention scores based on daily activity.
+- **Staff Member Management:** Developed a dedicated interface for staff to manage member onboarding and monitor individual progress.
+- **Relational Telemetry:** Upgraded the telemetry ingestion engine to attribute StepManiaX usage to individual member accounts.
 
-## [3.0.0] - Automated Prospecting & Lead Intelligence Milestone
-- **Prospect Portal:** Launched a secure, public-facing landing page (`/prospect/<token>`) for prospective franchise partners featuring personalized ROI models.
-- **Automated Outreach Bundle:** Developed `generate_outreach_messages.py` to synthesize lead data into tailored LinkedIn and Email campaigns with embedded portal links.
-- **Lead Intelligence UI:** Integrated propensity scoring and secure portal access directly into the Admin Dashboard for real-time prioritization.
-- **Playwright Scraper:** Upgraded `scrape_leads.py` to use Playwright for high-fidelity extraction of executive data from dynamic franchise portals.
-- **Data-Driven Prioritization:** Implemented the `calculate_propensity_score` algorithm to rank targets by portfolio scale, regional priority, and funnel status.
+## [3.1.0] - Operational Intelligence & Real-time Analytics Milestone
+- **Real-time Staff Dashboard:** Integrated HTMX-powered usage distribution and maintenance metrics.
+- **Anomaly Detection:** Enhanced `health_monitor.py` to automatically flag significant spikes or drops in equipment usage.
+- **Prospect Portals:** Launched personalized B2B landing pages with secure tokenized access and dynamic ROI modeling.
+- **Dual-Mode Authentication:** Hardened API security to support both Session and API Key authorization for internal dashboards.
 
 ## [2.9.0] - Lead Intelligence & Playwright Scraper Milestone
 - **Playwright Scraper:** Upgraded `scrape_leads.py` to use Playwright for headless browser scraping of dynamic franchise portals.

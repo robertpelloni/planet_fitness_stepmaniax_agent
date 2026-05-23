@@ -1,18 +1,10 @@
 import sqlite3
 import os
-import analytics
 from datetime import datetime
 from notifications import send_notification
 from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
-
-def get_historical_avg(cursor, equipment_id):
-    """Calculates average scans per hour for a unit."""
-    cursor.execute("SELECT scans_count FROM telemetry_history WHERE equipment_id = ?", (equipment_id,))
-    rows = cursor.fetchall()
-    if not rows: return 0
-    return sum(r[0] for r in rows) / len(rows)
 
 def monitor_health():
     """
@@ -39,17 +31,6 @@ def monitor_health():
         # C. Session variance check (Warning if avg session is < 5 mins - potentially user frustration)
         if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
              generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
-
-        # D. Real-time Usage Anomaly Check
-        hist_avg = get_historical_avg(cursor, unit['id'])
-        # Get latest scans from history
-        cursor.execute("SELECT scans_count FROM telemetry_history WHERE equipment_id = ? ORDER BY timestamp DESC LIMIT 1", (unit['id'],))
-        latest = cursor.fetchone()
-        if latest:
-            is_anomaly, score, reason = analytics.detect_usage_anomaly({'scans_count': latest[0]}, hist_avg)
-            if is_anomaly:
-                severity = "Critical" if score > 80 else "Warning"
-                generate_alert(cursor, severity, f"Usage Anomaly on {unit['equipment_name']}: {reason} (Score: {score})", unit['id'])
 
     conn.commit()
     conn.close()

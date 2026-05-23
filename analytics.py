@@ -87,23 +87,3 @@ def calculate_propensity_score(lead_data):
 
     # Cap at 100
     return min(100, score)
-
-def detect_usage_anomaly(unit_metrics, historical_average):
-    """
-    Detects if current unit performance deviates significantly from history.
-    Returns (is_anomaly, score, reason)
-    """
-    if historical_average == 0:
-        return False, 0, "No history"
-
-    current_val = unit_metrics.get('scans_count', 0)
-    variance = abs(current_val - historical_average) / historical_average
-
-    score = min(100, int(variance * 50))
-
-    if variance > 0.5 and current_val < historical_average:
-        return True, score, f"Significant usage drop: {int(variance*100)}% below avg"
-    elif variance > 2.0:
-        return True, score, f"Unusual usage spike: {int(variance)}x above avg"
-
-    return False, score, "Normal"

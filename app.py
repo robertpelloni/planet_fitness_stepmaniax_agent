@@ -1,5 +1,3 @@
-import secrets
-import analytics
 import os
 from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -8,6 +6,8 @@ from flask_wtf.csrf import CSRFProtect
 from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory
 from datetime import datetime
 import config
+import analytics
+import secrets
 from report_generator import generate_report
 from notifications import send_notification
 
@@ -31,18 +31,12 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 def require_api_key(f):
-    """
-    Decorator that allows access if a valid API Key is provided
-    OR if the user is already authenticated via session.
-    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
         if api_key and api_key == config.API_KEY:
             return f(*args, **kwargs)
-        if current_user.is_authenticated:
-            return f(*args, **kwargs)
-        return {"error": "Unauthorized access. API Key or Session required."}, 401
+        return {"error": "Unauthorized access"}, 401
     return decorated_function
 
 def role_required(roles):
@@ -126,6 +120,36 @@ def staff_api_alerts():
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
     return render_template('partials/staff_alerts.html', alerts=alerts)
 
+@app.route('/staff/members')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_members():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        members = Member.query.all()
+    else:
+        members = Member.query.filter_by(franchise_id=franchise_id).all()
+
+    return render_template('staff_members.html', members=members)
+
+@app.route('/staff/members/update/<int:member_id>', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_update_member_status(member_id):
+    member = Member.query.get_or_404(member_id)
+    new_status = request.form.get('status')
+
+    # Check multi-tenant permission
+    if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+        abort(403)
+
+    member.onboarding_status = new_status
+    db.session.commit()
+    flash(f"Status updated for member {member.name}")
+    return redirect(url_for('staff_members'))
+
 @app.route('/staff/dashboard')
 @login_required
 @role_required(['Admin', 'Staff'])
@@ -166,7 +190,72 @@ def member_dashboard():
         db.session.commit()
         flash("Profile updated successfully!")
 
-    return render_template('member_dashboard.html', member=member)
+    # Get available equipment for the member's franchise
+    equipment = EquipmentMetric.query.filter_by(franchise_id=member.franchise_id).all()
+
+    # Get member's upcoming sessions
+    upcoming_sessions = db.session.query(
+        MemberSchedule.start_time,
+        MemberSchedule.duration_minutes,
+        MemberSchedule.status,
+        EquipmentMetric.equipment_name
+    ).join(EquipmentMetric, MemberSchedule.equipment_id == EquipmentMetric.id)\
+     .filter(MemberSchedule.member_id == member.id)\
+     .order_by(MemberSchedule.start_time.asc()).all()
+
+    # Get engagement chart data
+    history = TelemetryHistory.query.filter_by(member_id=member.id).order_by(TelemetryHistory.timestamp.asc()).all()
+    daily_stats = {}
+    for entry in history:
+        date = entry.timestamp[:10]
+        daily_stats[date] = daily_stats.get(date, 0) + entry.scans_count
+
+    sorted_dates = sorted(daily_stats.keys())
+    chart_labels = sorted_dates[-7:] # Last 7 days
+    chart_data = [daily_stats[d] for d in chart_labels]
+
+    return render_template('member_dashboard.html',
+                           member=member,
+                           equipment=equipment,
+                           upcoming_sessions=upcoming_sessions,
+                           chart_labels=chart_labels,
+                           chart_data=chart_data)
+
+@app.route('/member/book', methods=['POST'])
+@login_required
+def member_book_session():
+    if current_user.role != 'Member':
+        abort(403)
+
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    equipment_id = request.form.get('equipment_id')
+    start_time = request.form.get('start_time')
+
+    if not start_time:
+        flash("Please select a valid date and time.")
+        return redirect(url_for('member_dashboard'))
+
+    # Format datetime for storage
+    try:
+        dt = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+        formatted_start = dt.strftime('%Y-%m-%d %H:%M')
+    except ValueError:
+        flash("Invalid date format.")
+        return redirect(url_for('member_dashboard'))
+
+    new_booking = MemberSchedule(
+        member_id=member.id,
+        member_name=member.name,
+        equipment_id=equipment_id,
+        start_time=formatted_start,
+        duration_minutes=15, # Default pilot session
+        status='Scheduled'
+    )
+    db.session.add(new_booking)
+    db.session.commit()
+
+    flash(f"Session booked for {formatted_start}!")
+    return redirect(url_for('member_dashboard'))
 
 @app.route('/api/v1/telemetry', methods=['POST'])
 @csrf.exempt # Exempting for machine-to-machine API calls
@@ -174,7 +263,7 @@ def member_dashboard():
 def telemetry():
     """
     Endpoint for StepManiaX units to POST telemetry data.
-    Expected JSON: { "equipment_id": int, "uptime_percent": float, "scans_increment": int, "session_duration": float }
+    Expected JSON: { "equipment_id": int, "uptime_percent": float, "scans_increment": int, "session_duration": float, "member_id": int }
     """
     data = request.get_json()
     if not data or 'equipment_id' not in data:
@@ -183,6 +272,11 @@ def telemetry():
     unit = EquipmentMetric.query.get(data['equipment_id'])
     if not unit:
         return {"error": "Unit not found"}, 404
+
+    member_id = data.get('member_id')
+    member = None
+    if member_id:
+        member = Member.query.get(member_id)
 
     # Update Metrics
     if 'uptime_percent' in data:
@@ -193,10 +287,19 @@ def telemetry():
         # Log to history
         history = TelemetryHistory(
             equipment_id=unit.id,
+            member_id=member_id,
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             scans_count=data['scans_increment']
         )
         db.session.add(history)
+
+        # Update member points and engagement
+        if member:
+            member.points += data['scans_increment']
+            # Simple engagement score: points / days since registration
+            reg_date = datetime.strptime(member.registration_date, "%Y-%m-%d")
+            days_active = (datetime.now() - reg_date).days + 1
+            member.engagement_score = min(1.0, member.points / (days_active * 100)) # Target 100 scans/day
 
     if 'session_duration' in data:
         # Proper moving average: (old_avg * count + new_val) / (count + 1)
@@ -486,35 +589,6 @@ def prospect_portal(token):
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
 
-@app.route('/staff/api/hourly_analytics')
-@login_required
-@role_required(['Admin', 'Staff'])
-def staff_api_hourly():
-    franchise_id = current_user.franchise_id
-    is_admin = (current_user.role == 'Admin')
-
-    if is_admin:
-        metrics = EquipmentMetric.query.all()
-    else:
-        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
-
-    metric_ids = [m.id for m in metrics]
-
-    # Get scans from the last 24 hours
-    history = TelemetryHistory.query.filter(TelemetryHistory.equipment_id.in_(metric_ids)).all()
-
-    hourly_stats = {}
-    for entry in history:
-        # timestamp format: "2026-05-23 14:21:39"
-        hour = entry.timestamp[11:13]
-        hourly_stats[hour] = hourly_stats.get(hour, 0) + entry.scans_count
-
-    sorted_hours = sorted(hourly_stats.keys())
-    return {
-        "labels": [f"{h}:00" for h in sorted_hours],
-        "data": [hourly_stats[h] for h in sorted_hours]
-    }
-
 @app.route('/dashboard')
 @login_required
 @role_required(['Admin', 'Franchisee'])
@@ -557,7 +631,7 @@ def dashboard():
 
     onboarding_dict = {status: count for status, count in onboarding_stats}
 
-    # 5. Lead List
+    # 5. Lead List with Propensity Scores
     if is_admin:
         leads_list = Lead.query.all()
     else:
@@ -583,7 +657,7 @@ def dashboard():
 
     # Sort by propensity score descending for Admin
     if is_admin:
-        leads_list.sort(key=lambda x: x.propensity_score or 0, reverse=True)
+        leads_list.sort(key=lambda x: x.propensity_score, reverse=True)
 
     return render_template('dashboard.html',
                            crm_stats=crm_stats,
