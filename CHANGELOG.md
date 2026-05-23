@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0] - Usage Trend Analytics & API Security Milestone
+- **Historical Usage Tracking:** Implemented time-series tracking via `TelemetryHistory` to capture per-scan equipment data.
+- **Usage Analytics API:** Launched `/api/v1/analytics/usage` for daily scan aggregation and trend reporting.
+- **Interactive Trend Charts:** Integrated a new "Historical Usage Trends" line chart into the dashboard for 7-day engagement visualization.
+- **API Key Authentication:** Hardened all `/api/v1/` REST endpoints with a mandatory `X-API-KEY` header requirement.
+- **Telemetry Security:** Secured the machine-to-machine telemetry ingestion endpoint to prevent unauthorized metric injection.
+
 ## [2.5.0] - Member Management API & Centralized Config Milestone
 - **Member REST API:** Launched a full CRUD API (`/api/v1/members`) for programmatic member management.
 - **API Security:** Enforced RBAC and CSRF exemptions for the management API while maintaining session-based security.

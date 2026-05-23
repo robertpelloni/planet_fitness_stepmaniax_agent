@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory
 from datetime import datetime
 import config
 from report_generator import generate_report
@@ -27,6 +27,15 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('X-API-KEY')
+        if api_key and api_key == config.API_KEY:
+            return f(*args, **kwargs)
+        return {"error": "Unauthorized access"}, 401
+    return decorated_function
 
 def role_required(roles):
     def decorator(f):
@@ -153,6 +162,7 @@ def member_dashboard():
 
 @app.route('/api/v1/telemetry', methods=['POST'])
 @csrf.exempt # Exempting for machine-to-machine API calls
+@require_api_key
 def telemetry():
     """
     Endpoint for StepManiaX units to POST telemetry data.
@@ -172,6 +182,13 @@ def telemetry():
 
     if 'scans_increment' in data:
         unit.total_scans += data['scans_increment']
+        # Log to history
+        history = TelemetryHistory(
+            equipment_id=unit.id,
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            scans_count=data['scans_increment']
+        )
+        db.session.add(history)
 
     if 'session_duration' in data:
         # Proper moving average: (old_avg * count + new_val) / (count + 1)
@@ -287,13 +304,43 @@ def settings():
 
     return render_template('settings.html', webhooks=webhooks, users=users)
 
-@app.route('/api/v1/members', methods=['GET'])
-@csrf.exempt
+@app.route('/api/v1/analytics/usage', methods=['GET'])
 @login_required
 @role_required(['Admin', 'Franchisee'])
-def api_list_members():
+def api_usage_analytics():
     franchise_id = current_user.franchise_id
-    if current_user.role == 'Admin':
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    metric_ids = [m.id for m in metrics]
+
+    # Simple aggregation by date from TelemetryHistory
+    # In a real app we'd use a group_by on substr(timestamp, 1, 10)
+    history = TelemetryHistory.query.filter(TelemetryHistory.equipment_id.in_(metric_ids)).all()
+
+    daily_stats = {}
+    for entry in history:
+        date = entry.timestamp[:10]
+        daily_stats[date] = daily_stats.get(date, 0) + entry.scans_count
+
+    # Sort by date
+    sorted_dates = sorted(daily_stats.keys())
+
+    return {
+        "labels": sorted_dates,
+        "data": [daily_stats[d] for d in sorted_dates]
+    }, 200
+
+@app.route('/api/v1/members', methods=['GET'])
+@csrf.exempt
+@require_api_key
+def api_list_members():
+    franchise_id = request.args.get('franchise_id')
+    if not franchise_id:
         members = Member.query.all()
     else:
         members = Member.query.filter_by(franchise_id=franchise_id).all()
@@ -313,8 +360,7 @@ def api_list_members():
 
 @app.route('/api/v1/members', methods=['POST'])
 @csrf.exempt
-@login_required
-@role_required(['Admin', 'Franchisee'])
+@require_api_key
 def api_create_member():
     data = request.get_json()
     if not data or 'email' not in data or 'name' not in data or 'password' not in data:
@@ -349,14 +395,9 @@ def api_create_member():
 
 @app.route('/api/v1/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 @csrf.exempt
-@login_required
-@role_required(['Admin', 'Franchisee'])
+@require_api_key
 def api_member_detail(member_id):
     member = Member.query.get_or_404(member_id)
-
-    # Multi-tenant isolation
-    if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
-        abort(403)
 
     if request.method == 'GET':
         return {

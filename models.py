@@ -84,3 +84,9 @@ class Webhook(db.Model):
     franchise_id = db.Column(db.String(50), nullable=True) # None for Global Admin
     url = db.Column(db.String(250), nullable=False)
     service = db.Column(db.String(50), default='Discord') # 'Discord', 'Slack'
+
+class TelemetryHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'), nullable=False)
+    timestamp = db.Column(db.String(50), nullable=False)
+    scans_count = db.Column(db.Integer, default=0)
