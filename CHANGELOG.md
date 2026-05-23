@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - Member Management API & Centralized Config Milestone
+- **Member REST API:** Launched a full CRUD API (`/api/v1/members`) for programmatic member management.
+- **API Security:** Enforced RBAC and CSRF exemptions for the management API while maintaining session-based security.
+- **Centralized Automation Config:** Created `config.py` to house all threshold and financial parameters (UPTIME_THRESHOLD, ROI defaults).
+- **Multi-Tenant API Isolation:** Programmatic member access is isolated by `franchise_id` to ensure data privacy between clubs.
+
 ## [2.4.0] - Staff Operations & Real-time Monitoring Milestone
 - **Staff-Facing Dashboard:** Launched a dedicated, high-visibility dashboard for facility staff to monitor club operations in real-time.
 - **Real-time Updates (HTMX):** Integrated HTMX for seamless, live-reloading of usage metrics, maintenance logs, and critical alerts.

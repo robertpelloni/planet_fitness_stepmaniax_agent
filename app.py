@@ -5,6 +5,7 @@ from functools import wraps
 from flask_wtf.csrf import CSRFProtect
 from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog
 from datetime import datetime
+import config
 from report_generator import generate_report
 from notifications import send_notification
 
@@ -178,8 +179,8 @@ def telemetry():
         unit.avg_session_duration = ((unit.avg_session_duration * unit.total_sessions) + new_duration) / (unit.total_sessions + 1)
         unit.total_sessions += 1
 
-    # Auto-generate Alert if uptime drops below 95%
-    if unit.uptime_percent < 95.0:
+    # Auto-generate Alert if uptime drops below threshold
+    if unit.uptime_percent < config.UPTIME_THRESHOLD:
         alert_msg = f"Low Uptime detected on {unit.equipment_name} at {unit.location}: {unit.uptime_percent}%"
         existing_alert = Alert.query.filter_by(message=alert_msg, is_resolved=False).first()
         if not existing_alert:
@@ -285,6 +286,105 @@ def settings():
         users = []
 
     return render_template('settings.html', webhooks=webhooks, users=users)
+
+@app.route('/api/v1/members', methods=['GET'])
+@csrf.exempt
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def api_list_members():
+    franchise_id = current_user.franchise_id
+    if current_user.role == 'Admin':
+        members = Member.query.all()
+    else:
+        members = Member.query.filter_by(franchise_id=franchise_id).all()
+
+    return {
+        "members": [
+            {
+                "id": m.id,
+                "name": m.name,
+                "email": m.email,
+                "onboarding_status": m.onboarding_status,
+                "registration_date": m.registration_date,
+                "franchise_id": m.franchise_id
+            } for m in members
+        ]
+    }, 200
+
+@app.route('/api/v1/members', methods=['POST'])
+@csrf.exempt
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def api_create_member():
+    data = request.get_json()
+    if not data or 'email' not in data or 'name' not in data or 'password' not in data:
+        return {"error": "Missing required fields"}, 400
+
+    # Check if exists
+    if User.query.filter_by(username=data['email']).first():
+        return {"error": "User already exists"}, 409
+
+    # Logic similar to /onboard but for API
+    new_user = User(
+        username=data['email'],
+        role='Member',
+        franchise_id=data.get('franchise_id', current_user.franchise_id)
+    )
+    new_user.set_password(data['password'])
+    db.session.add(new_user)
+    db.session.flush()
+
+    new_member = Member(
+        name=data['name'],
+        email=data['email'],
+        user_id=new_user.id,
+        franchise_id=new_user.franchise_id,
+        registration_date=datetime.now().strftime("%Y-%m-%d"),
+        onboarding_status=data.get('onboarding_status', 'Registered')
+    )
+    db.session.add(new_member)
+    db.session.commit()
+
+    return {"status": "success", "member_id": new_member.id}, 201
+
+@app.route('/api/v1/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
+@csrf.exempt
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def api_member_detail(member_id):
+    member = Member.query.get_or_404(member_id)
+
+    # Multi-tenant isolation
+    if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+        abort(403)
+
+    if request.method == 'GET':
+        return {
+            "id": member.id,
+            "name": member.name,
+            "email": member.email,
+            "onboarding_status": member.onboarding_status,
+            "registration_date": member.registration_date,
+            "franchise_id": member.franchise_id
+        }
+
+    if request.method == 'PUT':
+        data = request.get_json()
+        if 'name' in data:
+            member.name = data['name']
+        if 'onboarding_status' in data:
+            member.onboarding_status = data['onboarding_status']
+        db.session.commit()
+        return {"status": "updated"}
+
+    if request.method == 'DELETE':
+        # Remove User account too
+        user = User.query.get(member.user_id)
+        if user:
+            db.session.delete(user)
+        db.session.delete(member)
+        db.session.commit()
+        return {"status": "deleted"}
 
 @app.route('/generate_report/<int:unit_id>')
 @login_required

@@ -1,26 +1,29 @@
-# Project Handoff - v2.4.0 Milestone
+# Project Handoff - v2.5.0 Milestone
 
 ## Session Summary
-This session successfully transitioned the platform from a static management tool to a real-time facility operations monitor. We implemented dedicated dashboards for both members and facility staff, unified the database architecture, and enforced strict security via role-based access control.
+This session successfully transitioned the project into a more mature, API-driven platform. We launched a full REST API for member management and centralized all automation parameters into a global configuration file.
 
-## Key Accomplishments (v2.2.0 - v2.4.0)
-- **Member Portal (v2.2.0):** Launched `/member/dashboard` allowing pilot participants to manage their profiles and track status.
-- **Unified Schema (v2.2.0):** Standardized all tables (`leads`, `outreach_logs`, etc.) under SQLAlchemy ORM, ensuring consistent pluralization across Web, CLI, and migration tools.
-- **RBAC Security (v2.3.0):** Implemented a `@role_required` decorator. Secured facility and admin routes for 'Admin', 'Franchisee', and 'Staff' roles while isolating 'Member' users.
-- **Staff Operations (v2.4.0):** Launched a dark-mode Staff Portal with **HTMX-powered real-time updates** (metrics, alerts, maintenance).
-- **Automated Maintenance (v2.4.0):** The Telemetry API now automatically flags equipment as 'Needs Maintenance' when uptime drops below 95%.
+## Key Accomplishments (v2.5.0)
+- **Member Management API:** Launched `/api/v1/members` with full CRUD support (GET, POST, PUT, DELETE). The API is multi-tenant and restricted to Admin/Franchisee roles.
+- **Centralized Configuration:** Created `config.py` to manage all critical thresholds (UPTIME_THRESHOLD) and financial ROI defaults (RETENTION_LIFT, MONTHLY_FEE).
+- **Architecture Refinement:** Updated `app.py` and `analytics.py` to depend on `config.py`, making the system easier to tune for different franchise groups.
+- **Security Hardening:** Secured the new API endpoints with RBAC while providing CSRF exemptions for programmatic access via JSON.
 
 ## Technical State
-- **Library Additions:** HTMX (via CDN) for real-time dashboard polling.
-- **Database:** SQLite (`crm.db`) with unified SQLAlchemy mapping.
-- **Verification:** All core flows (Registration -> Login -> Role-Specific Dashboard -> Real-time Update) verified via Playwright in `/home/jules/verification/`.
+- **New File:** `config.py` (Global parameters).
+- **API Documentation:**
+  - `GET /api/v1/members`: List members.
+  - `POST /api/v1/members`: Create member & user.
+  - `GET /api/v1/members/<id>`: Detail view.
+  - `PUT /api/v1/members/<id>`: Update name/status.
+  - `DELETE /api/v1/members/<id>`: Remove member & user.
 
 ## Outstanding Work / Next Steps
-- **Phase 8.0:** Corporate SSO integration (Planet Fitness OpenID/SAML).
-- **Phase 9.0:** In-app equipment maintenance logging (allowing staff to mark units as 'Repaired').
-- **Phase 10.0:** Mobile app wrapper for the Staff and Member portals.
+- **Phase 8.0:** Corporate SSO integration.
+- **Phase 9.0:** Programmatic lead management API.
+- **Phase 10.0:** Integration of the Member API into external gym check-in kiosks.
 
 ## Setup Instructions
 1. Run `flask init-db` for new environments.
-2. Use `crm_tool.py create-user <username> <password> --role <Role>` to provision accounts.
-3. Start server: `python3 app.py`.
+2. Start server: `python3 app.py`.
+3. Configure `config.py` as needed for local threshold requirements.
