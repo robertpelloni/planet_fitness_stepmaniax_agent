@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StepManiaX B2B{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+    <nav class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-4">
+                    <div class="bg-yellow-400 text-black px-2 py-1 rounded font-black text-lg">SMX</div>
+                    <span class="font-bold text-xl tracking-tight hidden md:block">B2B PLATFORM</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-6">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role in ['Admin', 'Franchisee'] %}
+                            <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Dashboard</a>
+                        {% endif %}
+
+                        {% if current_user.role in ['Admin', 'Staff'] %}
+                            <a href="{{ url_for('staff_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Staff Portal</a>
+                            <a href="{{ url_for('facility_operations') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Live Ops</a>
+                        {% endif %}
+
+                        {% if current_user.role == 'Member' %}
+                            <a href="{{ url_for('member_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">My Progress</a>
+                        {% endif %}
+
+                        <a href="{{ url_for('settings') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Settings</a>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center gap-4">
+                    {% if current_user.is_authenticated %}
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-slate-400 leading-none">{{ current_user.role }}</p>
+                            <p class="text-sm font-bold">{{ current_user.username }}</p>
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm transition-colors">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-bold transition-colors">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="mb-6 p-4 rounded-lg bg-blue-50 border-l-4 border-blue-500 text-blue-700 text-sm font-medium shadow-sm flex justify-between items-center">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.remove()" class="text-blue-400 hover:text-blue-600">&times;</button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="mt-12 py-8 border-t border-slate-200 text-center">
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+            StepManiaX B2B Management System v3.2.0 •
+            Last Login: {{ current_user.last_login if current_user.is_authenticated and current_user.last_login else 'N/A' }}
+        </p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

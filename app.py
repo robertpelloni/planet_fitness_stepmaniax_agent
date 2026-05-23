@@ -68,6 +68,8 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
+            user.last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            db.session.commit()
             if user.role == 'Member':
                 return redirect(url_for('member_dashboard'))
             if user.role == 'Staff':
@@ -149,6 +151,40 @@ def staff_update_member_status(member_id):
     db.session.commit()
     flash(f"Status updated for member {member.name}")
     return redirect(url_for('staff_members'))
+
+@app.route('/staff/operations')
+@login_required
+@role_required(['Admin', 'Staff'])
+def facility_operations():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+        today = datetime.now().strftime("%Y-%m-%d")
+        schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        metric_ids = [m.id for m in metrics]
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(20).all()
+        today = datetime.now().strftime("%Y-%m-%d")
+        schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids), MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+
+    # Determine online status (heartbeat within last 5 minutes)
+    for m in metrics:
+        if m.last_heartbeat:
+            last_hb = datetime.strptime(m.last_heartbeat, "%Y-%m-%d %H:%M:%S")
+            diff = (datetime.now() - last_hb).total_seconds()
+            m.is_online = diff < 300 # 5 minutes
+        else:
+            m.is_online = False
+
+    return render_template('facility_ops.html',
+                           metrics=metrics,
+                           alerts=alerts,
+                           schedules=schedules,
+                           franchise_name=current_user.franchise_id or "Global Admin")
 
 @app.route('/staff/dashboard')
 @login_required
@@ -272,6 +308,9 @@ def telemetry():
     unit = EquipmentMetric.query.get(data['equipment_id'])
     if not unit:
         return {"error": "Unit not found"}, 404
+
+    # Update heartbeat
+    unit.last_heartbeat = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     member_id = data.get('member_id')
     member = None

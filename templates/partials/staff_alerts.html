@@ -1,9 +1,13 @@
 {% for alert in alerts %}
-<div class="alert-item">
-    <div style="font-weight: bold; color: #ff6666;">[{{ alert.severity }}]</div>
-    <div style="font-size: 0.85rem; margin-top: 2px;">{{ alert.message }}</div>
-    <div class="alert-time">{{ alert.timestamp }}</div>
+<div class="mb-3 p-3 rounded-xl border {{ 'bg-red-50 border-red-100' if alert.severity == 'Critical' else 'bg-yellow-50 border-yellow-100' }}">
+    <div class="flex justify-between items-start mb-1">
+        <span class="text-[10px] font-black uppercase tracking-widest {{ 'text-red-600' if alert.severity == 'Critical' else 'text-yellow-600' }}">
+            {{ alert.severity }}
+        </span>
+        <span class="text-[10px] text-slate-400 font-bold">{{ alert.timestamp }}</span>
+    </div>
+    <p class="text-xs font-bold text-slate-700 leading-tight">{{ alert.message }}</p>
 </div>
 {% else %}
-<div style="text-align: center; color: #666; padding: 1rem;">No critical alerts.</div>
+<p class="text-xs text-slate-400 italic text-center py-4">No active alerts.</p>
 {% endfor %}

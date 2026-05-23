@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0] - Facility Operations & Unified UI Milestone
+- **Facility Operations Center:** Launched a real-time monitoring dashboard (/staff/operations) for live equipment heartbeat tracking.
+- **Unified B2B Design Language:** Standardized the entire platform UI using a premium Tailwind-based design system and a master 'base.html' template.
+- **Equipment Heartbeat Tracking:** Implemented `last_heartbeat` monitoring for all StepManiaX units, enabling instant "Online/Offline" status visibility.
+- **Enhanced Auth Security:** Added `last_login` tracking for all user accounts and refined the Login experience with professional security aesthetics.
+- **Responsive Navigation:** Implemented a unified header system with role-based navigation links across all platform portals.
+
 ## [3.2.0] - Member Engagement & Tracking Milestone
 - **Member Dashboard v2:** Launched a reactive portal for pilot participants with session booking and engagement visualization.
 - **Engagement Scoring:** Implemented an automated tracking system calculating points and retention scores based on daily activity.

@@ -1,164 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Member Dashboard - StepManiaX Pilot</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 2rem; max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; }
-        .full-width { grid-column: span 2; }
-        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
-        input, select { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #ced4da; box-sizing: border-box; font-size: 1rem; }
-        button { padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-        button:hover { background-color: #0056b3; }
-        .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background-color: #e9ecef; color: #495057; }
-        .status-completed { background-color: #d4edda; color: #155724; }
-        .flash { background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #bee5eb; grid-column: span 2; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-        .stat-item { text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: #007bff; }
-        .stat-label { font-size: 0.75rem; color: #666; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        th { color: #666; font-weight: 600; }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <div style="font-size: 1.25rem; font-weight: bold;">StepManiaX Member Portal</div>
-        <div>
-            Welcome, <strong>{{ member.name }}</strong> |
-            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none; margin-left: 10px;">Logout</a>
-        </div>
-    </div>
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+{% extends "base.html" %}
 
-        <div class="card">
-            <h3>Pilot Stats <span class="status-badge {% if member.onboarding_status == 'Completed' %}status-completed{% endif %}">{{ member.onboarding_status }}</span></h3>
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-value">{{ member.points }}</div>
-                    <div class="stat-label">Engagement Points</div>
+{% block title %}Member Dashboard - StepManiaX{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile & Summary -->
+    <div class="lg:col-span-1 space-y-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+            <div class="w-24 h-24 rounded-full bg-yellow-400 mx-auto flex items-center justify-center text-3xl font-black text-black mb-4 shadow-inner">
+                {{ member.name[0] }}
+            </div>
+            <h2 class="text-2xl font-black text-slate-800">{{ member.name }}</h2>
+            <p class="text-slate-500 font-medium text-sm">{{ member.email }}</p>
+
+            <div class="mt-6 flex justify-center gap-4">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Points</p>
+                    <p class="text-xl font-black text-blue-600">{{ member.points }}</p>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value">{{ "%.1f"|format(member.engagement_score * 100) }}%</div>
-                    <div class="stat-label">Retention Score</div>
+                <div class="w-px h-8 bg-slate-100 self-center"></div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Engagement</p>
+                    <p class="text-xl font-black text-green-600">{{ "%.0f"|format(member.engagement_score * 100) }}%</p>
                 </div>
             </div>
-            <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #666;">
-                <strong>Club:</strong> {{ member.franchise_id }}<br>
-                <strong>Member Since:</strong> {{ member.registration_date }}
+
+            <div class="mt-8 pt-8 border-t border-slate-100">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Onboarding Status</p>
+                <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                    <span class="text-sm font-bold text-slate-700">{{ member.onboarding_status }}</span>
+                    <i class="fa-solid fa-circle-check text-green-500"></i>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <h3>Book a Session</h3>
-            <form action="{{ url_for('member_book_session') }}" method="POST">
+        <div class="bg-slate-900 rounded-2xl p-8 text-white shadow-xl">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
+                Quick Booking
+            </h3>
+            <form action="{{ url_for('member_book_session') }}" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="form-group">
-                    <label>Select Equipment</label>
-                    <select name="equipment_id" required>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Unit</label>
+                    <select name="equipment_id" class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-yellow-400">
                         {% for unit in equipment %}
-                        <option value="{{ unit.id }}">{{ unit.equipment_name }} ({{ unit.location }})</option>
+                        <option value="{{ unit.id }}">{{ unit.equipment_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Start Time</label>
-                    <input type="datetime-local" name="start_time" required>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</label>
+                    <input type="datetime-local" name="start_time" required class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-yellow-400">
                 </div>
-                <button type="submit">Reserve Slot</button>
-            </form>
-        </div>
-
-        <div class="card full-width">
-            <h3>My Upcoming Sessions</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Equipment</th>
-                        <th>Time</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in upcoming_sessions %}
-                    <tr>
-                        <td>{{ session.equipment_name }}</td>
-                        <td>{{ session.start_time }}</td>
-                        <td>{{ session.duration_minutes }} min</td>
-                        <td><span class="status-badge">{{ session.status }}</span></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #999; padding: 2rem;">No upcoming sessions scheduled.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card full-width">
-            <h3>My Progress</h3>
-            <canvas id="engagementChart" height="100"></canvas>
-        </div>
-
-        <div class="card full-width">
-            <h3>Profile Settings</h3>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="name" value="{{ member.name }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" value="{{ member.email }}" disabled style="background-color: #f8f9fa;">
-                    </div>
-                </div>
-                <button type="submit" style="width: auto; padding: 0.75rem 2rem;">Save Changes</button>
+                <button type="submit" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-black rounded-xl font-bold transition-all shadow-lg active:scale-95">
+                    Reserve Slot
+                </button>
             </form>
         </div>
     </div>
 
-    <script>
-        const ctx = document.getElementById('engagementChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: {{ chart_labels|tojson }},
-                datasets: [{
-                    label: 'Scans / Activity',
-                    data: {{ chart_data|tojson }},
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
+    <!-- Main Content Area -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Progress Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center justify-between">
+                Activity Breakdown
+                <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Last 7 Days</span>
+            </h3>
+            <div class="h-64">
+                <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Upcoming Sessions -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Your Scheduled Sessions</h3>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">{{ upcoming_sessions|length }} Upcoming</span>
+            </div>
+            <div class="divide-y divide-slate-100">
+                {% for session in upcoming_sessions %}
+                <div class="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-50 text-blue-500 w-10 h-10 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800">{{ session.start_time }}</p>
+                            <p class="text-xs text-slate-500 font-medium">{{ session.equipment_name }} • {{ session.duration_minutes }} min</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase {{ 'bg-blue-100 text-blue-700' if session.status == 'Scheduled' else 'bg-green-100 text-green-700' }}">
+                        {{ session.status }}
+                    </span>
+                </div>
+                {% else %}
+                <div class="p-12 text-center">
+                    <div class="text-slate-200 text-4xl mb-2">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium italic">No sessions scheduled. Book one on the left!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|tojson }},
+            datasets: [{
+                label: 'Points Earned',
+                data: {{ chart_data|tojson }},
+                backgroundColor: '#3b82f6',
+                borderRadius: 8,
+                barThickness: 20
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { display: false } },
-                    x: { grid: { display: false } }
-                }
+            plugins: {
+                legend: { display: false }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+{% endblock %}
