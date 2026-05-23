@@ -1,50 +1,69 @@
-# Deployment & Setup Instructions
+# StepManiaX B2B Agent: Production Deployment Guide
 
 ## Overview
-The StepManiaX B2B Sales Agent consists of a document suite for collateral and a Python-based automation stack for lead generation, CRM management, and performance monitoring.
+This document details the professional deployment of the StepManiaX B2B Management platform using Gunicorn and systemd for maximum reliability and uptime.
 
-## 1. Automation Environment Setup
-The project uses a unified execution pipeline to manage dependencies and virtual environments.
+## 1. Prerequisites
+- Linux Server (Ubuntu 22.04 LTS recommended)
+- Python 3.8+
+- Nginx (for Reverse Proxy)
 
-1. **System Requirements:** Python 3.8+, SQLite3, Bash.
-2. **One-Button Setup:**
+## 2. Standard Installation
+1. **Clone the Repository:**
    ```bash
-   bash launch_campaign.sh
+   git clone https://github.com/robertpelloni/planet-fitness-smx-agent.git /opt/smx-agent
+   cd /opt/smx-agent
    ```
-   This script will:
-   - Create a virtual environment (`venv/`).
-   - Install dependencies from `requirements.txt`.
-   - Initialize the CRM database (`crm.db`) if it doesn't exist.
-   - Run the automated lead generation and asset production sequence.
-
-## 2. Web Dashboard Deployment
-The Flask-based monitoring dashboard provides a real-time view of the sales funnel and equipment telemetry.
-
-1. **Start the Dashboard:**
+2. **Setup Environment:**
    ```bash
-   python app.py
+   bash pipeline.sh
+   cp .env.example .env
+   # Edit .env with secure SECRET_KEY and SMX_API_KEY
    ```
-2. **Access:** Navigate to `http://localhost:5000` in your browser.
-3. **User Management:** Create a dashboard user via the CRM CLI:
+3. **Run Readiness Check:**
    ```bash
-   python crm_tool.py create-user <username> <password>
+   ./production_check.sh
    ```
 
-## 3. CRM Management (CLI)
-Interact with the lead database directly via `crm_tool.py`:
-- `list`: View all leads and their current status.
-- `add`: Manually add a new franchise group.
-- `log-outreach`: Record a contact attempt and update follow-up counters.
-- `analytics`: View aggregated ROI potential across the portfolio.
+## 3. Production Serving (Gunicorn)
+The platform uses Gunicorn as a high-performance WSGI server.
+- **Config:** `gunicorn_config.py`
+- **Command:** `gunicorn --config gunicorn_config.py app:app`
 
-## 4. Secrets Management
-The agent uses a `.env` file for sensitive configurations (e.g., LinkedIn tokens or Dashboard secret keys).
-1. Copy `.env.example` to `.env`.
-2. Populate the required variables.
-3. Never commit the `.env` file to version control.
+## 4. Background Monitoring (Health Monitor)
+The `health_monitor.py` script runs as a continuous service, scanning equipment metrics and firing real-time alerts.
 
-## 5. Directory Structure
-- `/outreach`: Tailored sales scripts and follow-up templates.
-- `/templates`: HTML layouts for the web dashboard.
-- `crm.db`: SQLite database (Auto-generated).
-- `analytics.py`: Core logic for LTV/ROI calculations.
+## 5. Systemd Service Integration
+For automatic startup and crash recovery, install the provided service templates.
+
+1. **Install Web Dashboard Service:**
+   ```bash
+   sudo cp smx-dashboard.service.example /etc/systemd/system/smx-dashboard.service
+   # Edit user/path in /etc/systemd/system/smx-dashboard.service
+   sudo systemctl enable --now smx-dashboard
+   ```
+2. **Install Health Monitor Service:**
+   ```bash
+   sudo cp smx-monitor.service.example /etc/systemd/system/smx-monitor.service
+   sudo systemctl enable --now smx-monitor
+   ```
+
+## 6. Nginx Reverse Proxy (Example)
+```nginx
+server {
+    listen 80;
+    server_name smx-dashboard.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+## 7. Operational Commands
+- **Check Logs:** `journalctl -u smx-dashboard -f`
+- **Restart Services:** `sudo systemctl restart smx-dashboard smx-monitor`
+- **DB Maintenance:** Use `crm_tool.py` for user provisioning and lead management.

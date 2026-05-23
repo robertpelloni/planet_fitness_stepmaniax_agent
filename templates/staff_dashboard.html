@@ -102,7 +102,7 @@
 
     <script>
         // Initialize Engagement Trend Chart
-        fetch('/api/v1/analytics/usage?api_key=dev-api-key-999') // Staff session has cookie, but using query for simplicity if needed or header
+        fetch('/api/v1/analytics/usage') // Using session-based auth (cookies) for internal dashboard requests
             .then(response => response.json())
             .then(data => {
                 const ctx = document.getElementById('staffTrendChart').getContext('2d');

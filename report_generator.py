@@ -25,7 +25,8 @@ def generate_report(unit_id):
         return
 
     # 2. Fetch Onboarding Data
-    cursor.execute("SELECT count(*) as total, SUM(CASE WHEN onboarding_status='Completed' THEN 1 ELSE 0 END) as completed FROM member WHERE club_id LIKE ?", (f"%{unit['location']}%",))
+    # Schema uses franchise_id as the link.
+    cursor.execute("SELECT count(*) as total, SUM(CASE WHEN onboarding_status='Completed' THEN 1 ELSE 0 END) as completed FROM member WHERE franchise_id = ?", (unit['franchise_id'],))
     onboarding = cursor.fetchone()
     total_onboarded = onboarding['total'] or 0
     completed_onboarding = onboarding['completed'] or 0

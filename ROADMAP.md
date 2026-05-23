@@ -28,3 +28,13 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Member Lifecycle Integration:** Launched member onboarding workflow and retention-scaled analytics.
 - [x] **Operational Readiness:** Developed `staff-training-manual.md` for club-level onboarding.
 - [x] **The "Land and Expand" Trigger:** Developed `commercial-proposal-template.md` detailing regional procurement models.
+
+## Phase 5: Operations & Multi-Tenant Infrastructure
+- [x] **Multi-Tenant Management Dashboard:** Launched high-visibility dashboards for Global Admins, Franchisees, and Club Staff.
+- [x] **Real-time Facility Monitoring:** Implemented HTMX-powered staff portal for asynchronous status updates and maintenance alerting.
+- [x] **Historical Usage Analytics:** Developed time-series data ingestion and 7-day trend visualization for member engagement.
+
+## Phase 6: Security & Deployment Readiness
+- [x] **Enterprise-Grade RBAC:** Hardened platform security with granular Role-Based Access Control and secure User Management UI.
+- [x] **Programmatic API Security:** Implemented dual-mode authentication (Session/API Key) for telemetry and management REST endpoints.
+- [x] **Production Deployment Stack:** Established Gunicorn/Systemd infrastructure and automated readiness checks for 24/7 operations.

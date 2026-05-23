@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.8.0] - Production Deployment & Monitoring Milestone
+- **Production Infrastructure:** Added `gunicorn_config.py` and systemd service templates for professional deployment.
+- **Continuous Health Monitoring:** Updated `health_monitor.py` with a persistent execution loop for real-time alerting.
+- **Deployment Automation:** Created `production_check.sh` to automate environmental verification.
+- **Bug Fixes:** Resolved schema mismatch in `report_generator.py` and removed hardcoded API keys from frontend templates.
+- **Documentation:** Overhauled `DEPLOY.md` with full production setup and operational instructions.
+
 ## [2.7.0] - Management & Security Hardening Milestone
 - **Staff Analytics Integration:** Added 7-day engagement trend charts to the Staff Dashboard for club-level usage monitoring.
 - **Admin User Management UI:** Launched a dedicated user provisioning interface in Settings for Global Admins.
