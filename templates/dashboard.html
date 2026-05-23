@@ -23,6 +23,8 @@
         .severity-Warning { color: #ffc107; font-weight: bold; }
         .severity-Info { color: #17a2b8; font-weight: bold; }
         .uptime-good { color: #28a745; font-weight: bold; }
+        .btn-report { font-size: 0.75rem; background-color: #007bff; color: white; padding: 2px 6px; border-radius: 4px; text-decoration: none; }
+        .btn-report:hover { background-color: #0056b3; }
         .chart-container { height: 300px; position: relative; }
         .alert-item { padding: 0.75rem; border-bottom: 1px solid #f8d7da; background-color: #fff8f8; border-radius: 4px; margin-bottom: 0.5rem; }
         .alert-item:last-child { border-bottom: none; }
@@ -38,6 +40,15 @@
         </div>
     </div>
     <div class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div style="background-color: #d1ecf1; color: #0c5460; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #bee5eb;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         <div class="dashboard-grid">
 
             <!-- Real-time Usage Metrics -->
@@ -100,6 +111,7 @@
                             <th>Uptime</th>
                             <th>Scans</th>
                             <th>Avg Sess</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -109,24 +121,53 @@
                             <td><span class="uptime-good">{{ metric.uptime_percent }}%</span></td>
                             <td>{{ metric.total_scans }}</td>
                             <td>{{ metric.avg_session_duration }}m</td>
+                            <td>
+                                <a href="{{ url_for('generate_unit_report', unit_id=metric.id) }}" class="btn-report">Report</a>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">No active pilots monitored.</td>
+                            <td colspan="5" style="text-align: center; color: #999;">No active pilots monitored.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <!-- CRM Summary -->
+            <!-- CRM Status Manager -->
             <div class="card">
-                <h3>Sales Funnel Status</h3>
+                <h3>Sales Funnel Management</h3>
+                <form action="{{ url_for('update_lead_status') }}" method="POST" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: flex-end;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div style="flex-grow: 1;">
+                        <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 0.25rem;">Select Lead ID</label>
+                        <select name="lead_id" style="width: 100%; padding: 0.4rem; border-radius: 4px; border: 1px solid #ddd;">
+                            <!-- We'll need to pass the list of leads to the template to populate this -->
+                            {% for lead in leads_list %}
+                            <option value="{{ lead.id }}">{{ lead.company }} ({{ lead.id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 0.25rem;">New Status</label>
+                        <select name="status" style="width: 100%; padding: 0.4rem; border-radius: 4px; border: 1px solid #ddd;">
+                            <option value="Identified">Identified</option>
+                            <option value="Researching">Researching</option>
+                            <option value="Ready for Outreach">Ready for Outreach</option>
+                            <option value="Outreach Active">Outreach Active</option>
+                            <option value="Discovery Call Scheduled">Discovery Call Scheduled</option>
+                            <option value="Pilot MOU Signed">Pilot MOU Signed</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Update</button>
+                </form>
+
                 <table>
                     <thead>
                         <tr>
                             <th>Status</th>
-                            <th>Lead Count</th>
+                            <th>Count</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,7 +191,7 @@
                         <li>Power: Standard 110v Outlet</li>
                         <li>SLA: 48hr Service Guarantee</li>
                     </ul>
-                    <a href="/manufacturer-alignment.md" style="color: #007bff; text-decoration: none; font-weight: bold;">View Alignment Docs &rarr;</a>
+                    <a href="{{ url_for('serve_resources', filename='manufacturer-alignment.md') }}" style="color: #007bff; text-decoration: none; font-weight: bold;">View Alignment Docs &rarr;</a>
                 </div>
             </div>
 

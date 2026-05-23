@@ -4,6 +4,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf.csrf import CSRFProtect
 from models import db, User, EquipmentMetric, Alert, MemberSchedule
 import sqlite3
+from datetime import datetime
+from report_generator import generate_report
 
 app = Flask(__name__)
 # Secret key should be loaded from environment for production
@@ -48,6 +50,81 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/api/v1/telemetry', methods=['POST'])
+@csrf.exempt # Exempting for machine-to-machine API calls
+def telemetry():
+    """
+    Endpoint for StepManiaX units to POST telemetry data.
+    Expected JSON: { "equipment_id": int, "uptime_percent": float, "scans_increment": int, "session_duration": float }
+    """
+    data = request.get_json()
+    if not data or 'equipment_id' not in data:
+        return {"error": "Invalid telemetry packet"}, 400
+
+    unit = EquipmentMetric.query.get(data['equipment_id'])
+    if not unit:
+        return {"error": "Unit not found"}, 404
+
+    # Update Metrics
+    if 'uptime_percent' in data:
+        unit.uptime_percent = data['uptime_percent']
+
+    if 'scans_increment' in data:
+        unit.total_scans += data['scans_increment']
+
+    if 'session_duration' in data:
+        # Simple rolling average for avg_session_duration
+        if unit.avg_session_duration == 0:
+            unit.avg_session_duration = data['session_duration']
+        else:
+            unit.avg_session_duration = (unit.avg_session_duration + data['session_duration']) / 2
+
+    # Auto-generate Alert if uptime drops below 95%
+    if unit.uptime_percent < 95.0:
+        alert_msg = f"Low Uptime detected on {unit.equipment_name} at {unit.location}: {unit.uptime_percent}%"
+        existing_alert = Alert.query.filter_by(message=alert_msg, is_resolved=False).first()
+        if not existing_alert:
+            new_alert = Alert(
+                severity="Critical",
+                message=alert_msg,
+                timestamp=datetime.now().strftime("%Y-%m-%d %H:%M"),
+                is_resolved=False
+            )
+            db.session.add(new_alert)
+
+    db.session.commit()
+    return {"status": "success", "unit": unit.equipment_name}, 200
+
+@app.route('/update_lead_status', methods=['POST'])
+@login_required
+def update_lead_status():
+    lead_id = request.form.get('lead_id')
+    new_status = request.form.get('status')
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE leads SET status = ? WHERE id = ?", (new_status, lead_id))
+    conn.commit()
+    conn.close()
+
+    flash(f"Status updated for lead {lead_id} to {new_status}")
+    return redirect(url_for('dashboard'))
+
+@app.route('/resources/<path:filename>')
+@login_required
+def serve_resources(filename):
+    return send_from_directory('.', filename)
+
+@app.route('/generate_report/<int:unit_id>')
+@login_required
+def generate_unit_report(unit_id):
+    filepath = generate_report(unit_id)
+    if filepath:
+        flash(f"Performance report generated successfully: {os.path.basename(filepath)}")
+    else:
+        flash("Failed to generate performance report.")
+    return redirect(url_for('dashboard'))
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -67,11 +144,19 @@ def dashboard():
     # 4. Fetch Schedules
     schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
 
+    # 5. Fetch Full Lead List for Status Manager
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, company FROM leads ORDER BY company ASC")
+    leads_list = cursor.fetchall()
+
     return render_template('dashboard.html',
                            crm_stats=crm_stats,
                            metrics=metrics,
                            alerts=alerts,
-                           schedules=schedules)
+                           schedules=schedules,
+                           leads_list=leads_list)
 
 # Database Initialization Command
 @app.cli.command("init-db")

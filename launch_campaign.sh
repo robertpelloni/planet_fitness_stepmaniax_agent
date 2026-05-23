@@ -9,6 +9,9 @@ echo "==========================================================="
 
 # 1. Database Initialization & Lead Migration
 echo "[1/5] Initializing CRM Database..."
+# Ensure all tables are created (including dashboard and telemetry)
+export FLASK_APP=app.py
+flask init-db
 python3 initialize_crm_db.py
 
 # 2. Lead Generation Phase
