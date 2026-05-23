@@ -1,0 +1,22 @@
+<table>
+    <thead>
+        <tr>
+            <th>Unit</th>
+            <th>Status</th>
+            <th>Last Service</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for unit in metrics %}
+        <tr>
+            <td>{{ unit.equipment_name }}</td>
+            <td>
+                <span class="status-badge status-{{ 'operational' if unit.maintenance_status == 'Operational' else 'maintenance' }}">
+                    {{ unit.maintenance_status }}
+                </span>
+            </td>
+            <td>{{ unit.last_service_date or 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

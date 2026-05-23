@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Member Dashboard - StepManiaX Pilot</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
+        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .container { padding: 2rem; max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; margin-bottom: 1.5rem; }
+        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
+        input { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #ced4da; box-sizing: border-box; font-size: 1rem; }
+        button { padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background-color: #e9ecef; color: #495057; }
+        .status-completed { background-color: #d4edda; color: #155724; }
+        .flash { background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="font-size: 1.25rem; font-weight: bold;">StepManiaX Member Portal</div>
+        <div>
+            Welcome, <strong>{{ member.name }}</strong> |
+            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none; margin-left: 10px;">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h3>Pilot Participation Status</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.9rem; color: #666;">Onboarding Progress:</div>
+                    <div style="font-size: 1.1rem; font-weight: bold; margin-top: 5px;">{{ member.onboarding_status }}</div>
+                </div>
+                <span class="status-badge {% if member.onboarding_status == 'Completed' %}status-completed{% endif %}">
+                    {{ member.onboarding_status }}
+                </span>
+            </div>
+            <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #666;">
+                Registered on: {{ member.registration_date }}<br>
+                Assigned Club: {{ member.franchise_id }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Modify Membership Details</h3>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ member.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address (Username)</label>
+                    <input type="email" value="{{ member.email }}" disabled style="background-color: #f8f9fa;">
+                    <small style="color: #999;">Email address cannot be changed.</small>
+                </div>
+                <button type="submit">Update Profile</button>
+            </form>
+        </div>
+
+        <div class="card" style="border-top-color: #17a2b8;">
+            <h3>Pilot Feedback</h3>
+            <p style="font-size: 0.9rem; color: #666;">We'd love to hear about your StepManiaX experience! Feedback helps us improve member retention.</p>
+            <button style="background-color: #17a2b8; opacity: 0.6; cursor: not-allowed;">Share Feedback (Coming Soon)</button>
+        </div>
+    </div>
+</body>
+</html>

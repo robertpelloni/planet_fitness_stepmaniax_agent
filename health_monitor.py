@@ -61,5 +61,15 @@ def generate_alert(cursor, severity, message, equipment_id):
     with app.app_context():
         send_notification(f"{emoji} [{severity}] {message}", franchise_id=fid)
 
+import time
+
 if __name__ == "__main__":
-    monitor_health()
+    # In production, this script runs in a continuous loop via systemd
+    while True:
+        try:
+            monitor_health()
+        except Exception as e:
+            print(f"Health Monitor encountered an error: {e}")
+
+        # Check every 60 seconds
+        time.sleep(60)

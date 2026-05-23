@@ -57,9 +57,17 @@
 
             <!-- Real-time Usage Metrics -->
             <div class="card">
-                <h3>Real-time Usage Metrics</h3>
+                <h3>Unit Engagement (Total Scans)</h3>
                 <div class="chart-container">
                     <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Historical Usage Trends -->
+            <div class="card">
+                <h3>Historical Usage Trends (7 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
@@ -227,6 +235,7 @@
     </div>
 
     <script>
+        // 1. Current Engagement Chart
         const ctx = document.getElementById('usageChart').getContext('2d');
         const usageChart = new Chart(ctx, {
             type: 'bar',
@@ -251,6 +260,37 @@
                 }
             }
         });
+
+        // 2. Historical Trend Chart
+        fetch('/api/v1/analytics/usage')
+            .then(response => response.json())
+            .then(data => {
+                const ctxTrend = document.getElementById('trendChart').getContext('2d');
+                new Chart(ctxTrend, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Daily Session Scans',
+                            data: data.data,
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Total Scans' }
+                            }
+                        }
+                    }
+                });
+            });
     </script>
 </body>
 </html>

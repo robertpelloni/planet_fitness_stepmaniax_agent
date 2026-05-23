@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn instance to serve StepManiaX B2B Dashboard
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/smx-agent
+Environment="PATH=/opt/smx-agent/venv/bin"
+Environment="SECRET_KEY=replace-with-secure-key"
+Environment="SMX_API_KEY=replace-with-secure-key"
+ExecStart=/opt/smx-agent/venv/bin/gunicorn --config gunicorn_config.py app:app
+
+[Install]
+WantedBy=multi-user.target

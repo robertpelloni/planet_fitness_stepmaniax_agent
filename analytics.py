@@ -3,11 +3,13 @@ Shared Analytical Module for StepManiaX B2B Sales Agent.
 Provides consolidated ROI and Lifetime Value (LTV) calculation logic.
 """
 
+import config
+
 def calculate_detailed_metrics(
     num_clubs=1,
     members_per_club=6000,
-    avg_monthly_fee=15.0,
-    retention_lift_percent=0.03,
+    avg_monthly_fee=config.DEFAULT_MONTHLY_FEE,
+    retention_lift_percent=config.DEFAULT_RETENTION_LIFT,
     avg_member_lifetime_months=18,
     smx_monthly_cost_per_club=600.0,
     onboarding_conversion_rate=1.0 # 1.0 = 100%
