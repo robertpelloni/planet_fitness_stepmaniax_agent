@@ -33,9 +33,13 @@
 </head>
 <body>
     <div class="navbar">
-        <div style="font-size: 1.25rem; font-weight: bold;">StepManiaX B2B Management Dashboard</div>
+        <div style="font-size: 1.25rem; font-weight: bold;">
+            StepManiaX B2B Management Dashboard
+            <span style="font-size: 0.8rem; font-weight: normal; background: #555; padding: 2px 8px; border-radius: 10px; margin-left: 10px;">{{ franchise_name }}</span>
+        </div>
         <div style="font-size: 0.9rem;">
             Welcome, <strong>{{ current_user.username }}</strong> |
+            <a href="{{ url_for('settings') }}" style="color: #adb5bd; text-decoration: none; margin-right: 10px;">Settings</a> |
             <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none; margin-left: 10px;">Logout</a>
         </div>
     </div>
@@ -136,7 +140,7 @@
 
             <!-- CRM Status Manager -->
             <div class="card">
-                <h3>Sales Funnel Management</h3>
+                <h3>Sales Funnel Management {% if not is_admin %}({{ franchise_name }}){% endif %}</h3>
                 <form action="{{ url_for('update_lead_status') }}" method="POST" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: flex-end;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div style="flex-grow: 1;">

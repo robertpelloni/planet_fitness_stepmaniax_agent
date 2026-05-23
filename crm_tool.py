@@ -101,7 +101,7 @@ def show_portfolio_analytics():
     print("===========================================================")
     conn.close()
 
-def create_user(username, password):
+def create_user(username, password, role='Franchisee', franchise_id=None):
     conn = get_db()
     cursor = conn.cursor()
     # Check if user table exists
@@ -112,11 +112,22 @@ def create_user(username, password):
 
     password_hash = generate_password_hash(password)
     try:
-        cursor.execute("INSERT INTO user (username, password_hash) VALUES (?, ?)", (username, password_hash))
-        print(f"Successfully created dashboard user: {username}")
+        cursor.execute("INSERT INTO user (username, password_hash, role, franchise_id) VALUES (?, ?, ?, ?)", (username, password_hash, role, franchise_id))
+        print(f"Successfully created {role} user: {username}")
     except sqlite3.IntegrityError:
         print(f"Error: User '{username}' already exists.")
 
+    conn.commit()
+    conn.close()
+
+def add_webhook(url, service='Discord', franchise_id=None):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO webhook (url, service, franchise_id) VALUES (?, ?, ?)", (url, service, franchise_id))
+        print(f"Successfully added {service} webhook for franchise {franchise_id or 'Global'}")
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
     conn.commit()
     conn.close()
 
@@ -146,6 +157,14 @@ def main():
     user_parser = subparsers.add_parser("create-user", help="Create a dashboard user")
     user_parser.add_argument("username", help="Username")
     user_parser.add_argument("password", help="Password")
+    user_parser.add_argument("--role", default="Franchisee", help="User role (Admin/Franchisee)")
+    user_parser.add_argument("--fid", help="Franchise ID (Lead ID)")
+
+    # Webhook Management
+    hook_parser = subparsers.add_parser("add-webhook", help="Add a notification webhook")
+    hook_parser.add_argument("url", help="Webhook URL")
+    hook_parser.add_argument("--service", default="Discord", help="Service (Discord/Slack)")
+    hook_parser.add_argument("--fid", help="Franchise ID (Lead ID) - None for Global")
 
     args = parser.parse_args()
 
@@ -158,7 +177,9 @@ def main():
     elif args.command == "analytics":
         show_portfolio_analytics()
     elif args.command == "create-user":
-        create_user(username=args.username, password=args.password)
+        create_user(username=args.username, password=args.password, role=args.role, franchise_id=args.fid)
+    elif args.command == "add-webhook":
+        add_webhook(url=args.url, service=args.service, franchise_id=args.fid)
     else:
         parser.print_help()
 

@@ -1,6 +1,8 @@
 import sqlite3
 import os
 from datetime import datetime
+from notifications import send_notification
+from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
 
@@ -47,6 +49,17 @@ def generate_alert(cursor, severity, message, equipment_id):
     cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved) VALUES (?, ?, ?, 0)",
                    (severity, message, timestamp))
     print(f"Alert Generated: [{severity}] {message}")
+
+    # Send Notification (Franchise filtering)
+    cursor.execute("SELECT location FROM equipment_metric WHERE id = ?", (equipment_id,))
+    loc = cursor.fetchone()[0]
+    cursor.execute("SELECT id FROM leads WHERE ? LIKE '%' || company || '%'", (loc,))
+    lead = cursor.fetchone()
+    fid = lead[0] if lead else None
+
+    emoji = "⚠️" if severity == "Warning" else "🚨"
+    with app.app_context():
+        send_notification(f"{emoji} [{severity}] {message}", franchise_id=fid)
 
 if __name__ == "__main__":
     monitor_health()
