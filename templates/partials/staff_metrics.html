@@ -1,0 +1,12 @@
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    {% for unit in metrics %}
+    <div style="background: #383838; padding: 1rem; border-radius: 6px;">
+        <div style="font-size: 0.8rem; color: #aaa;">{{ unit.equipment_name }}</div>
+        <div class="metric-value">{{ unit.total_scans }}</div>
+        <div style="font-size: 0.75rem; color: #888;">Total Scans</div>
+        <div style="margin-top: 0.5rem; font-size: 0.85rem;">
+            Uptime: <span style="color: {{ '#28a745' if unit.uptime_percent > 95 else '#dc3545' }}">{{ unit.uptime_percent }}%</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>

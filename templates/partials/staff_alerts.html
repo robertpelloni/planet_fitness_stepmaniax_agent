@@ -1,0 +1,9 @@
+{% for alert in alerts %}
+<div class="alert-item">
+    <div style="font-weight: bold; color: #ff6666;">[{{ alert.severity }}]</div>
+    <div style="font-size: 0.85rem; margin-top: 2px;">{{ alert.message }}</div>
+    <div class="alert-time">{{ alert.timestamp }}</div>
+</div>
+{% else %}
+<div style="text-align: center; color: #666; padding: 1rem;">No critical alerts.</div>
+{% endfor %}

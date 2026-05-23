@@ -58,6 +58,8 @@ def login():
             login_user(user)
             if user.role == 'Member':
                 return redirect(url_for('member_dashboard'))
+            if user.role == 'Staff':
+                return redirect(url_for('staff_dashboard'))
             return redirect(url_for('dashboard'))
         flash('Invalid username or password')
     return render_template('login.html')
@@ -67,6 +69,67 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/staff/api/metrics')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_api_metrics():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+    return render_template('partials/staff_metrics.html', metrics=metrics)
+
+@app.route('/staff/api/maintenance')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_api_maintenance():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+    return render_template('partials/staff_maintenance.html', metrics=metrics)
+
+@app.route('/staff/api/alerts')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_api_alerts():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+    if is_admin:
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        metric_ids = [m.id for m in metrics]
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
+    return render_template('partials/staff_alerts.html', alerts=alerts)
+
+@app.route('/staff/dashboard')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_dashboard():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
+        schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        metric_ids = [m.id for m in metrics]
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
+        schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+
+    return render_template('staff_dashboard.html',
+                           metrics=metrics,
+                           alerts=alerts,
+                           schedules=schedules,
+                           franchise_name=current_user.franchise_id or "Global Admin")
 
 @app.route('/member/dashboard', methods=['GET', 'POST'])
 @login_required
@@ -128,6 +191,8 @@ def telemetry():
                 equipment_id=unit.id
             )
             db.session.add(new_alert)
+            # Update maintenance status
+            unit.maintenance_status = 'Needs Maintenance'
             send_notification(f"⚠️ [CRITICAL] {alert_msg}", franchise_id=unit.franchise_id)
 
     db.session.commit()

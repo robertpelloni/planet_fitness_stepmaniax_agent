@@ -8,7 +8,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee', 'Member'
+    role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee', 'Member', 'Staff'
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
 
     def set_password(self, password):
@@ -27,6 +27,7 @@ class EquipmentMetric(db.Model):
     last_service_date = db.Column(db.String(50))
     avg_session_duration = db.Column(db.Float, default=0.0) # In minutes
     total_sessions = db.Column(db.Integer, default=0)
+    maintenance_status = db.Column(db.String(50), default='Operational') # 'Operational', 'Needs Maintenance'
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)

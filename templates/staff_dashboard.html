@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Dashboard - StepManiaX Facility Management</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #1a1a1a; color: #e0e0e0; }
+        .navbar { background-color: #333; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #007bff; }
+        .container { padding: 1.5rem; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; }
+        .card { background: #2d2d2d; padding: 1.25rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
+        .card.alert-card { border-left-color: #dc3545; }
+        .card.maintenance-card { border-left-color: #ffc107; }
+        h3 { margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 0.5rem; display: flex; justify-content: space-between; }
+        .metric-value { font-size: 2rem; font-weight: bold; color: #007bff; }
+        .status-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .status-operational { background-color: #28a745; color: white; }
+        .status-maintenance { background-color: #ffc107; color: #212529; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #444; }
+        th { color: #888; font-weight: 600; }
+        .alert-item { padding: 0.75rem; background: #3d1a1a; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid #600; }
+        .alert-time { font-size: 0.7rem; color: #aaa; margin-top: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="font-size: 1.25rem; font-weight: bold;">
+            StepManiaX STAFF PORTAL
+            <span style="font-size: 0.8rem; font-weight: normal; color: #007bff; margin-left: 10px;">{{ franchise_name }}</span>
+        </div>
+        <div style="font-size: 0.9rem;">
+            Staff: <strong>{{ current_user.username }}</strong> |
+            <a href="{{ url_for('logout') }}" style="color: #aaa; text-decoration: none; margin-left: 10px;">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="dashboard-grid">
+
+            <!-- Real-time Equipment Status -->
+            <div class="card" hx-get="/staff/api/metrics" hx-trigger="every 10s">
+                <h3>Live Equipment Status</h3>
+                <div id="metrics-container">
+                    {% include 'partials/staff_metrics.html' %}
+                </div>
+            </div>
+
+            <!-- Active Alerts -->
+            <div class="card alert-card" hx-get="/staff/api/alerts" hx-trigger="every 5s">
+                <h3>Critical Alerts</h3>
+                <div id="alerts-container">
+                    {% include 'partials/staff_alerts.html' %}
+                </div>
+            </div>
+
+            <!-- Maintenance Tracking -->
+            <div class="card maintenance-card" hx-get="/staff/api/maintenance" hx-trigger="every 10s">
+                <h3>Maintenance Log</h3>
+                <div id="maintenance-container">
+                    {% include 'partials/staff_maintenance.html' %}
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Upcoming Bookings</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Member</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in schedules %}
+                        <tr>
+                            <td>{{ booking.start_time }}</td>
+                            <td>{{ booking.member_name }}</td>
+                            <td>{{ booking.equipment_id }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #666;">No sessions booked.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
