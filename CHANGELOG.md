@@ -29,10 +29,12 @@ All notable changes to this project will be documented in this file.
 - Major documentation overhaul: Rewrote `README.md` to reflect the actual repository architecture (hybrid B2B collateral workspace and Python data-gathering utility).
 - Updated README to clearly outline the overarching autonomous agent case-study goals and the 4-Phase SOP execution pipeline.
 
-## [1.7.0]
-- **Manufacturer Alignment:** Published `manufacturer-alignment.md` with official hardware specs and warranty terms.
-- **Enhanced Dashboard:** Integrated technical resource center into the web monitoring dashboard.
-- **Sales Readiness:** Released `equipment-brochure.md` for club-level operational stakeholders.
-- **Conflict Resolution:** Reconciled divergent branch states to ensure a unified v1.7.0 production baseline.
+## [2.0.0] - Member Lifecycle Milestone
+- **Member Onboarding Workflow:** Launched `member_onboarding.py` and a web-based onboarding portal for pilot participants.
+- **Retention Analytics Integration:** Updated `analytics.py` to factor member onboarding conversion rates into ROI and retention lift projections.
+- **Onboarding Portal:** Created `templates/onboarding_portal.html` providing a professional registration interface for gym members.
+- **Dashboard Enhancements:** Added an "Onboarding & Retention" metrics card to the management dashboard.
+- **Data-Driven Reporting:** Enhanced `report_generator.py` and `pilot-performance-report.md` to include onboarding and conversion KPIs.
+- **Database Schema Update:** Added `Member` model to `crm.db` to track member lifecycle states.
 
 [... previous entries remain unchanged ...]

@@ -15,6 +15,8 @@
 | **Average Session Duration** | 10 Minutes | [Actual] | % |
 | **Repeat Visit Rate (3+ times/week)** | [Target] | [Actual] | % |
 | **Total HIIT Sessions Completed** | [Target] | [Actual] | % |
+| **Onboarding Completion Rate** | 85% | [Onboarding Conversion] | - |
+| **Total Registered Members** | - | [Total Registered Members] | - |
 
 ## 2. Demographic Distribution
 *Goal: Prove engagement among the 'Interactive Generation' (Gen Z / Millennials).*

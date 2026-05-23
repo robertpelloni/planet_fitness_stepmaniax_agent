@@ -9,7 +9,8 @@ def calculate_detailed_metrics(
     avg_monthly_fee=15.0,
     retention_lift_percent=0.03,
     avg_member_lifetime_months=18,
-    smx_monthly_cost_per_club=600.0
+    smx_monthly_cost_per_club=600.0,
+    onboarding_conversion_rate=1.0 # 1.0 = 100%
 ):
     """
     Calculates comprehensive ROI metrics using the LTV framework.
@@ -21,7 +22,9 @@ def calculate_detailed_metrics(
     base_total_portfolio_value = total_members * base_ltv
 
     # 2. Lifted LTV Analysis
-    lifted_lifetime_months = avg_member_lifetime_months * (1 + retention_lift_percent)
+    # Realized lift is scaled by the onboarding conversion rate
+    realized_lift = retention_lift_percent * onboarding_conversion_rate
+    lifted_lifetime_months = avg_member_lifetime_months * (1 + realized_lift)
     lifted_ltv = avg_monthly_fee * lifted_lifetime_months
     lifted_total_portfolio_value = total_members * lifted_ltv
 
