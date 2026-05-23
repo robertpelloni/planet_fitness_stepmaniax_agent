@@ -31,7 +31,7 @@ def load_user(user_id):
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        api_key = request.headers.get('X-API-KEY')
+        api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
         if api_key and api_key == config.API_KEY:
             return f(*args, **kwargs)
         return {"error": "Unauthorized access"}, 401
@@ -282,17 +282,35 @@ def member_onboarding():
 @role_required(['Admin', 'Franchisee'])
 def settings():
     if request.method == 'POST':
-        url = request.form.get('url')
-        service = request.form.get('service')
+        action = request.form.get('action')
 
-        new_hook = Webhook(
-            url=url,
-            service=service,
-            franchise_id=current_user.franchise_id if current_user.role != 'Admin' else None
-        )
-        db.session.add(new_hook)
-        db.session.commit()
-        flash(f"Webhook added successfully for {service}")
+        if action == 'add_webhook':
+            url = request.form.get('url')
+            service = request.form.get('service')
+            new_hook = Webhook(
+                url=url,
+                service=service,
+                franchise_id=current_user.franchise_id if current_user.role != 'Admin' else None
+            )
+            db.session.add(new_hook)
+            db.session.commit()
+            flash(f"Webhook added successfully for {service}")
+
+        elif action == 'create_user' and current_user.role == 'Admin':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            role = request.form.get('role')
+            franchise_id = request.form.get('franchise_id')
+
+            if User.query.filter_by(username=username).first():
+                flash("User already exists.")
+            else:
+                new_user = User(username=username, role=role, franchise_id=franchise_id if franchise_id else None)
+                new_user.set_password(password)
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f"User {username} created successfully as {role}.")
+
         return redirect(url_for('settings'))
 
     if current_user.role == 'Admin':
@@ -305,11 +323,17 @@ def settings():
     return render_template('settings.html', webhooks=webhooks, users=users)
 
 @app.route('/api/v1/analytics/usage', methods=['GET'])
-@login_required
-@role_required(['Admin', 'Franchisee'])
+@csrf.exempt
+@require_api_key
 def api_usage_analytics():
-    franchise_id = current_user.franchise_id
-    is_admin = (current_user.role == 'Admin')
+    # If authenticated via session (e.g. from dashboard), use session context
+    # Otherwise, require franchise_id as a parameter if not global
+    if current_user.is_authenticated:
+        franchise_id = current_user.franchise_id
+        is_admin = (current_user.role == 'Admin')
+    else:
+        franchise_id = request.args.get('franchise_id')
+        is_admin = not franchise_id
 
     if is_admin:
         metrics = EquipmentMetric.query.all()

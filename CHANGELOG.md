@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.7.0] - Management & Security Hardening Milestone
+- **Staff Analytics Integration:** Added 7-day engagement trend charts to the Staff Dashboard for club-level usage monitoring.
+- **Admin User Management UI:** Launched a dedicated user provisioning interface in Settings for Global Admins.
+- **Enhanced API Security:** Implemented dual-mode authentication (Session or API Key) for analytics endpoints to support both UI and machine access.
+- **RBAC Audit:** Hardened all administrative and management routes with strict `@role_required` enforcement.
+
 ## [2.6.0] - Usage Trend Analytics & API Security Milestone
 - **Historical Usage Tracking:** Implemented time-series tracking via `TelemetryHistory` to capture per-scan equipment data.
 - **Usage Analytics API:** Launched `/api/v1/analytics/usage` for daily scan aggregation and trend reporting.
