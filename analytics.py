@@ -50,3 +50,60 @@ def calculate_detailed_metrics(
         "annual_net_profit": round(annual_net_profit, 2),
         "roi_multiple": round(roi_multiple, 2)
     }
+
+def calculate_propensity_score(lead_data):
+    """
+    Calculates a 'Propensity Score' (0-100) based on lead metadata.
+    Higher scores indicate better targets for StepManiaX.
+    """
+    score = 50 # Base score
+
+    # 1. Scale Multiplier (Bigger is better for regional expansion)
+    num_clubs = lead_data.get('num_clubs', 1)
+    if num_clubs > 100: score += 20
+    elif num_clubs > 50: score += 15
+    elif num_clubs > 20: score += 10
+
+    # 2. Regional Priority (Michigan/Midwest)
+    region = lead_data.get('region', '').lower()
+    if 'michigan' in region or 'mi' == region: score += 15
+    elif 'ohio' in region or 'midwest' in region: score += 10
+
+    # 3. Status Bonus (Further down the funnel = higher propensity)
+    status = lead_data.get('status', 'Identified')
+    status_weights = {
+        'Researching': 5,
+        'Ready for Outreach': 10,
+        'Outreach Active': 15,
+        'Discovery Call Scheduled': 25,
+        'Pilot MOU Signed': 40
+    }
+    score += status_weights.get(status, 0)
+
+    # 4. Priority Multiplier
+    priority = lead_data.get('priority', 'Medium')
+    if priority == 'High': score += 10
+    elif priority == 'Low': score -= 10
+
+    # Cap at 100
+    return min(100, score)
+
+def detect_usage_anomaly(unit_metrics, historical_average):
+    """
+    Detects if current unit performance deviates significantly from history.
+    Returns (is_anomaly, score, reason)
+    """
+    if historical_average == 0:
+        return False, 0, "No history"
+
+    current_val = unit_metrics.get('scans_count', 0)
+    variance = abs(current_val - historical_average) / historical_average
+
+    score = min(100, int(variance * 50))
+
+    if variance > 0.5 and current_val < historical_average:
+        return True, score, f"Significant usage drop: {int(variance*100)}% below avg"
+    elif variance > 2.0:
+        return True, score, f"Unusual usage spike: {int(variance)}x above avg"
+
+    return False, score, "Normal"

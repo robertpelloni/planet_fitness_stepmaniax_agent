@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - Real-time Analytics & Operational Intelligence Milestone
+- **Real-time Analytics Dashboard:** Integrated an 'Hourly Usage Distribution' chart into the Staff Dashboard for peak-usage identification.
+- **Operational Anomaly Detection:** Enhanced the Health Monitor with `detect_usage_anomaly` to automatically flag unusual usage spikes or drops.
+- **Staff Intelligence:** Updated the Staff Portal to provide live metrics polling via HTMX for improved facility awareness.
+- **Enhanced Financial Models:** Added hourly usage trend ingestion to support more granular regional expansion proposals.
+
+## [3.0.0] - Automated Prospecting & Lead Intelligence Milestone
+- **Prospect Portal:** Launched a secure, public-facing landing page (`/prospect/<token>`) for prospective franchise partners featuring personalized ROI models.
+- **Automated Outreach Bundle:** Developed `generate_outreach_messages.py` to synthesize lead data into tailored LinkedIn and Email campaigns with embedded portal links.
+- **Lead Intelligence UI:** Integrated propensity scoring and secure portal access directly into the Admin Dashboard for real-time prioritization.
+- **Playwright Scraper:** Upgraded `scrape_leads.py` to use Playwright for high-fidelity extraction of executive data from dynamic franchise portals.
+- **Data-Driven Prioritization:** Implemented the `calculate_propensity_score` algorithm to rank targets by portfolio scale, regional priority, and funnel status.
+
+## [2.9.0] - Lead Intelligence & Playwright Scraper Milestone
+- **Playwright Scraper:** Upgraded `scrape_leads.py` to use Playwright for headless browser scraping of dynamic franchise portals.
+- **Lead Propensity Scoring:** Implemented an automated scoring algorithm in `analytics.py` to rank leads by sales priority.
+- **Propensity Leaderboard:** Integrated a new "High Propensity Targets" section into the Admin Dashboard for prioritized outreach.
+- **Scalable Extraction:** Enhanced metadata extraction heuristics for leadership team pages across multiple franchise group domains.
+
 ## [2.8.0] - Production Deployment & Monitoring Milestone
 - **Production Infrastructure:** Added `gunicorn_config.py` and systemd service templates for professional deployment.
 - **Continuous Health Monitoring:** Updated `health_monitor.py` with a persistent execution loop for real-time alerting.

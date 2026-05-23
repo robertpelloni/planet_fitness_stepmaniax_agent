@@ -1,4 +1,4 @@
-import requests
+from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import csv
 import time
@@ -7,111 +7,107 @@ import os
 # Target URLs for Planet Fitness Franchise Groups
 TARGET_GROUPS = [
     {"name": "National Fitness Partners", "url": "https://www.nfpfit.com/our-team"},
-    {"name": "Excel Fitness", "url": "https://www.excelfitness.com/leadership"}, # Inferred
-    {"name": "Grand Fitness Partners", "url": "https://grandfitnesspartners.com/team"}, # Inferred
-    {"name": "United Fitness Partners", "url": "https://pffranchisee.org/united-fp-rings-in-the-new-year-with-big-leadership-changes/"},
+    {"name": "United Fitness Partners", "url": "https://www.unitedpf.com/leadership/"}, # Updated URL
     {"name": "Flynn Group", "url": "https://flynn.com/flynn-fitness/"},
     {"name": "CDM Fitness Holdings", "url": "https://www.fitearth.com/"},
+    {"name": "Ohana Growth Partners", "url": "https://www.ohanagp.com/team"},
+    {"name": "EPIC Fitness Group", "url": "https://www.epicfitnessgroup.com/"}
 ]
 
 OUTPUT_FILE = "franchise_leads.csv"
 
 def is_junk(text):
-    """
-    Heuristic to filter out junk text, placeholders, and layout artifacts.
-    """
     junk_keywords = [
-        "lorem", "ipsum", "dolor", "sit", "amet", # Standard placeholders
-        "locations totals", "loading details", "loading location", # Dynamic artifacts
-        "apply now", "join our team", "careers", # Recruitment CTA noise
-        "premier zone", "judgement free", "all rights reserved" # Slogans
+        "lorem", "ipsum", "dolor", "sit", "amet",
+        "locations totals", "loading details", "loading location",
+        "apply now", "join our team", "careers",
+        "premier zone", "judgement free", "all rights reserved"
     ]
+    if not text: return True
     text_lower = text.lower()
-
-    # 1. Keyword check
-    if any(junk in text_lower for junk in junk_keywords):
-        return True
-
-    # 2. Length check (too short or too long for a name/title)
-    if len(text) < 3 or len(text) > 100:
-        return True
-
+    if any(junk in text_lower for junk in junk_keywords): return True
+    if len(text) < 3 or len(text) > 100: return True
     return False
 
-def scrape_leadership(group):
-    """
-    Scrapes a franchise group's leadership/team page.
-    """
+def scrape_leadership_playwright(browser, group):
     name = group['name']
     url = group['url']
-    print(f"--- Scraping {name} at {url} ---")
+    print(f"--- Scraping {name} via Playwright at {url} ---")
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-
+    page = browser.new_page()
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
+        page.goto(url, wait_until="load", timeout=30000)
+        # Scroll to ensure dynamic content loads
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(2)
+        content = page.content()
+    except Exception as e:
         print(f"Error fetching {url}: {e}")
         return []
+    finally:
+        page.close()
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(content, 'html.parser')
     leads = []
 
-    # NFP Specific Parsing
-    if "nfpfit.com" in url:
-        for person in soup.find_all(['h3', 'h4']):
-            full_name = person.text.strip()
-            title = person.find_next(['p', 'span']).text.strip() if person.find_next(['p', 'span']) else "Unknown"
-            if not is_junk(full_name) and len(full_name.split()) > 1:
+    # Improved Parsing Heuristics
+    # Look for common containers like 'team-member', 'person', 'staff'
+    potential_leads = []
+
+    # Try finding elements with 'CEO', 'President', 'Director', 'Manager'
+    keywords = ["CEO", "President", "Director", "Manager", "Founder", "VP", "Vice President"]
+
+    for tag in soup.find_all(['h2', 'h3', 'h4', 'h5', 'strong']):
+        text = tag.get_text(separator=' ').strip()
+        if is_junk(text): continue
+
+        # Check if this element or its siblings contain a leadership keyword
+        parent = tag.parent
+        combined_text = parent.get_text(separator=' ')
+
+        if any(kw in combined_text for kw in keywords):
+            # Attempt to extract Name and Title
+            # Usually the heading is the name
+            full_name = text
+            # Find the title (often in a p or span sibling or child)
+            title = "Leadership"
+            for sibling in tag.find_next_siblings(['p', 'span', 'div']):
+                sib_text = sibling.get_text().strip()
+                if any(kw in sib_text for kw in keywords):
+                    title = sib_text
+                    break
+
+            if len(full_name.split()) > 1 and len(full_name.split()) < 5:
                 leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
-    # Flynn Group Specific Parsing
-    elif "flynn.com" in url:
-        for leader in soup.find_all('h4'):
-            full_name = leader.text.strip()
-            title = leader.find_next(['p']).text.strip() if leader.find_next(['p']) else "Unknown"
-            if not is_junk(full_name) and not is_junk(title):
-                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
+    # Deduplicate
+    unique_leads = []
+    seen = set()
+    for lead in leads:
+        key = (lead['Name'], lead['Franchise Group'])
+        if key not in seen:
+            unique_leads.append(lead)
+            seen.add(key)
 
-    # Generic Fallback
-    else:
-        print(f"No specific parser for {url}, using generic heuristic.")
-        for item in soup.find_all(['h2', 'h3', 'h4']):
-            text = item.text.strip()
-            if is_junk(text):
-                continue
-            if any(key in text for key in ["Team", "Leadership", "Executive", "Mission"]):
-                continue
-            leads.append({'Franchise Group': name, 'Name': text, 'Title': "Consult LEADS.md"})
-
-    print(f"Found {len(leads)} potential leads for {name}.")
-    return leads
+    print(f"Found {len(unique_leads)} potential leads for {name}.")
+    return unique_leads
 
 def save_to_csv(leads, filename):
-    """
-    Saves the extracted leads to a CSV file.
-    """
     if not leads:
-        print("No leads found to save in this run.")
+        print("No leads found to save.")
         return
-
     keys = leads[0].keys()
-    try:
-        with open(filename, 'w', newline='', encoding='utf-8') as output_file:
-            dict_writer = csv.DictWriter(output_file, fieldnames=keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(leads)
-        print(f"Successfully saved leads to {filename}")
-    except IOError as e:
-        print(f"Error saving file: {e}")
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        writer.writerows(leads)
+    print(f"Saved {len(leads)} leads to {filename}")
 
 if __name__ == "__main__":
-    all_leads = []
-    for group in TARGET_GROUPS:
-        time.sleep(1) # Polite delay
-        all_leads.extend(scrape_leadership(group))
-
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        all_leads = []
+        for group in TARGET_GROUPS:
+            all_leads.extend(scrape_leadership_playwright(browser, group))
+        browser.close()
     save_to_csv(all_leads, OUTPUT_FILE)

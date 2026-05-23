@@ -111,6 +111,35 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {% if is_admin %}
+                <h4 style="margin: 1.5rem 0 0.5rem 0; font-size: 0.9rem; color: #495057;">High Propensity Targets</h4>
+                <table style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Propensity</th>
+                            <th>Clubs</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads_list[:5] %}
+                        <tr>
+                            <td>{{ lead.company }}</td>
+                            <td>
+                                <div style="width: 100%; background: #eee; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: {{ lead.propensity_score }}%; background: {% if lead.propensity_score > 75 %}#28a745{% elif lead.propensity_score > 50 %}#ffc107{% else %}#007bff{% endif %}; height: 100%;"></div>
+                                </div>
+                                <div style="font-size: 0.7rem; color: #666; margin-top: 2px;">{{ lead.propensity_score }}/100</div>
+                            </td>
+                            <td>{{ lead.num_clubs }}</td>
+                            <td><a href="{{ url_for('prospect_portal', token=lead.public_token) }}" target="_blank" style="text-decoration: none; font-size: 1.2rem;" title="View Prospect Portal">🔗</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
             </div>
 
             <!-- Equipment Monitoring -->

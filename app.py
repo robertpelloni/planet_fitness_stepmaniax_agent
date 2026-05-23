@@ -1,3 +1,5 @@
+import secrets
+import analytics
 import os
 from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -29,12 +31,18 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 def require_api_key(f):
+    """
+    Decorator that allows access if a valid API Key is provided
+    OR if the user is already authenticated via session.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
         if api_key and api_key == config.API_KEY:
             return f(*args, **kwargs)
-        return {"error": "Unauthorized access"}, 401
+        if current_user.is_authenticated:
+            return f(*args, **kwargs)
+        return {"error": "Unauthorized access. API Key or Session required."}, 401
     return decorated_function
 
 def role_required(roles):
@@ -462,6 +470,51 @@ def generate_unit_report(unit_id):
         flash("Failed to generate performance report.")
     return redirect(url_for('dashboard'))
 
+@app.route('/prospect/<token>')
+def prospect_portal(token):
+    """
+    Public but secure landing page for prospective franchise partners.
+    """
+    lead = Lead.query.filter_by(public_token=token).first_or_404()
+
+    # Calculate personalized metrics
+    metrics = analytics.calculate_detailed_metrics(
+        num_clubs=lead.num_clubs,
+        retention_lift_percent=lead.retention_lift,
+        avg_monthly_fee=lead.avg_monthly_fee
+    )
+
+    return render_template('prospect_portal.html', lead=lead, metrics=metrics)
+
+@app.route('/staff/api/hourly_analytics')
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_api_hourly():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    metric_ids = [m.id for m in metrics]
+
+    # Get scans from the last 24 hours
+    history = TelemetryHistory.query.filter(TelemetryHistory.equipment_id.in_(metric_ids)).all()
+
+    hourly_stats = {}
+    for entry in history:
+        # timestamp format: "2026-05-23 14:21:39"
+        hour = entry.timestamp[11:13]
+        hourly_stats[hour] = hourly_stats.get(hour, 0) + entry.scans_count
+
+    sorted_hours = sorted(hourly_stats.keys())
+    return {
+        "labels": [f"{h}:00" for h in sorted_hours],
+        "data": [hourly_stats[h] for h in sorted_hours]
+    }
+
 @app.route('/dashboard')
 @login_required
 @role_required(['Admin', 'Franchisee'])
@@ -506,9 +559,31 @@ def dashboard():
 
     # 5. Lead List
     if is_admin:
-        leads_list = Lead.query.order_by(Lead.company.asc()).all()
+        leads_list = Lead.query.all()
     else:
         leads_list = Lead.query.filter_by(id=franchise_id).all()
+
+    # Dynamic scoring and token generation
+    updated = False
+    for lead in leads_list:
+        if not lead.public_token:
+            lead.public_token = secrets.token_urlsafe(16)
+            updated = True
+
+        lead_dict = {
+            'num_clubs': lead.num_clubs,
+            'region': lead.region,
+            'status': lead.status,
+            'priority': lead.priority
+        }
+        lead.propensity_score = analytics.calculate_propensity_score(lead_dict)
+
+    if updated:
+        db.session.commit()
+
+    # Sort by propensity score descending for Admin
+    if is_admin:
+        leads_list.sort(key=lambda x: x.propensity_score or 0, reverse=True)
 
     return render_template('dashboard.html',
                            crm_stats=crm_stats,

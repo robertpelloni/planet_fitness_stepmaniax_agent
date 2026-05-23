@@ -71,6 +71,14 @@
                 </div>
             </div>
 
+            <!-- Real-time Usage Distribution -->
+            <div class="card" style="grid-column: span 2;">
+                <h3>Hourly Usage Distribution (24h)</h3>
+                <div style="height: 250px;">
+                    <canvas id="hourlyStatsChart"></canvas>
+                </div>
+            </div>
+
             <div class="card">
                 <h3>Upcoming Bookings</h3>
                 <table>
@@ -117,6 +125,44 @@
                             backgroundColor: 'rgba(40, 167, 69, 0.1)',
                             fill: true,
                             tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#aaa' } }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#444' },
+                                ticks: { color: '#888' }
+                            },
+                            x: {
+                                grid: { color: '#444' },
+                                ticks: { color: '#888' }
+                            }
+                        }
+                    }
+                });
+            });
+
+        // Initialize Hourly Stats Chart
+        fetch('/staff/api/hourly_analytics')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('hourlyStatsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Hourly Scans',
+                            data: data.data,
+                            backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                            borderColor: '#007bff',
+                            borderWidth: 1
                         }]
                     },
                     options: {

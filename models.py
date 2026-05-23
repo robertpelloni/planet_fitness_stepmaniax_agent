@@ -70,6 +70,8 @@ class Lead(db.Model):
     projected_annual_profit = db.Column(db.Float)
     follow_up_count = db.Column(db.Integer, default=0)
     last_contact_date = db.Column(db.String(50))
+    public_token = db.Column(db.String(100), unique=True)
+    propensity_score = db.Column(db.Integer, default=50)
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'
