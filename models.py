@@ -8,8 +8,8 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee'
-    franchise_id = db.Column(db.String(50), nullable=True) # ID of the Lead they manage
+    role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee', 'Member'
+    franchise_id = db.Column(db.String(50), db.ForeignKey('lead.id'), nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -21,6 +21,7 @@ class EquipmentMetric(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     equipment_name = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(100), nullable=False)
+    franchise_id = db.Column(db.String(50), db.ForeignKey('lead.id'), nullable=True)
     uptime_percent = db.Column(db.Float, default=100.0)
     total_scans = db.Column(db.Integer, default=0)
     last_service_date = db.Column(db.String(50))
@@ -44,11 +45,36 @@ class MemberSchedule(db.Model):
 
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     onboarding_status = db.Column(db.String(50), default='Registered') # 'Registered', 'In Progress', 'Completed'
     registration_date = db.Column(db.String(50), nullable=False)
-    club_id = db.Column(db.String(100)) # Linked to the Lead/Club location
+    franchise_id = db.Column(db.String(50), db.ForeignKey('lead.id'), nullable=True)
+
+class Lead(db.Model):
+    id = db.Column(db.String(50), primary_key=True)
+    company = db.Column(db.String(100), nullable=False)
+    contact_name = db.Column(db.String(100))
+    title = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    region = db.Column(db.String(50))
+    status = db.Column(db.String(50), default='Identified')
+    priority = db.Column(db.String(20), default='Medium')
+    notes = db.Column(db.Text)
+    num_clubs = db.Column(db.Integer)
+    retention_lift = db.Column(db.Float, default=0.03)
+    avg_monthly_fee = db.Column(db.Float, default=15.0)
+    projected_annual_profit = db.Column(db.Float)
+    follow_up_count = db.Column(db.Integer, default=0)
+    last_contact_date = db.Column(db.String(50))
+
+class OutreachLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    lead_id = db.Column(db.String(50), db.ForeignKey('lead.id'), nullable=False)
+    date_sent = db.Column(db.String(50), nullable=False)
+    channel = db.Column(db.String(50))
+    notes = db.Column(db.Text)
 
 class Webhook(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -2,8 +2,7 @@ import os
 from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook
-import sqlite3
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog
 from datetime import datetime
 from report_generator import generate_report
 from notifications import send_notification
@@ -41,6 +40,8 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
+            if user.role == 'Member':
+                return redirect(url_for('member_dashboard'))
             return redirect(url_for('dashboard'))
         flash('Invalid username or password')
     return render_template('login.html')
@@ -50,6 +51,25 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/member/dashboard', methods=['GET', 'POST'])
+@login_required
+def member_dashboard():
+    if current_user.role != 'Member':
+        return redirect(url_for('dashboard'))
+
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    if not member:
+        flash("Member record not found.")
+        return redirect(url_for('logout'))
+
+    if request.method == 'POST':
+        member.name = request.form.get('name')
+        # We don't allow email change for now as it's the username
+        db.session.commit()
+        flash("Profile updated successfully!")
+
+    return render_template('member_dashboard.html', member=member)
 
 @app.route('/api/v1/telemetry', methods=['POST'])
 @csrf.exempt # Exempting for machine-to-machine API calls
@@ -92,15 +112,7 @@ def telemetry():
                 equipment_id=unit.id
             )
             db.session.add(new_alert)
-            # Find franchise_id for this location to send notification
-            conn = sqlite3.connect(db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            # Simple heuristic: location contains club name which is usually in leads.company
-            cursor.execute("SELECT id FROM leads WHERE ? LIKE '%' || company || '%'", (unit.location,))
-            lead = cursor.fetchone()
-            fid = lead['id'] if lead else None
-            send_notification(f"⚠️ [CRITICAL] {alert_msg}", franchise_id=fid)
+            send_notification(f"⚠️ [CRITICAL] {alert_msg}", franchise_id=unit.franchise_id)
 
     db.session.commit()
     return {"status": "success", "unit": unit.equipment_name}, 200
@@ -111,13 +123,14 @@ def update_lead_status():
     lead_id = request.form.get('lead_id')
     new_status = request.form.get('status')
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE leads SET status = ? WHERE id = ?", (new_status, lead_id))
-    conn.commit()
-    conn.close()
+    lead = Lead.query.get(lead_id)
+    if lead:
+        lead.status = new_status
+        db.session.commit()
+        flash(f"Status updated for lead {lead_id} to {new_status}")
+    else:
+        flash(f"Error: Lead {lead_id} not found.")
 
-    flash(f"Status updated for lead {lead_id} to {new_status}")
     return redirect(url_for('dashboard'))
 
 @app.route('/resources/<path:filename>')
@@ -131,26 +144,37 @@ def member_onboarding():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
-        club_id = request.form.get('club_id')
+        password = request.form.get('password')
+        franchise_id = request.form.get('franchise_id')
 
         # Check if member already exists
         existing = Member.query.filter_by(email=email).first()
         if existing:
             flash("You are already registered for this pilot!")
         else:
+            # Create User first
+            new_user = User(username=email, role='Member')
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.flush() # Get ID
+
             new_member = Member(
                 name=name,
                 email=email,
-                club_id=club_id,
-                registration_date=datetime.now().strftime("%Y-%m-%d")
+                franchise_id=franchise_id,
+                registration_date=datetime.now().strftime("%Y-%m-%d"),
+                user_id=new_user.id
             )
             db.session.add(new_member)
             db.session.commit()
-            send_notification(f"🎉 New Pilot Registration: {name} at {club_id}", franchise_id=club_id)
-            flash("Successfully registered for the StepManiaX Pilot!")
+            send_notification(f"🎉 New Pilot Registration: {name}", franchise_id=franchise_id)
+            flash("Successfully registered! You can now log in to your dashboard.")
+            return redirect(url_for('login'))
         return redirect(url_for('member_onboarding'))
 
-    return render_template('onboarding_portal.html')
+    # Get available franchise locations for the dropdown
+    leads = Lead.query.filter(Lead.status.contains('Pilot')).all()
+    return render_template('onboarding_portal.html', leads=leads)
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -193,26 +217,17 @@ def dashboard():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
 
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
     # 1. CRM Summary
     if is_admin:
-        cursor.execute("SELECT status, count(*) as count FROM leads GROUP BY status")
+        crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).group_by(Lead.status).all()
     else:
-        cursor.execute("SELECT status, count(*) as count FROM leads WHERE id = ? GROUP BY status", (franchise_id,))
-    crm_stats = cursor.fetchall()
+        crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).filter_by(id=franchise_id).group_by(Lead.status).all()
 
     # 2. Equipment Metrics
     if is_admin:
         metrics = EquipmentMetric.query.all()
     else:
-        # We need to link equipment_metric to leads via location or a new FK
-        # For now, let's assume location contains the company name
-        cursor.execute("SELECT company FROM leads WHERE id = ?", (franchise_id,))
-        company = cursor.fetchone()['company']
-        metrics = EquipmentMetric.query.filter(EquipmentMetric.location.contains(company)).all()
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
 
     metric_ids = [m.id for m in metrics]
 
@@ -232,16 +247,15 @@ def dashboard():
     if is_admin:
         onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
     else:
-        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).filter_by(club_id=franchise_id).group_by(Member.onboarding_status).all()
+        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).filter_by(franchise_id=franchise_id).group_by(Member.onboarding_status).all()
 
     onboarding_dict = {status: count for status, count in onboarding_stats}
 
     # 5. Lead List
     if is_admin:
-        cursor.execute("SELECT id, company FROM leads ORDER BY company ASC")
+        leads_list = Lead.query.order_by(Lead.company.asc()).all()
     else:
-        cursor.execute("SELECT id, company FROM leads WHERE id = ?", (franchise_id,))
-    leads_list = cursor.fetchall()
+        leads_list = Lead.query.filter_by(id=franchise_id).all()
 
     return render_template('dashboard.html',
                            crm_stats=crm_stats,
@@ -251,7 +265,7 @@ def dashboard():
                            leads_list=leads_list,
                            onboarding_stats=onboarding_dict,
                            is_admin=is_admin,
-                           franchise_name=leads_list[0]['company'] if not is_admin and leads_list else "Global Admin")
+                           franchise_name=leads_list[0].company if not is_admin and leads_list else "Global Admin")
 
 # Database Initialization Command
 @app.cli.command("init-db")
