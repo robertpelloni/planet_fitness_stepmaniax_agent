@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member
 import sqlite3
 from datetime import datetime
 from report_generator import generate_report
@@ -115,6 +115,31 @@ def update_lead_status():
 def serve_resources(filename):
     return send_from_directory('.', filename)
 
+@app.route('/onboard', methods=['GET', 'POST'])
+def member_onboarding():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        club_id = request.form.get('club_id')
+
+        # Check if member already exists
+        existing = Member.query.filter_by(email=email).first()
+        if existing:
+            flash("You are already registered for this pilot!")
+        else:
+            new_member = Member(
+                name=name,
+                email=email,
+                club_id=club_id,
+                registration_date=datetime.now().strftime("%Y-%m-%d")
+            )
+            db.session.add(new_member)
+            db.session.commit()
+            flash("Successfully registered for the StepManiaX Pilot!")
+        return redirect(url_for('member_onboarding'))
+
+    return render_template('onboarding_portal.html')
+
 @app.route('/generate_report/<int:unit_id>')
 @login_required
 def generate_unit_report(unit_id):
@@ -144,6 +169,10 @@ def dashboard():
     # 4. Fetch Schedules
     schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
 
+    # 6. Fetch Onboarding Stats
+    onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
+    onboarding_dict = {status: count for status, count in onboarding_stats}
+
     # 5. Fetch Full Lead List for Status Manager
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -156,7 +185,8 @@ def dashboard():
                            metrics=metrics,
                            alerts=alerts,
                            schedules=schedules,
-                           leads_list=leads_list)
+                           leads_list=leads_list,
+                           onboarding_stats=onboarding_dict)
 
 # Database Initialization Command
 @app.cli.command("init-db")

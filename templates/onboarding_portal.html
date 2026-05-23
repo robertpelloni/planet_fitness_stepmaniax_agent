@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StepManiaX Pilot - Member Onboarding</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #333; }
+        .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border-top: 6px solid #007bff; }
+        h2 { text-align: center; color: #007bff; margin-bottom: 0.5rem; }
+        p { text-align: center; color: #666; margin-bottom: 2rem; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
+        input, select { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #ced4da; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 1rem; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 1rem; transition: background-color 0.2s; }
+        button:hover { background-color: #0056b3; }
+        .flash { background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center; font-size: 0.9rem; border: 1px solid #bee5eb; }
+        .footer { text-align: center; margin-top: 2rem; font-size: 0.75rem; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Pilot Onboarding</h2>
+        <p>Register for the StepManiaX Interactive Cardio Pilot and track your retention lift!</p>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label>Planet Fitness Email</label>
+                <input type="email" name="email" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Club Location</label>
+                <select name="club_id" required>
+                    <option value="EPIC-Northville">Northville, MI (EPIC)</option>
+                    <option value="EPIC-AnnArbor">Ann Arbor, MI (EPIC)</option>
+                    <option value="NFP-CampHill">Camp Hill, PA (NFP)</option>
+                </select>
+            </div>
+            <button type="submit">Join Pilot Experience</button>
+        </form>
+        <div class="footer">
+            StepRevolution Commercial Placement Group &copy; 2026
+        </div>
+    </div>
+</body>
+</html>

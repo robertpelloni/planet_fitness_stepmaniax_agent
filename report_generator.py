@@ -24,7 +24,14 @@ def generate_report(unit_id):
         print(f"Error: Unit ID {unit_id} not found.")
         return
 
-    # 2. Prepare Data
+    # 2. Fetch Onboarding Data
+    cursor.execute("SELECT count(*) as total, SUM(CASE WHEN onboarding_status='Completed' THEN 1 ELSE 0 END) as completed FROM member WHERE club_id LIKE ?", (f"%{unit['location']}%",))
+    onboarding = cursor.fetchone()
+    total_onboarded = onboarding['total'] or 0
+    completed_onboarding = onboarding['completed'] or 0
+    conv_rate = (completed_onboarding / total_onboarded * 100) if total_onboarded > 0 else 0
+
+    # 3. Prepare Data
     report_data = {
         "[Date]": datetime.now().strftime("%Y-%m-%d"),
         "[Unit ID]": unit['equipment_name'],
@@ -32,7 +39,9 @@ def generate_report(unit_id):
         "[Uptime %]": f"{unit['uptime_percent']}%",
         "[Total Scans]": str(unit['total_scans']),
         "[Avg Session Duration]": f"{unit['avg_session_duration']} minutes",
-        "[Actual]": str(unit['total_scans'])
+        "[Actual]": str(unit['total_scans']),
+        "[Onboarding Conversion]": f"{conv_rate:.1f}%",
+        "[Total Registered Members]": str(total_onboarded)
     }
 
     # 3. Read Template

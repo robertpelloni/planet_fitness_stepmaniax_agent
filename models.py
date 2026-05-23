@@ -37,3 +37,11 @@ class MemberSchedule(db.Model):
     start_time = db.Column(db.String(50), nullable=False)
     duration_minutes = db.Column(db.Integer, default=10)
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'))
+
+class Member(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    onboarding_status = db.Column(db.String(50), default='Registered') # 'Registered', 'In Progress', 'Completed'
+    registration_date = db.Column(db.String(50), nullable=False)
+    club_id = db.Column(db.String(100)) # Linked to the Lead/Club location

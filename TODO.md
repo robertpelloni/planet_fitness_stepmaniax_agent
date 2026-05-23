@@ -29,3 +29,5 @@ Ordered by priority:
 25. [x] **Phase 1.1 (Alignment):** Consolidated official manufacturer specifications and integrated into dashboard.
 26. [x] **Phase 5.2 (Telemetry):** Implemented real-time Telemetry Ingestion API and automated health monitoring.
 27. [x] **Phase 4.2 (Automation):** Automated Pilot Performance Reporting and CRM status management via UI.
+28. [x] **Phase 6.1 (Member Lifecycle):** Implemented member onboarding portal and registration workflow.
+29. [x] **Phase 6.2 (Analytics):** Integrated onboarding conversion rates into ROI retention models.

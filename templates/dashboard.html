@@ -181,6 +181,30 @@
                 </table>
             </div>
 
+            <!-- Member Onboarding & Retention -->
+            <div class="card schedule-card">
+                <h3>Member Onboarding & Retention</h3>
+                <div style="display: flex; justify-content: space-around; padding: 1rem 0;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ onboarding_stats.get('Completed', 0) }}</div>
+                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Completed</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #007bff;">{{ onboarding_stats.get('Registered', 0) }}</div>
+                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Registered</div>
+                    </div>
+                    <div style="text-align: center;">
+                        {% set total = onboarding_stats.get('Completed', 0) + onboarding_stats.get('Registered', 0) %}
+                        {% set conv = (onboarding_stats.get('Completed', 0) / total * 100) if total > 0 else 0 %}
+                        <div style="font-size: 2rem; font-weight: bold; color: #17a2b8;">{{ conv | round(1) }}%</div>
+                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Conv Rate</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="{{ url_for('member_onboarding') }}" target="_blank" style="font-size: 0.85rem; color: #007bff; text-decoration: none; border: 1px solid #007bff; padding: 4px 12px; border-radius: 20px;">Open Member Portal &rarr;</a>
+                </div>
+            </div>
+
             <!-- Resources Card -->
             <div class="card">
                 <h3>Technical Resources</h3>
