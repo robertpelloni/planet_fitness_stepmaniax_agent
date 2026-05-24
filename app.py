@@ -681,7 +681,7 @@ def api_create_member():
     new_user = User(
         username=data['email'],
         role='Member',
-        franchise_id=data.get('franchise_id', current_user.franchise_id)
+        franchise_id=data.get('franchise_id', getattr(current_user, 'franchise_id', None))
     )
     new_user.set_password(data['password'])
     db.session.add(new_user)
@@ -757,6 +757,14 @@ def prospect_portal(token):
     Public but secure landing page for prospective franchise partners.
     """
     lead = Lead.query.filter_by(public_token=token).first_or_404()
+
+    # Increment view counter
+    if lead.portal_views is None: lead.portal_views = 0
+    lead.portal_views += 1
+    db.session.commit()
+
+    # Log engagement
+    log_security_event(None, f"Prospect Portal Viewed: {lead.company} (Token: {token})")
 
     # Calculate personalized metrics
     metrics = analytics.calculate_detailed_metrics(
@@ -896,7 +904,8 @@ def dashboard():
             'pilot_engagement': {
                 'member_count': member_count,
                 'total_points': total_points
-            }
+            },
+            'portal_views': lead.portal_views
         }
         lead.propensity_score = analytics.calculate_propensity_score(lead_dict)
 

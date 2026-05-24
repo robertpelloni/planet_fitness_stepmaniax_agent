@@ -96,6 +96,12 @@ def calculate_propensity_score(lead_data):
     if points > 1000: score += 10
     elif points > 100: score += 5
 
+    # 6. Intent Signal (v3.8.0)
+    views = lead_data.get('portal_views', 0)
+    if views > 10: score += 20
+    elif views > 5: score += 15
+    elif views > 0: score += 10
+
     # Cap at 100
     return min(100, score)
 

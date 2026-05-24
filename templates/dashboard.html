@@ -49,6 +49,7 @@
                         <thead>
                             <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
                                 <th class="px-6 py-4">Company / Group</th>
+                                <th class="px-6 py-4">Engagement</th>
                                 <th class="px-6 py-4">Propensity Score</th>
                                 <th class="px-6 py-4">Current Status</th>
                                 <th class="px-6 py-4 text-right">Actions</th>
@@ -66,6 +67,18 @@
                                             <p class="font-bold text-slate-800 text-sm">{{ lead.company }}</p>
                                             <p class="text-[10px] text-slate-400 font-medium uppercase">{{ lead.contact_name }} • {{ lead.region }}</p>
                                         </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-black text-slate-700">{{ lead.portal_views or 0 }}</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Views</span>
+                                        {% if lead.portal_views and lead.portal_views > 0 %}
+                                        <span class="flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-blue-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                        </span>
+                                        {% endif %}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">

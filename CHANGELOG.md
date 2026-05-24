@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.0] - Lead Engagement & Intent Tracking Milestone
+- **Engagement Analytics:** Implemented real-time tracking of Prospect Portal views with automated audit logging.
+- **Intent-Based Scoring:** Enhanced the `analytics.py` propensity algorithm to prioritize leads based on portal engagement levels.
+- **CRM Engagement Dashboard:** Integrated an 'Engagement' intelligence column into the main Admin Dashboard with live activity indicators.
+- **Audit Attribution:** Prospect engagement events are now attributed in the persistent security audit log.
+
 ## [3.7.0] - Predictive Maintenance Intelligence Milestone
 - **Predictive Health Engine:** Launched `calculate_predictive_health_score` in `analytics.py` to assess unit stability based on uptime, session intensity, and connectivity.
 - **Stability Monitoring:** Integrated real-time Predictive Health tracking into `health_monitor.py` for all equipment units.
