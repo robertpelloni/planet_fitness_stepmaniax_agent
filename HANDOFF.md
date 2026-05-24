@@ -1,32 +1,37 @@
-# Project Handoff - v3.3.0 Milestone
+# Project Handoff - v3.6.0 Milestone
 
 ## Session Summary
-This session successfully delivered the **Facility Operations & UI Standardization Milestone (v3.3.0)**. The platform has been transformed with a professional B2B design language and a dedicated "Live Ops" center for real-time equipment monitoring.
+This session successfully delivered the **Strategic Optimization & Security Hardening Milestone (v3.5.0 - v3.6.0)**. The platform now features enterprise-grade brute-force protection, persistent audit logging, and a strategic intelligence engine that identifies capacity constraints and lifecycle opportunities.
 
-## Key Accomplishments (v3.3.0)
-- **Facility Operations Center:** Launched `/staff/operations`, a high-visibility dashboard for club staff. It features real-time equipment status (Online/Offline) based on a 5-minute heartbeat threshold, today's reservation tracking, and an active incident monitor.
-- **Unified Design Language:** Standardized 10+ templates using a master `base.html` template and Tailwind CSS. This ensures a consistent, premium aesthetic across Admin, Staff, Member, and Prospect portals.
-- **Live Heartbeat Monitoring:** Implemented `last_heartbeat` tracking in the `EquipmentMetric` model. Telemetry ingestion now automatically updates this timestamp, providing instant visibility into unit connectivity.
-- **Enhanced Audit Trails:** Integrated `last_login` tracking for all users and refined the authentication UI to match the new B2B design standards.
-- **Responsive Navigation:** Added a global, role-based header system that adapts to the user's permissions (Admin, Staff, or Member).
+## Key Accomplishments
+- **Optimization Intelligence (v3.6.0):**
+    - **Optimization Dashboard:** Launched `/admin/optimization` featuring lifecycle KPIs (Avg Engagement, Onboarding Conversion) and automated optimization strategies.
+    - **Strategic Analytics:** Developed an engine in `analytics.py` that generates recommendations for secondary deployments, predictive maintenance, and engagement challenges based on session intensity.
+    - **Capacity Tracking:** Implemented visual capacity utilization bars with "Critical" red-level indicators for high-traffic units.
+- **Enterprise Security Hardening (v3.5.0):**
+    - **Brute-Force Protection:** Implemented automated account lockout after 5 consecutive failures.
+    - **Persistent Audit Logging:** Launched the `AuditLog` system to track security events (logins, lockouts, password changes) with IP attribution.
+    - **Secure Password Rotation:** Developed an interactive "Change Password" interface in Settings with current-password validation.
+    - **Multi-Tenant API Hardening:** Enforced strict `franchise_id` isolation on Member and Analytics REST APIs.
 
 ## Technical State & Changes
 - **Database Schema Updates:**
-  - `EquipmentMetric`: Added `last_heartbeat` (String).
-  - `User`: Added `last_login` (String).
-- **Core Templates:**
-  - `base.html`: The new master template containing the global header, footer, and Tailwind/HTMX/FontAwesome dependencies.
-  - `facility_ops.html`: The new operations center dashboard.
-- **Routing:**
-  - `/staff/operations`: Dedicated route for live club monitoring.
+    - `User`: Added `failed_login_attempts` (Int) and `is_locked` (Boolean).
+    - `AuditLog`: New model for persistent security tracking.
+    - `Member`: Enhanced with `engagement_score` (Float) and `points` (Int).
+- **Core Modules:**
+    - `analytics.py`: Enhanced with `generate_optimization_recommendations`.
+    - `app.py`: Integrated security lockout logic and optimization route.
+- **Templates:**
+    - `admin_optimization.html`: The new intelligence dashboard.
+    - `settings.html`: Updated with security logs and password rotation forms.
 
 ## Verification Status
-- **Automated Verification:** Verified via multiple Playwright scripts (`verify_heartbeat.py`, `verify_facility_ops.py`, `verify_ui.py`).
+- **Automated Verification:** Verified security hardening via `verify_security_hardening.py` and optimization dashboard via `verify_optimization_dashboard.py`.
 - **Visual Confirmation:**
-  - `facility_ops_verify.png`: Displays the new live status cards with "Offline" alerting.
-  - `v330_admin.png`, `v330_staff.png`, `v330_ops.png`: Confirm the successful UI unification across all portals.
+    - `v360_optimization_verify.png`: Confirms the rendering of strategic recommendations and capacity utilization metrics.
 
 ## Instructions for Successor
-1. **Heartbeat Maintenance:** The "Online" status is determined by a 5-minute (300s) threshold relative to the server time. Ensure equipment heartbeats are sent at least every 60-120 seconds.
-2. **UI Updates:** When adding new pages, always extend `base.html` and use Tailwind CSS for styling to maintain design consistency.
-3. **Next Focus:** The platform is now ready for **Phase 8.4 (Hourly Usage Distribution)** to provide staff with peak-hour staffing insights.
+1. **Security Lockout:** To unlock an account for testing, use `crm_tool.py` or manually update `is_locked=False` in `crm.db`.
+2. **Analytics Logic:** The "Capacity Warning" is triggered at 450+ sessions. Adjust this threshold in `analytics.py` if testing with smaller datasets.
+3. **Next Focus:** Transition to **Phase 8 (Scaling & Predictive Intelligence)**, specifically implementing a Predictive Maintenance score based on heartbeat gaps and usage intensity.

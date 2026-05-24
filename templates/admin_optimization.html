@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Optimization Intelligence - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Optimization Intelligence</h1>
+            <p class="text-slate-500 font-medium">Performance Metrics & Lifecycle Optimization</p>
+        </div>
+        <a href="{{ url_for('admin_command_center') }}" class="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Back to Command Center
+        </a>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pilot Members</p>
+            <p class="text-3xl font-black text-slate-800">{{ total_members }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Fleet Avg Engagement</p>
+            <p class="text-3xl font-black text-blue-600">{{ avg_engagement }}%</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Onboarding Conversion</p>
+            <p class="text-3xl font-black text-green-600">
+                {% set completed = onboarding_stats.get('Completed', 0) %}
+                {{ (completed / total_members * 100)|round(1) if total_members > 0 else 0 }}%
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Optimization Recommendations -->
+        <div class="bg-slate-900 rounded-3xl p-8 text-white">
+            <h3 class="font-black text-xs text-yellow-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb"></i> Optimization Strategies
+            </h3>
+            <div class="space-y-4">
+                {% for rec in recommendations %}
+                <div class="bg-white/5 border border-white/10 p-4 rounded-2xl flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-yellow-400/20 text-yellow-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid {{ 'fa-triangle-exclamation text-red-400' if 'Warning' in rec.type else 'fa-bolt' }} text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{{ rec.type }}</p>
+                        <p class="text-sm font-medium leading-relaxed">{{ rec.message }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-slate-500 italic text-sm">No critical optimizations identified at this time.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Performance Distribution -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-[0.2em] mb-6">Usage Intensity Distribution</h3>
+            <div class="space-y-6">
+                {% for unit in units %}
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-slate-700">{{ unit.equipment_name }}</span>
+                        <span class="text-xs font-black text-slate-400">{{ unit.total_sessions }} sessions</span>
+                    </div>
+                    <div class="h-4 bg-slate-100 rounded-full overflow-hidden">
+                        {% set session_limit = 500 %}
+                        {% set percent = [(unit.total_sessions / session_limit * 100), 100]|min %}
+                        <div class="h-full {{ 'bg-red-500' if percent > 90 else 'bg-blue-500' }}" style="width: {{ percent }}%;"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Capacity Utilization: {{ percent|round(1) }}%</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

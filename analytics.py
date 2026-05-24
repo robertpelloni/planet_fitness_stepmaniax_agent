@@ -98,3 +98,36 @@ def calculate_propensity_score(lead_data):
 
     # Cap at 100
     return min(100, score)
+
+def generate_optimization_recommendations(metrics_list):
+    """
+    Generates strategic optimization recommendations based on fleet performance.
+    Expects a list of dictionaries containing equipment metrics.
+    """
+    recommendations = []
+    for unit in metrics_list:
+        # 1. Capacity Constraints
+        if unit.get('total_sessions', 0) > 450:
+            recommendations.append({
+                "unit": unit.get('equipment_name'),
+                "type": "Capacity Warning",
+                "message": f"Unit at {unit.get('location')} is operating at >90% peak capacity. Secondary deployment recommended."
+            })
+
+        # 2. Maintenance Predictor
+        if unit.get('uptime_percent', 100) < 96:
+            recommendations.append({
+                "unit": unit.get('equipment_name'),
+                "type": "Health Warning",
+                "message": f"Uptime degradation detected for {unit.get('equipment_name')}. Schedule predictive maintenance."
+            })
+
+        # 3. Engagement Optimization
+        if unit.get('avg_session_duration', 0) < 8 and unit.get('total_sessions', 0) > 100:
+            recommendations.append({
+                "unit": unit.get('equipment_name'),
+                "type": "Engagement Opportunity",
+                "message": f"Low session duration at {unit.get('location')}. Consider adjusting difficulty or hosting a HIIT challenge."
+            })
+
+    return recommendations

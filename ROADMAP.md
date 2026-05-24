@@ -45,3 +45,9 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Operational Security Audit:** Integrated 'last_login' and 'last_heartbeat' persistent audit trails.
 - [x] **Advanced Usage Intelligence:** Deployed hourly peak-usage distribution models and member-engagement propensity scoring.
 - [x] **Security Hardening Milestone:** Implemented account lockout policies, persistent audit logging, and secure password rotation. (v3.5.0)
+- [x] **Strategic Optimization Milestone:** Deployed automated lifecycle recommendations and usage intensity tracking. (v3.6.0)
+
+## Phase 8: Scaling & Predictive Intelligence
+- [ ] **Predictive Maintenance Engine:** Transition from reactive alerts to ML-based failure prediction.
+- [ ] **Automated ROI Reporting for Leads:** Dynamic, self-service ROI dashboards for prospective franchisees.
+- [ ] **Regional Fleet Orchestration:** Centralized control for multi-club hardware deployment and rotation.

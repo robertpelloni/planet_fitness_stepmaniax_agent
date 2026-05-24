@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.0] - Optimization Intelligence & Strategic Analytics Milestone
+- **Strategic Optimization Engine:** Developed `generate_optimization_recommendations` in `analytics.py` to identify capacity constraints, uptime degradation, and engagement opportunities.
+- **Optimization Dashboard:** Launched `/admin/optimization` for Global Admins, featuring lifecycle KPIs and automated optimization strategies.
+- **Usage Intensity Tracking:** Implemented capacity utilization metrics with visual indicators for high-traffic units.
+- **Strategic KPI Grid:** Integrated fleet-avg engagement, onboarding conversion rates, and total pilot membership tracking.
+- **Data-Object Mapping:** Enhanced dashboard logic to bridge SQLAlchemy models with strategic analytical functions.
+
 ## [3.5.0] - Enterprise Security Hardening Milestone
 - **Brute-Force Protection:** Implemented automated account lockout after 5 consecutive failed login attempts.
 - **Persistent Audit Logging:** Launched a global `AuditLog` system to track security-sensitive events (logins, lockouts, password changes) with IP attribution.

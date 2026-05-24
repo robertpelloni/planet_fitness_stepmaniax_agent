@@ -7,6 +7,7 @@
 - **Multi-Tenant Security:** Implemented role-based access control (RBAC) and data isolation using `franchise_id` to support global admins and regional staff.
 - **Production-Ready Ingestion:** The telemetry API and health monitor utilize a high-concurrency Gunicorn/Systemd stack with background health daemons for 24/7 reliability.
 - **Enterprise Security Hardening:** Implemented automated brute-force protection (lockout after 5 failures) and persistent audit logging (`AuditLog` model) for all security-sensitive events.
+- **Optimization Intelligence:** Built a strategic recommendation engine that bridges raw telemetry with actionable B2B outcomes (e.g., secondary deployment triggers based on session intensity).
 
 ## Discovered Traits
 - **Franchise Site Autonomy:** Franchise Groups maintain independent web presences, which are rich sources of executive bios and operational regions often missing from corporate portals.

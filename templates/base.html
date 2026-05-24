@@ -31,6 +31,7 @@
 
                         {% if current_user.role == 'Admin' %}
                             <a href="{{ url_for('admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
+                            <a href="{{ url_for('admin_optimization') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Optimization</a>
                         {% endif %}
 
                         {% if current_user.role in ['Admin', 'Staff'] %}

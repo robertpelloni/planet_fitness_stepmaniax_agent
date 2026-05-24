@@ -767,6 +767,39 @@ def prospect_portal(token):
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
 
+@app.route('/admin/optimization')
+@login_required
+@role_required(['Admin'])
+def admin_optimization():
+    # Optimization & Performance Metrics
+    total_members = Member.query.count()
+    onboarding_funnel = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
+    onboarding_dict = {status: count for status, count in onboarding_funnel}
+
+    # Avg Engagement Score across fleet
+    avg_engagement = db.session.query(db.func.avg(Member.engagement_score)).scalar() or 0
+
+    # Optimization recommendations
+    units = EquipmentMetric.query.all()
+    # Convert SQLAlchemy objects to dicts for the analytics function
+    metrics_list = [
+        {
+            "equipment_name": u.equipment_name,
+            "location": u.location,
+            "uptime_percent": u.uptime_percent,
+            "total_sessions": u.total_sessions,
+            "avg_session_duration": u.avg_session_duration
+        } for u in units
+    ]
+    recommendations = analytics.generate_optimization_recommendations(metrics_list)
+
+    return render_template('admin_optimization.html',
+                           total_members=total_members,
+                           onboarding_stats=onboarding_dict,
+                           avg_engagement=round(avg_engagement * 100, 1),
+                           recommendations=recommendations,
+                           units=units)
+
 @app.route('/admin/command-center')
 @login_required
 @role_required(['Admin'])
