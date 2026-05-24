@@ -131,3 +131,36 @@ def generate_optimization_recommendations(metrics_list):
             })
 
     return recommendations
+
+def calculate_predictive_health_score(unit_data, recent_history=[]):
+    """
+    Calculates a predictive health score (0-100) based on uptime,
+    heartbeat stability, and recent session density.
+    """
+    score = unit_data.get('uptime_percent', 100.0)
+
+    # 1. Intensity Penalty (High volume increases wear)
+    total_sessions = unit_data.get('total_sessions', 0)
+    if total_sessions > 1000: score -= 10
+    elif total_sessions > 500: score -= 5
+
+    # 2. Stability Factor (Check for irregular heartbeat gaps in history)
+    # Mocking for now: if avg session duration is very low (< 3 mins),
+    # it might indicate hardware resets or crashes.
+    avg_duration = unit_data.get('avg_session_duration', 0)
+    if avg_duration < 3.0 and total_sessions > 50:
+        score -= 15
+
+    # 3. Connectivity Penalty (If heartbeat is old)
+    last_hb = unit_data.get('last_heartbeat')
+    if last_hb:
+        from datetime import datetime
+        try:
+            dt = datetime.strptime(last_hb, "%Y-%m-%d %H:%M:%S")
+            diff = (datetime.now() - dt).total_seconds()
+            if diff > 300: # > 5 mins
+                score -= 10
+        except:
+            pass
+
+    return max(0.0, min(100.0, score))

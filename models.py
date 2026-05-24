@@ -32,6 +32,7 @@ class EquipmentMetric(db.Model):
     total_sessions = db.Column(db.Integer, default=0)
     maintenance_status = db.Column(db.String(50), default='Operational') # 'Operational', 'Needs Maintenance'
     last_heartbeat = db.Column(db.String(50))
+    predictive_health_score = db.Column(db.Float, default=100.0)
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)

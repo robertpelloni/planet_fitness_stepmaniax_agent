@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime
+import analytics
 from notifications import send_notification
 from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
 
@@ -40,6 +41,11 @@ def monitor_health():
                 generate_alert(cursor, "Critical", f"UNIT OFFLINE: {unit['equipment_name']} at {unit['location']} has not reported a heartbeat for > 10 minutes.", unit['id'])
         else:
             generate_alert(cursor, "Warning", f"Heartbeat Missing: {unit['equipment_name']} at {unit['location']} has never reported a heartbeat.", unit['id'])
+
+        # E. Predictive Health Calculation (v3.7.0)
+        unit_data = dict(unit)
+        score = analytics.calculate_predictive_health_score(unit_data)
+        cursor.execute("UPDATE equipment_metric SET predictive_health_score = ? WHERE id = ?", (score, unit['id']))
 
     conn.commit()
     conn.close()

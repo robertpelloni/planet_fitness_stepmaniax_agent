@@ -16,14 +16,20 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mt-4">
+    <div class="grid grid-cols-3 gap-3 mt-4">
         <div class="bg-slate-50 p-3 rounded-lg">
             <p class="text-[10px] text-slate-400 uppercase font-bold">Total Scans</p>
-            <p class="text-xl font-black text-slate-700">{{ unit.total_scans }}</p>
+            <p class="text-lg font-black text-slate-700">{{ unit.total_scans }}</p>
         </div>
         <div class="bg-slate-50 p-3 rounded-lg">
             <p class="text-[10px] text-slate-400 uppercase font-bold">Uptime</p>
-            <p class="text-xl font-black text-slate-700">{{ unit.uptime_percent }}%</p>
+            <p class="text-lg font-black text-slate-700">{{ unit.uptime_percent|round(1) }}%</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg">
+            <p class="text-[10px] text-slate-400 uppercase font-bold">Stability</p>
+            <p class="text-lg font-black {{ 'text-blue-600' if unit.predictive_health_score > 90 else 'text-yellow-600' if unit.predictive_health_score > 75 else 'text-red-600' }}">
+                {{ unit.predictive_health_score|round(1) }}
+            </p>
         </div>
     </div>
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0] - Predictive Maintenance Intelligence Milestone
+- **Predictive Health Engine:** Launched `calculate_predictive_health_score` in `analytics.py` to assess unit stability based on uptime, session intensity, and connectivity.
+- **Stability Monitoring:** Integrated real-time Predictive Health tracking into `health_monitor.py` for all equipment units.
+- **Predictive Dashboards:** Updated the Global Command Center and Staff Facility Operations portals to visualize stability scores with visual risk indicators.
+- **Schema Expansion:** Added `predictive_health_score` to the `EquipmentMetric` model and database.
+
 ## [3.6.0] - Optimization Intelligence & Strategic Analytics Milestone
 - **Strategic Optimization Engine:** Developed `generate_optimization_recommendations` in `analytics.py` to identify capacity constraints, uptime degradation, and engagement opportunities.
 - **Optimization Dashboard:** Launched `/admin/optimization` for Global Admins, featuring lifecycle KPIs and automated optimization strategies.

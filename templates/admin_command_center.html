@@ -61,9 +61,17 @@
                         <p class="font-bold text-sm">{{ unit.equipment_name }}</p>
                         <p class="text-[10px] text-slate-500 uppercase font-bold">{{ unit.location }}</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xs font-black {{ 'text-green-500' if unit.uptime_percent > 95 else 'text-red-500' }}">{{ unit.uptime_percent }}%</p>
-                        <p class="text-[10px] text-slate-500 font-medium">Uptime</p>
+                    <div class="flex items-center gap-6 text-right">
+                        <div>
+                            <p class="text-xs font-black {{ 'text-blue-500' if unit.predictive_health_score > 90 else 'text-yellow-500' if unit.predictive_health_score > 75 else 'text-red-500' }}">
+                                {{ unit.predictive_health_score|round(1) }}
+                            </p>
+                            <p class="text-[10px] text-slate-500 font-medium">Stability</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black {{ 'text-green-500' if unit.uptime_percent > 95 else 'text-red-500' }}">{{ unit.uptime_percent }}%</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Uptime</p>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
