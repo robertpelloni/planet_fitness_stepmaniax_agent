@@ -231,6 +231,46 @@ def facility_operations():
                            schedules=schedules,
                            franchise_name=current_user.franchise_id or "Global Admin")
 
+@app.route('/manager/dashboard')
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def manager_dashboard():
+    """Manager-specific intelligence dashboard (v3.9.0)"""
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    # 1. Equipment Stability & Health
+    if is_admin:
+        units = EquipmentMetric.query.all()
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    # 2. Staff Schedule & Reservations
+    if is_admin:
+        schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).limit(20).all()
+    else:
+        metric_ids = [u.id for u in units]
+        schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+
+    # 3. Automation Efficiency
+    automation_status = AutomationHeartbeat.query.all()
+
+    # 4. Critical Alerts
+    if is_admin:
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(5).all()
+    else:
+        metric_ids = [u.id for u in units]
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
+
+    franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global Fleet"
+
+    return render_template('manager_dashboard.html',
+                           units=units,
+                           schedules=schedules,
+                           automation_status=automation_status,
+                           alerts=alerts,
+                           franchise_name=franchise_name)
+
 @app.route('/staff/dashboard')
 @login_required
 @role_required(['Admin', 'Staff'])

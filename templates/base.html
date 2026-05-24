@@ -26,7 +26,8 @@
                 <div class="hidden md:flex items-center space-x-6">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role in ['Admin', 'Franchisee'] %}
-                            <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Dashboard</a>
+                            <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Portfolio</a>
+                            <a href="{{ url_for('manager_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Manager Ops</a>
                         {% endif %}
 
                         {% if current_user.role == 'Admin' %}
@@ -79,7 +80,7 @@
 
     <footer class="mt-12 py-8 border-t border-slate-200 text-center">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-            StepManiaX B2B Management System v3.8.0 •
+            StepManiaX B2B Management System v3.9.0 •
             Last Login: {{ current_user.last_login if current_user.is_authenticated and current_user.last_login else 'N/A' }}
         </p>
     </footer>
