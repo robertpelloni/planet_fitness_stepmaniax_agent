@@ -85,5 +85,16 @@ def calculate_propensity_score(lead_data):
     if priority == 'High': score += 10
     elif priority == 'Low': score -= 10
 
+    # 5. Pilot Engagement Bonus (v3.4.0)
+    pilot_engagement = lead_data.get('pilot_engagement', {})
+    members = pilot_engagement.get('member_count', 0)
+    points = pilot_engagement.get('total_points', 0)
+
+    if members > 10: score += 10
+    elif members > 0: score += 5
+
+    if points > 1000: score += 10
+    elif points > 100: score += 5
+
     # Cap at 100
     return min(100, score)

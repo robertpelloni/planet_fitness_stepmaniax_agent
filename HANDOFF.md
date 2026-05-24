@@ -1,34 +1,32 @@
-# Project Handoff - v3.2.0 Milestone
+# Project Handoff - v3.3.0 Milestone
 
 ## Session Summary
-This session delivered the **Member Authentication and Engagement Module (v3.2.0)**. The platform now supports a full-circle member experience, from onboarding to active tracking and session management. Staff and Admins also gained advanced tools for member oversight and retention monitoring.
+This session successfully delivered the **Facility Operations & UI Standardization Milestone (v3.3.0)**. The platform has been transformed with a professional B2B design language and a dedicated "Live Ops" center for real-time equipment monitoring.
 
-## Key Accomplishments (v3.2.0)
-- **Member Dashboard & Booking:** Launched a dedicated portal for gym members. Features include a real-time "Pilot Stats" panel (Engagement Points & Retention Score), a session booking system, and a 7-day progress visualization using Chart.js.
-- **Automated Engagement Tracking:** Enhanced the telemetry engine to attribute equipment usage to individual members. The system now dynamically calculates an **Engagement Score** based on historical activity.
-- **Member Management UI:** Developed a new administrative interface for staff to manage the pilot participant pool, featuring engagement progress bars and status management.
-- **Multi-tenant Security:** Hardened data isolation across all new member routes, ensuring that franchisee staff can only access member data within their own organization.
-- **Data Model Evolution:** Upgraded the `Member`, `MemberSchedule`, and `TelemetryHistory` schemas to support relational engagement tracking and point accumulation.
+## Key Accomplishments (v3.3.0)
+- **Facility Operations Center:** Launched `/staff/operations`, a high-visibility dashboard for club staff. It features real-time equipment status (Online/Offline) based on a 5-minute heartbeat threshold, today's reservation tracking, and an active incident monitor.
+- **Unified Design Language:** Standardized 10+ templates using a master `base.html` template and Tailwind CSS. This ensures a consistent, premium aesthetic across Admin, Staff, Member, and Prospect portals.
+- **Live Heartbeat Monitoring:** Implemented `last_heartbeat` tracking in the `EquipmentMetric` model. Telemetry ingestion now automatically updates this timestamp, providing instant visibility into unit connectivity.
+- **Enhanced Audit Trails:** Integrated `last_login` tracking for all users and refined the authentication UI to match the new B2B design standards.
+- **Responsive Navigation:** Added a global, role-based header system that adapts to the user's permissions (Admin, Staff, or Member).
 
 ## Technical State & Changes
-- **Database Schema:**
-  - `Member`: Added `points`, `engagement_score`, and `user_id`.
-  - `MemberSchedule`: Linked to `Member` via `member_id` and added `status`.
-  - `TelemetryHistory`: Added `member_id` for activity attribution.
-- **API Enhancements:** The `/api/v1/telemetry` endpoint now accepts an optional `member_id` to trigger point awards and score recalculations.
-- **New Routes:**
-  - `/member/dashboard`: The primary interface for pilot participants.
-  - `/member/book`: Handles session reservations.
-  - `/staff/members`: Staff interface for member oversight.
+- **Database Schema Updates:**
+  - `EquipmentMetric`: Added `last_heartbeat` (String).
+  - `User`: Added `last_login` (String).
+- **Core Templates:**
+  - `base.html`: The new master template containing the global header, footer, and Tailwind/HTMX/FontAwesome dependencies.
+  - `facility_ops.html`: The new operations center dashboard.
+- **Routing:**
+  - `/staff/operations`: Dedicated route for live club monitoring.
 
 ## Verification Status
-- **Automated Verification:** Verified via Playwright (`verify_member_module.py`), confirming successful login, booking flow, and administrative management.
-- **Visual Evidence:**
-  - `member_dashboard.png`: Displays the member stats and booking UI.
-  - `member_booked.png`: Confirms successful session reservation.
-  - `admin_member_mgmt.png`: Shows the staff-facing member management table.
+- **Automated Verification:** Verified via multiple Playwright scripts (`verify_heartbeat.py`, `verify_facility_ops.py`, `verify_ui.py`).
+- **Visual Confirmation:**
+  - `facility_ops_verify.png`: Displays the new live status cards with "Offline" alerting.
+  - `v330_admin.png`, `v330_staff.png`, `v330_ops.png`: Confirm the successful UI unification across all portals.
 
 ## Instructions for Successor
-1. **Member Onboarding:** Direct members to `/onboard` to create their pilot accounts.
-2. **Activity Tracking:** Ensure StepManiaX units include the `member_id` in their telemetry POST packets to reward points.
-3. **Engagement Analysis:** Use the `/staff/members` page to identify high-engagement "super users" for case studies and retention modeling.
+1. **Heartbeat Maintenance:** The "Online" status is determined by a 5-minute (300s) threshold relative to the server time. Ensure equipment heartbeats are sent at least every 60-120 seconds.
+2. **UI Updates:** When adding new pages, always extend `base.html` and use Tailwind CSS for styling to maintain design consistency.
+3. **Next Focus:** The platform is now ready for **Phase 8.4 (Hourly Usage Distribution)** to provide staff with peak-hour staffing insights.

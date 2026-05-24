@@ -32,6 +32,15 @@ def monitor_health():
         if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
              generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
 
+        # D. Heartbeat / Offline Check (Critical if no heartbeat > 10 mins)
+        if unit['last_heartbeat']:
+            last_hb = datetime.strptime(unit['last_heartbeat'], "%Y-%m-%d %H:%M:%S")
+            diff = (datetime.now() - last_hb).total_seconds()
+            if diff > 600: # 10 minutes
+                generate_alert(cursor, "Critical", f"UNIT OFFLINE: {unit['equipment_name']} at {unit['location']} has not reported a heartbeat for > 10 minutes.", unit['id'])
+        else:
+            generate_alert(cursor, "Warning", f"Heartbeat Missing: {unit['equipment_name']} at {unit['location']} has never reported a heartbeat.", unit['id'])
+
     conn.commit()
     conn.close()
     print("Health Monitor check complete.")

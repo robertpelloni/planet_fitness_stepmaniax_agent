@@ -36,3 +36,8 @@ Ordered by priority:
 32. [x] **Phase 7.3 (Analytics):** Developed historical telemetry tracking and 7-day trend charts (v2.6.0).
 33. [x] **Phase 7.4 (Security):** Hardened REST APIs with API-Key authentication and RBAC audits (v2.7.0).
 34. [x] **Phase 7.5 (Deployment):** Orchestrated production deployment stack via Gunicorn and Systemd (v2.8.0).
+35. [x] **Phase 8.1 (Monitoring):** Implemented real-time heartbeat monitoring and 'last_heartbeat' tracking (v3.3.0).
+36. [x] **Phase 8.2 (UI/UX):** Unified platform design language with master base template and Tailwind CSS (v3.3.0).
+37. [x] **Phase 8.3 (Operations):** Launched Facility Operations Center for live club monitoring (v3.3.0).
+38. [ ] **Phase 8.4 (Analytics):** Implement Hourly Usage Distribution visualizations (v3.4.0).
+39. [ ] **Phase 8.5 (Intelligence):** Refine Lead Propensity to factor in real-time pilot engagement (v3.4.0).

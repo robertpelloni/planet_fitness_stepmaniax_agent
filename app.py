@@ -472,6 +472,42 @@ def settings():
 
     return render_template('settings.html', webhooks=webhooks, users=users)
 
+@app.route('/api/v1/analytics/hourly', methods=['GET'])
+@csrf.exempt
+@require_api_key
+def api_hourly_analytics():
+    """
+    Returns scan distribution by hour of day (0-23).
+    """
+    if current_user.is_authenticated:
+        franchise_id = current_user.franchise_id
+        is_admin = (current_user.role == 'Admin')
+    else:
+        franchise_id = request.args.get('franchise_id')
+        is_admin = not franchise_id
+
+    if is_admin:
+        metrics = EquipmentMetric.query.all()
+    else:
+        metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    metric_ids = [m.id for m in metrics]
+    history = TelemetryHistory.query.filter(TelemetryHistory.equipment_id.in_(metric_ids)).all()
+
+    hourly_distribution = {i: 0 for i in range(24)}
+    for entry in history:
+        # Expected format: "YYYY-MM-DD HH:MM:S"
+        try:
+            hour = int(entry.timestamp[11:13])
+            hourly_distribution[hour] += entry.scans_count
+        except (ValueError, IndexError):
+            continue
+
+    return {
+        "labels": [f"{h:02d}:00" for h in range(24)],
+        "data": [hourly_distribution[h] for h in range(24)]
+    }, 200
+
 @app.route('/api/v1/analytics/usage', methods=['GET'])
 @csrf.exempt
 @require_api_key
@@ -683,11 +719,19 @@ def dashboard():
             lead.public_token = secrets.token_urlsafe(16)
             updated = True
 
+        # Calculate real-time pilot engagement
+        member_count = Member.query.filter_by(franchise_id=lead.id).count()
+        total_points = db.session.query(db.func.sum(Member.points)).filter_by(franchise_id=lead.id).scalar() or 0
+
         lead_dict = {
             'num_clubs': lead.num_clubs,
             'region': lead.region,
             'status': lead.status,
-            'priority': lead.priority
+            'priority': lead.priority,
+            'pilot_engagement': {
+                'member_count': member_count,
+                'total_points': total_points
+            }
         }
         lead.propensity_score = analytics.calculate_propensity_score(lead_dict)
 

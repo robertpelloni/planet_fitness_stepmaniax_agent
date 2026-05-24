@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0] - Operational Intelligence & Analytics Milestone
+- **Hourly Peak-Usage Distribution:** Integrated a new bar chart into the Staff Dashboard to visualize club traffic patterns.
+- **Advanced Propensity Scoring:** Refined lead prioritization to factor in real-time pilot engagement (member counts and points).
+- **Proactive Offline Alerting:** Enhanced `health_monitor.py` to trigger 'Critical' alerts for equipment units offline for > 10 minutes.
+- **Hourly Analytics API:** Launched `/api/v1/analytics/hourly` for time-of-day usage aggregation.
+- **Governance Cleanup:** Synchronized all roadmap and handoff documentation with the v3.4.0 feature set.
+
 ## [3.3.0] - Facility Operations & Unified UI Milestone
 - **Facility Operations Center:** Launched a real-time monitoring dashboard (/staff/operations) for live equipment heartbeat tracking.
 - **Unified B2B Design Language:** Standardized the entire platform UI using a premium Tailwind-based design system and a master 'base.html' template.
