@@ -3,8 +3,9 @@ from flask import Flask, render_template, redirect, url_for, request, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog, AutomationHeartbeat
 from datetime import datetime
+import subprocess
 import config
 import analytics
 import secrets
@@ -43,10 +44,11 @@ def log_security_event(user_id, action):
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Support both X-API-KEY header and standard session auth (v3.9.0)
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-        if api_key and api_key == config.API_KEY:
+        if (api_key and api_key == config.API_KEY) or (current_user and current_user.is_authenticated):
             return f(*args, **kwargs)
-        return {"error": "Unauthorized access"}, 401
+        return {"error": "Unauthorized access. API-KEY or Session required."}, 401
     return decorated_function
 
 def role_required(roles):
@@ -808,10 +810,40 @@ def admin_optimization():
                            recommendations=recommendations,
                            units=units)
 
+@app.route('/admin/launch-campaign', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_launch_campaign():
+    """Triggers the autonomous sales pipeline (v3.9.0)"""
+    try:
+        # Run launch_campaign.sh in the background
+        subprocess.Popen(["bash", "launch_campaign.sh"],
+                         stdout=open("campaign_launch.log", "a"),
+                         stderr=subprocess.STDOUT)
+
+        # Log the event
+        audit = AuditLog(
+            user_id=current_user.id,
+            action="Campaign Launch Triggered: Autonomous sales pipeline (launch_campaign.sh) initiated via Command Center.",
+            ip_address=request.remote_addr,
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        db.session.add(audit)
+        db.session.commit()
+
+        flash("Autonomous Campaign Launch Sequence Initiated! Monitor logs for progress.", "success")
+    except Exception as e:
+        flash(f"Error launching campaign: {str(e)}", "danger")
+
+    return redirect(url_for('admin_command_center'))
+
 @app.route('/admin/command-center')
 @login_required
 @role_required(['Admin'])
 def admin_command_center():
+    # Automation Status (v3.9.0)
+    automation_status = AutomationHeartbeat.query.all()
+
     # Global Fleet Stats
     total_units = EquipmentMetric.query.count()
     active_alerts = Alert.query.filter_by(is_resolved=False).count()
@@ -835,7 +867,8 @@ def admin_command_center():
                            avg_uptime=round(avg_uptime, 1),
                            live_sessions=live_sessions,
                            metrics=metrics,
-                           alerts=alerts)
+                           alerts=alerts,
+                           automation_status=automation_status)
 
 @app.route('/dashboard')
 @login_required

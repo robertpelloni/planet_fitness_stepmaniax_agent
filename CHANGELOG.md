@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.0] - Autonomous Background Engine Milestone
+- **Centralized Background Orchestration:** Migrated lead follow-up logic into the unified `health_monitor.py` execution loop.
+- **Automation Heartbeat System:** Launched the `AutomationHeartbeat` model to track the health and last-run timestamps of all background tasks.
+- **Automation Health Dashboard:** Integrated an "Automation & Management Efficiency" control center into the Global Command Center with a one-click autonomous pipeline trigger.
+- **Autonomous Task Monitoring:** Standardized heartbeat updates for the Health Monitor, Lead Scraper, and Outreach Cadence engines.
+
 ## [3.8.0] - Lead Engagement & Intent Tracking Milestone
 - **Engagement Analytics:** Implemented real-time tracking of Prospect Portal views with automated audit logging.
 - **Intent-Based Scoring:** Enhanced the `analytics.py` propensity algorithm to prioritize leads based on portal engagement levels.

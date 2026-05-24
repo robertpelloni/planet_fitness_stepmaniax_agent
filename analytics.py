@@ -59,18 +59,18 @@ def calculate_propensity_score(lead_data):
     score = 50 # Base score
 
     # 1. Scale Multiplier (Bigger is better for regional expansion)
-    num_clubs = lead_data.get('num_clubs', 1)
+    num_clubs = lead_data.get('num_clubs') or 0
     if num_clubs > 100: score += 20
     elif num_clubs > 50: score += 15
     elif num_clubs > 20: score += 10
 
     # 2. Regional Priority (Michigan/Midwest)
-    region = lead_data.get('region', '').lower()
+    region = (lead_data.get('region') or '').lower()
     if 'michigan' in region or 'mi' == region: score += 15
     elif 'ohio' in region or 'midwest' in region: score += 10
 
     # 3. Status Bonus (Further down the funnel = higher propensity)
-    status = lead_data.get('status', 'Identified')
+    status = lead_data.get('status') or 'Identified'
     status_weights = {
         'Researching': 5,
         'Ready for Outreach': 10,
@@ -97,7 +97,7 @@ def calculate_propensity_score(lead_data):
     elif points > 100: score += 5
 
     # 6. Intent Signal (v3.8.0)
-    views = lead_data.get('portal_views', 0)
+    views = lead_data.get('portal_views') or 0
     if views > 10: score += 20
     elif views > 5: score += 15
     elif views > 0: score += 10

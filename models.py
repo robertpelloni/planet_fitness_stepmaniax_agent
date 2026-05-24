@@ -112,3 +112,9 @@ class AuditLog(db.Model):
     action = db.Column(db.String(250), nullable=False)
     ip_address = db.Column(db.String(50))
     timestamp = db.Column(db.String(50), nullable=False)
+
+class AutomationHeartbeat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_name = db.Column(db.String(100), unique=True, nullable=False)
+    last_run = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(50), default='Healthy')

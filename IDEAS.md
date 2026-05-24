@@ -9,6 +9,7 @@
 - **Automated LinkedIn Outreach:** Integrate with a headless browser to automate personalized connection requests using the `outreach-script.md` logic.
 - **Live ROI Dashboard for Leads:** Create a "public" (password-protected) version of the dashboard that a lead can visit to see live ROI projections based on their specific number of clubs.
 - **AI-Powered Lead Scoring:** Implement a machine learning model to rank leads based on group size, regional saturation, and past interaction sentiment.
+- **Autonomous Outreach Scaling:** Expand the `launch_campaign.sh` pipeline to target multi-region clusters simultaneously using distributed scrapers.
 
 ## Strategic Pivots
 - **Secondary Brands target:** Adapt the collateral for other "HVLP" (High Value Low Price) gym chains like Crunch Fitness or YouFit, using the same "Rogue Franchise" methodology.
