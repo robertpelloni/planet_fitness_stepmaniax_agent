@@ -106,13 +106,17 @@
 
     <!-- User Provisioning (Admin Only) -->
     <!-- Audit Logging (Admin Only) -->
-    {% if current_user.role == 'Admin' %}
     <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="md:col-span-1">
             <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Security Audit Log</h3>
             <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                Real-time tracking of security-sensitive events across the entire platform fleet.
+                Real-time tracking of security-sensitive events attributed to your account and fleet scope.
             </p>
+            {% if current_user.role == 'Admin' %}
+            <form action="{{ url_for('settings') }}" method="GET" class="mt-4">
+                <input type="text" name="q" placeholder="Filter actions..." class="w-full bg-slate-100 border-none rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500" value="{{ request.args.get('q', '') }}">
+            </form>
+            {% endif %}
         </div>
 
         <div class="md:col-span-2">
@@ -147,6 +151,7 @@
         </div>
     </div>
 
+    {% if current_user.role == 'Admin' %}
     <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="md:col-span-1">
             <h3 class="font-bold text-slate-800">User Management</h3>

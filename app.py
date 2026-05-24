@@ -153,9 +153,30 @@ def staff_api_maintenance():
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
     return render_template('partials/staff_maintenance.html', metrics=metrics)
 
+@app.route('/manager/api/activity')
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def manager_api_activity():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        units = EquipmentMetric.query.all()
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    metric_ids = [u.id for u in units]
+
+    activity = db.session.query(TelemetryHistory, Member.name)\
+        .outerjoin(Member, TelemetryHistory.member_id == Member.id)\
+        .filter(TelemetryHistory.equipment_id.in_(metric_ids))\
+        .order_by(TelemetryHistory.timestamp.desc()).limit(10).all()
+
+    return render_template('partials/manager_activity.html', activity=activity)
+
 @app.route('/staff/api/alerts')
 @login_required
-@role_required(['Admin', 'Staff'])
+@role_required(['Admin', 'Staff', 'Franchisee'])
 def staff_api_alerts():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
@@ -252,23 +273,43 @@ def manager_dashboard():
         metric_ids = [u.id for u in units]
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
 
-    # 3. Automation Efficiency
+    # 3. Live Activity Feed (Recent Scans)
+    if is_admin:
+        activity = db.session.query(TelemetryHistory, Member.name)\
+            .outerjoin(Member, TelemetryHistory.member_id == Member.id)\
+            .order_by(TelemetryHistory.timestamp.desc()).limit(10).all()
+    else:
+        metric_ids = [u.id for u in units]
+        activity = db.session.query(TelemetryHistory, Member.name)\
+            .outerjoin(Member, TelemetryHistory.member_id == Member.id)\
+            .filter(TelemetryHistory.equipment_id.in_(metric_ids))\
+            .order_by(TelemetryHistory.timestamp.desc()).limit(10).all()
+
+    # 4. Automation Efficiency
     automation_status = AutomationHeartbeat.query.all()
 
-    # 4. Critical Alerts
+    # 5. Critical Alerts
     if is_admin:
         alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(5).all()
     else:
         metric_ids = [u.id for u in units]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
 
+    # 6. Security & Access Audit
+    if is_admin:
+        security_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
+    else:
+        security_logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(5).all()
+
     franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global Fleet"
 
     return render_template('manager_dashboard.html',
                            units=units,
                            schedules=schedules,
+                           activity=activity,
                            automation_status=automation_status,
                            alerts=alerts,
+                           security_logs=security_logs,
                            franchise_name=franchise_name)
 
 @app.route('/staff/dashboard')
@@ -564,14 +605,20 @@ def settings():
 
         return redirect(url_for('settings'))
 
+    # Filtering for audit logs (v3.9.0)
+    search_query = request.args.get('q', '')
+
     if current_user.role == 'Admin':
         webhooks = Webhook.query.all()
         users = User.query.all()
-        audit_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(50).all()
+        audit_base = AuditLog.query
+        if search_query:
+            audit_base = audit_base.filter(AuditLog.action.contains(search_query))
+        audit_logs = audit_base.order_by(AuditLog.timestamp.desc()).limit(50).all()
     else:
         webhooks = Webhook.query.filter_by(franchise_id=current_user.franchise_id).all()
         users = []
-        audit_logs = []
+        audit_logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(10).all()
 
     return render_template('settings.html', webhooks=webhooks, users=users, audit_logs=audit_logs)
 
@@ -849,6 +896,22 @@ def admin_optimization():
                            avg_engagement=round(avg_engagement * 100, 1),
                            recommendations=recommendations,
                            units=units)
+
+@app.route('/admin/api/logs')
+@login_required
+@role_required(['Admin'])
+def admin_api_logs():
+    """Serves the latest system logs for real-time streaming (v3.9.0)"""
+    log_files = ['campaign_launch.log', 'server.log']
+    logs = []
+    for log_file in log_files:
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                # Get last 5 lines from each
+                lines = f.readlines()[-5:]
+                logs.extend([f"[{log_file}] {line.strip()}" for line in lines])
+
+    return "<br>".join(logs) if logs else "Waiting for system logs..."
 
 @app.route('/admin/launch-campaign', methods=['POST'])
 @login_required

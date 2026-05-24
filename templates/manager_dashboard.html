@@ -56,6 +56,18 @@
                     </div>
                     {% endfor %}
                 </div>
+                <div class="flex items-center gap-4 border-l border-slate-100 pl-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Access Audit</p>
+                        <div class="space-y-1">
+                            {% for log in security_logs %}
+                            <p class="text-[9px] font-medium text-slate-500 italic">
+                                {{ log.timestamp.split(' ')[1] }} - {{ log.action[:20] }}...
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -65,24 +77,28 @@
                 <h3 class="font-black text-xs uppercase tracking-widest">Operational Risks</h3>
                 <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
             </div>
-            <div class="divide-y divide-slate-100">
-                {% for alert in alerts %}
-                <div class="p-4 hover:bg-red-50 transition-colors">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-[10px] font-black text-red-500 uppercase tracking-widest">{{ alert.severity }}</span>
-                        <span class="text-[10px] text-slate-400 font-medium">{{ alert.timestamp }}</span>
-                    </div>
-                    <p class="text-xs font-bold text-slate-700 leading-tight">{{ alert.message }}</p>
-                </div>
-                {% else %}
-                <div class="p-12 text-center text-slate-400 italic text-xs">No active risks detected for this franchise.</div>
-                {% endfor %}
+            <div class="divide-y divide-slate-100" hx-get="{{ url_for('staff_api_alerts') }}" hx-trigger="every 30s">
+                {% include 'partials/staff_alerts.html' %}
             </div>
         </div>
     </div>
 
     <!-- Bottom Grid: Schedules & Automation -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Live Activity Feed -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Live Activity Feed</h3>
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+            </div>
+            <div class="divide-y divide-slate-100" hx-get="{{ url_for('manager_api_activity') }}" hx-trigger="every 10s">
+                {% include 'partials/manager_activity.html' %}
+            </div>
+        </div>
+
         <!-- Staff Schedule & Member Reservations -->
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -122,12 +138,12 @@
         </div>
 
         <!-- Automation Efficiency Heartbeats -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-3">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Management Efficiency</h3>
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Management Efficiency & Automation</h3>
                 <i class="fa-solid fa-microchip text-blue-500"></i>
             </div>
-            <div class="p-6 space-y-6">
+            <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-8">
                 {% for task in automation_status %}
                 <div class="flex items-center gap-4">
                     <div class="w-2 h-2 rounded-full {{ 'bg-green-500 animate-pulse' if task.status == 'Healthy' else 'bg-red-500' }}"></div>
@@ -139,10 +155,12 @@
                 {% else %}
                 <p class="text-xs text-slate-400 italic">Autonomous monitors active.</p>
                 {% endfor %}
-                <div class="pt-4 border-t border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Automated Optimization</p>
-                    <div class="flex items-center gap-2 text-xs font-black text-blue-600 italic">
-                        <i class="fa-solid fa-circle-check"></i> Lead Follow-up Engine Active
+                <div class="flex items-center gap-4 border-l border-slate-100 pl-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                        <div class="flex items-center gap-2 text-xs font-black text-blue-600 italic">
+                            <i class="fa-solid fa-circle-check"></i> Lead Engine Active
+                        </div>
                     </div>
                 </div>
             </div>
