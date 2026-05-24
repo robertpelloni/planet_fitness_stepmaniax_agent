@@ -108,14 +108,35 @@
                     <h3 class="font-black text-xs uppercase tracking-[0.2em]">Operational Alerts</h3>
                     <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
                 </div>
-                <div class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
+                <div class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                     {% for alert in alerts %}
-                    <div class="p-4 hover:bg-red-50 transition-colors">
+                    <div class="p-4 hover:bg-red-50 transition-colors" id="alert-{{ alert.id }}">
                         <div class="flex justify-between items-start mb-1">
                             <span class="text-[10px] font-black text-red-500 uppercase tracking-widest">{{ alert.severity }}</span>
                             <span class="text-[10px] text-slate-400 font-medium">{{ alert.timestamp }}</span>
                         </div>
-                        <p class="text-xs font-bold text-slate-700 leading-relaxed">{{ alert.message }}</p>
+                        <p class="text-xs font-bold text-slate-700 leading-relaxed mb-3">{{ alert.message }}</p>
+                        <div class="flex gap-2">
+                            {% if not alert.acknowledged_by %}
+                            <button hx-post="/api/v1/alerts/{{ alert.id }}/acknowledge"
+                                    hx-target="#alert-actions-{{ alert.id }}"
+                                    hx-swap="innerHTML"
+                                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded text-[10px] font-black uppercase transition-all">
+                                Ack
+                            </button>
+                            {% endif %}
+                            <div id="alert-actions-{{ alert.id }}" class="flex gap-2 items-center">
+                                {% if alert.acknowledged_by %}
+                                    <span class="text-[10px] font-bold text-blue-500 italic">Ack by {{ alert.acknowledged_by }}</span>
+                                {% endif %}
+                                <button hx-post="/api/v1/alerts/{{ alert.id }}/resolve"
+                                        hx-target="#alert-{{ alert.id }}"
+                                        hx-swap="outerHTML"
+                                        class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-[10px] font-black uppercase transition-all">
+                                    Resolve
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     {% else %}
                     <div class="p-12 text-center text-slate-400 italic text-xs font-medium">

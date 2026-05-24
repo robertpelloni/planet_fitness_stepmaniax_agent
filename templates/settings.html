@@ -5,7 +5,46 @@
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-8">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-black text-slate-800 tracking-tight">PLATFORM SETTINGS</h1>
+        <h1 class="text-2xl font-black text-slate-800 tracking-tight italic uppercase tracking-widest">Platform Settings</h1>
+    </div>
+
+    <!-- Security: Change Password -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-200">
+        <div class="md:col-span-1">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Security Credentials</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Maintain account security by rotating your access credentials regularly.
+            </p>
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="change_password"/>
+
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Password</label>
+                            <input type="password" name="current_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">New Password</label>
+                                <input type="password" name="new_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm New Password</label>
+                                <input type="password" name="confirm_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Webhooks Section -->
@@ -66,7 +105,48 @@
     </div>
 
     <!-- User Provisioning (Admin Only) -->
+    <!-- Audit Logging (Admin Only) -->
     {% if current_user.role == 'Admin' %}
+    <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Security Audit Log</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Real-time tracking of security-sensitive events across the entire platform fleet.
+            </p>
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr class="text-slate-400 font-black uppercase">
+                                <th class="px-4 py-3">Timestamp</th>
+                                <th class="px-4 py-3">User ID</th>
+                                <th class="px-4 py-3">Action</th>
+                                <th class="px-4 py-3">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {% for log in audit_logs %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-3 font-medium text-slate-500">{{ log.timestamp }}</td>
+                                <td class="px-4 py-3 font-bold text-slate-700">#{{ log.user_id }}</td>
+                                <td class="px-4 py-3 text-slate-600">{{ log.action }}</td>
+                                <td class="px-4 py-3 text-slate-400 font-mono">{{ log.ip_address }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">No audit records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="md:col-span-1">
             <h3 class="font-bold text-slate-800">User Management</h3>

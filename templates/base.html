@@ -6,6 +6,11 @@
     <title>{% block title %}StepManiaX B2B{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        document.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token() }}';
+        });
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     {% block extra_head %}{% endblock %}
 </head>
@@ -22,6 +27,10 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.role in ['Admin', 'Franchisee'] %}
                             <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Dashboard</a>
+                        {% endif %}
+
+                        {% if current_user.role == 'Admin' %}
+                            <a href="{{ url_for('admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
                         {% endif %}
 
                         {% if current_user.role in ['Admin', 'Staff'] %}

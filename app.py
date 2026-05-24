@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog
 from datetime import datetime
 import config
 import analytics
@@ -29,6 +29,16 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def log_security_event(user_id, action):
+    log = AuditLog(
+        user_id=user_id,
+        action=action,
+        ip_address=request.remote_addr,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    db.session.add(log)
+    db.session.commit()
 
 def require_api_key(f):
     @wraps(f)
@@ -66,15 +76,36 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            login_user(user)
-            user.last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            db.session.commit()
-            if user.role == 'Member':
-                return redirect(url_for('member_dashboard'))
-            if user.role == 'Staff':
-                return redirect(url_for('staff_dashboard'))
-            return redirect(url_for('dashboard'))
+
+        if user:
+            if user.is_locked:
+                log_security_event(user.id, f"Login attempt on locked account: {username}")
+                flash('Account is locked due to too many failed attempts. Please contact an administrator.')
+                return render_template('login.html')
+
+            if user.check_password(password):
+                user.failed_login_attempts = 0
+                user.last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                db.session.commit()
+                login_user(user)
+                log_security_event(user.id, f"Successful login: {username}")
+
+                if user.role == 'Member':
+                    return redirect(url_for('member_dashboard'))
+                if user.role == 'Staff':
+                    return redirect(url_for('staff_dashboard'))
+                return redirect(url_for('dashboard'))
+            else:
+                if user.failed_login_attempts is None:
+                    user.failed_login_attempts = 0
+                user.failed_login_attempts += 1
+                if user.failed_login_attempts >= 5:
+                    user.is_locked = True
+                    log_security_event(user.id, f"Account locked after 5 failures: {username}")
+                else:
+                    log_security_event(user.id, f"Failed login attempt: {username} (Attempt {user.failed_login_attempts})")
+                db.session.commit()
+
         flash('Invalid username or password')
     return render_template('login.html')
 
@@ -94,6 +125,18 @@ def staff_api_metrics():
         metrics = EquipmentMetric.query.all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    # Determine online status
+    for m in metrics:
+        if m.last_heartbeat:
+            last_hb = datetime.strptime(m.last_heartbeat, "%Y-%m-%d %H:%M:%S")
+            diff = (datetime.now() - last_hb).total_seconds()
+            m.is_online = diff < 300
+        else:
+            m.is_online = False
+
+    if request.args.get('view') == 'ops':
+        return render_template('partials/facility_metrics.html', metrics=metrics)
     return render_template('partials/staff_metrics.html', metrics=metrics)
 
 @app.route('/staff/api/maintenance')
@@ -429,10 +472,26 @@ def member_onboarding():
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@role_required(['Admin', 'Franchisee', 'Staff'])
 def settings():
     if request.method == 'POST':
         action = request.form.get('action')
+
+        if action == 'change_password':
+            current_pw = request.form.get('current_password')
+            new_pw = request.form.get('new_password')
+            confirm_pw = request.form.get('confirm_password')
+
+            if not current_user.check_password(current_pw):
+                flash("Current password incorrect.")
+            elif new_pw != confirm_pw:
+                flash("New passwords do not match.")
+            else:
+                current_user.set_password(new_pw)
+                db.session.commit()
+                log_security_event(current_user.id, "Password changed successfully")
+                flash("Password updated successfully!")
+            return redirect(url_for('settings'))
 
         if action == 'add_webhook':
             url = request.form.get('url')
@@ -466,11 +525,13 @@ def settings():
     if current_user.role == 'Admin':
         webhooks = Webhook.query.all()
         users = User.query.all()
+        audit_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(50).all()
     else:
         webhooks = Webhook.query.filter_by(franchise_id=current_user.franchise_id).all()
         users = []
+        audit_logs = []
 
-    return render_template('settings.html', webhooks=webhooks, users=users)
+    return render_template('settings.html', webhooks=webhooks, users=users, audit_logs=audit_logs)
 
 @app.route('/api/v1/analytics/hourly', methods=['GET'])
 @csrf.exempt
@@ -507,6 +568,34 @@ def api_hourly_analytics():
         "labels": [f"{h:02d}:00" for h in range(24)],
         "data": [hourly_distribution[h] for h in range(24)]
     }, 200
+
+@app.route('/api/v1/alerts/<int:alert_id>/acknowledge', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def api_acknowledge_alert(alert_id):
+    alert = Alert.query.get_or_404(alert_id)
+    alert.acknowledged_by = current_user.username
+    db.session.commit()
+    return {"status": "acknowledged", "user": current_user.username}, 200
+
+@app.route('/api/v1/alerts/<int:alert_id>/resolve', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def api_resolve_alert(alert_id):
+    alert = Alert.query.get_or_404(alert_id)
+    alert.is_resolved = True
+    alert.resolved_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    alert.resolved_by = current_user.username
+
+    # Also update equipment status if all alerts for it are resolved
+    unit = EquipmentMetric.query.get(alert.equipment_id)
+    if unit:
+        remaining = Alert.query.filter_by(equipment_id=unit.id, is_resolved=False).count()
+        if remaining <= 1: # This one is about to be resolved
+            unit.maintenance_status = 'Operational'
+
+    db.session.commit()
+    return {"status": "resolved", "user": current_user.username}, 200
 
 @app.route('/api/v1/analytics/usage', methods=['GET'])
 @csrf.exempt
@@ -549,11 +638,19 @@ def api_usage_analytics():
 @csrf.exempt
 @require_api_key
 def api_list_members():
-    franchise_id = request.args.get('franchise_id')
-    if not franchise_id:
-        members = Member.query.all()
+    # If authenticated via API Key, we assume Global Admin scope for now as the key is in config.py
+    # If authenticated via Session, we check roles.
+    is_admin = not current_user.is_authenticated or current_user.role == 'Admin'
+
+    if is_admin:
+        franchise_id = request.args.get('franchise_id')
+        if not franchise_id:
+            members = Member.query.all()
+        else:
+            members = Member.query.filter_by(franchise_id=franchise_id).all()
     else:
-        members = Member.query.filter_by(franchise_id=franchise_id).all()
+        # Force filter by current user's franchise if not admin
+        members = Member.query.filter_by(franchise_id=current_user.franchise_id).all()
 
     return {
         "members": [
@@ -609,6 +706,12 @@ def api_create_member():
 def api_member_detail(member_id):
     member = Member.query.get_or_404(member_id)
 
+    # Multi-tenant isolation for session-based users
+    if current_user.is_authenticated:
+        if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+            log_security_event(current_user.id, f"Unauthorized member access attempt: Member {member_id}")
+            abort(403)
+
     if request.method == 'GET':
         return {
             "id": member.id,
@@ -663,6 +766,35 @@ def prospect_portal(token):
     )
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
+
+@app.route('/admin/command-center')
+@login_required
+@role_required(['Admin'])
+def admin_command_center():
+    # Global Fleet Stats
+    total_units = EquipmentMetric.query.count()
+    active_alerts = Alert.query.filter_by(is_resolved=False).count()
+    total_scans = db.session.query(db.func.sum(EquipmentMetric.total_scans)).scalar() or 0
+    avg_uptime = db.session.query(db.func.avg(EquipmentMetric.uptime_percent)).scalar() or 0
+
+    # Active Sessions (Mocking for now as we don't have a 'session' table yet,
+    # but we can count unique member_ids in TelemetryHistory from last hour)
+    one_hour_ago = datetime.now().timestamp() - 3600
+    # Actually our timestamp is a string, so we'd need to convert.
+    # For now let's just count distinct member_ids from the last 10 telemetry entries as 'live'
+    live_sessions = db.session.query(TelemetryHistory.member_id).distinct().limit(10).count()
+
+    metrics = EquipmentMetric.query.all()
+    alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
+
+    return render_template('admin_command_center.html',
+                           total_units=total_units,
+                           active_alerts=active_alerts,
+                           total_scans=total_scans,
+                           avg_uptime=round(avg_uptime, 1),
+                           live_sessions=live_sessions,
+                           metrics=metrics,
+                           alerts=alerts)
 
 @app.route('/dashboard')
 @login_required

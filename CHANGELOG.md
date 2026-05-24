@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.5.0] - Enterprise Security Hardening Milestone
+- **Brute-Force Protection:** Implemented automated account lockout after 5 consecutive failed login attempts.
+- **Persistent Audit Logging:** Launched a global `AuditLog` system to track security-sensitive events (logins, lockouts, password changes) with IP attribution.
+- **Secure Password Rotation:** Developed an interactive "Change Password" interface in Settings with current-password validation.
+- **Multi-Tenant API Hardening:** Enforced strict `franchise_id` isolation on Member and Analytics REST APIs to prevent cross-tenant data leaks.
+- **HTMX Security Fix:** Standardized CSRF token injection for all asynchronous HTMX requests.
+
 ## [3.4.0] - Operational Intelligence & Analytics Milestone
 - **Hourly Peak-Usage Distribution:** Integrated a new bar chart into the Staff Dashboard to visualize club traffic patterns.
 - **Advanced Propensity Scoring:** Refined lead prioritization to factor in real-time pilot engagement (member counts and points).

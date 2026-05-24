@@ -6,6 +6,7 @@
 - **Centralized Analytics:** Financial modeling (ROI/LTV) is consolidated in `analytics.py` to ensure consistency across CLI tools, automated asset generation, and the web dashboard.
 - **Multi-Tenant Security:** Implemented role-based access control (RBAC) and data isolation using `franchise_id` to support global admins and regional staff.
 - **Production-Ready Ingestion:** The telemetry API and health monitor utilize a high-concurrency Gunicorn/Systemd stack with background health daemons for 24/7 reliability.
+- **Enterprise Security Hardening:** Implemented automated brute-force protection (lockout after 5 failures) and persistent audit logging (`AuditLog` model) for all security-sensitive events.
 
 ## Discovered Traits
 - **Franchise Site Autonomy:** Franchise Groups maintain independent web presences, which are rich sources of executive bios and operational regions often missing from corporate portals.
