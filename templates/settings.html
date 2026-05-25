@@ -200,15 +200,43 @@
                                 <tr class="text-slate-400 font-black uppercase">
                                     <th class="pb-2">User</th>
                                     <th class="pb-2">Role</th>
-                                    <th class="pb-2">Scope</th>
+                                    <th class="pb-2">Status</th>
+                                    <th class="pb-2">Last Login</th>
+                                    <th class="pb-2 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50">
                                 {% for user in users %}
                                 <tr>
-                                    <td class="py-2 font-bold text-slate-700">{{ user.username }}</td>
+                                    <td class="py-2">
+                                        <p class="font-bold text-slate-700">{{ user.username }}</p>
+                                        <p class="text-[10px] text-slate-400 uppercase">{{ user.franchise_id or 'Global' }}</p>
+                                    </td>
                                     <td class="py-2 text-slate-500">{{ user.role }}</td>
-                                    <td class="py-2 text-slate-400">{{ user.franchise_id or 'Global' }}</td>
+                                    <td class="py-2">
+                                        {% if user.is_locked %}
+                                            <span class="text-red-500 font-black uppercase text-[9px]">Locked</span>
+                                        {% else %}
+                                            <span class="text-green-500 font-black uppercase text-[9px]">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-2 text-slate-400 text-[10px]">{{ user.last_login or 'Never' }}</td>
+                                    <td class="py-2 text-right space-x-2">
+                                        {% if user.is_locked %}
+                                        <form action="{{ url_for('admin_unlock_user', user_id=user.id) }}" method="POST" class="inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="text-blue-500 hover:text-blue-700 font-black uppercase text-[9px]">Unlock</button>
+                                        </form>
+                                        {% endif %}
+                                        {% if user.id != current_user.id %}
+                                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this user permanently?')">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

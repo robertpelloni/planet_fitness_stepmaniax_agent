@@ -43,14 +43,36 @@ def log_security_event(user_id, action):
     db.session.commit()
 
 def require_api_key(f):
+    """Simple API Key or Session check for public/semi-public APIs."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Support both X-API-KEY header and standard session auth (v3.9.0)
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
         if (api_key and api_key == config.API_KEY) or (current_user and current_user.is_authenticated):
             return f(*args, **kwargs)
         return {"error": "Unauthorized access. API-KEY or Session required."}, 401
     return decorated_function
+
+def require_api_or_role(roles):
+    """Advanced decorator for v3.9.2 that handles API-Key (Global scope) or Role-Based session access."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # 1. Check for valid API Key (provides Global scope)
+            api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
+            if api_key and api_key == config.API_KEY:
+                return f(*args, **kwargs)
+
+            # 2. Check for Authenticated Session
+            if not current_user.is_authenticated:
+                return {"error": "Authentication required. API-KEY or Session."}, 401
+
+            # 3. Check Role restrictions
+            if current_user.role not in roles:
+                return {"error": "Insufficient permissions for this resource."}, 403
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def role_required(roles):
     def decorator(f):
@@ -87,10 +109,11 @@ def login():
                 return render_template('login.html')
 
             if user.check_password(password):
+                remember = True if request.form.get('remember') else False
                 user.failed_login_attempts = 0
                 user.last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 db.session.commit()
-                login_user(user)
+                login_user(user, remember=remember)
                 log_security_event(user.id, f"Successful login: {username}")
 
                 if user.role == 'Member':
@@ -465,7 +488,7 @@ def member_book_session():
 
 @app.route('/api/v1/payments', methods=['POST'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Member'])
 def api_process_payment():
     """Processes membership payments via configured gateway (v3.9.2)"""
     data = request.get_json()
@@ -635,6 +658,40 @@ def member_onboarding():
     leads = Lead.query.filter(Lead.status.contains('Pilot')).all()
     return render_template('onboarding_portal.html', leads=leads)
 
+@app.route('/admin/users/unlock/<int:user_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_unlock_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.is_locked = False
+    user.failed_login_attempts = 0
+    db.session.commit()
+    log_security_event(current_user.id, f"Unlocked user account: {user.username}")
+    flash(f"Account for {user.username} has been unlocked.")
+    return redirect(url_for('settings'))
+
+@app.route('/admin/users/delete/<int:user_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_delete_user(user_id):
+    if user_id == current_user.id:
+        flash("Cannot delete your own account.")
+        return redirect(url_for('settings'))
+
+    user = User.query.get_or_404(user_id)
+    username = user.username
+
+    # Also find associated member record if any
+    member = Member.query.filter_by(user_id=user.id).first()
+    if member:
+        db.session.delete(member)
+
+    db.session.delete(user)
+    db.session.commit()
+    log_security_event(current_user.id, f"Deleted user account: {username}")
+    flash(f"Account for {username} and associated member data deleted.")
+    return redirect(url_for('settings'))
+
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 @role_required(['Admin', 'Franchisee', 'Staff'])
@@ -706,7 +763,7 @@ def settings():
 
 @app.route('/api/v1/analytics/hourly', methods=['GET'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_hourly_analytics():
     """
     Returns scan distribution by hour of day (0-23).
@@ -770,7 +827,7 @@ def api_resolve_alert(alert_id):
 
 @app.route('/api/v1/analytics/usage', methods=['GET'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_usage_analytics():
     # If authenticated via session (e.g. from dashboard), use session context
     # Otherwise, require franchise_id as a parameter if not global
@@ -807,7 +864,7 @@ def api_usage_analytics():
 
 @app.route('/api/v1/members', methods=['GET'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_list_members():
     # If authenticated via API Key, we assume Global Admin scope for now as the key is in config.py
     # If authenticated via Session, we check roles.
@@ -838,7 +895,7 @@ def api_list_members():
 
 @app.route('/api/v1/members', methods=['POST'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Staff'])
 def api_create_member():
     data = request.get_json()
     if not data or 'email' not in data or 'name' not in data or 'password' not in data:
@@ -873,7 +930,7 @@ def api_create_member():
 
 @app.route('/api/v1/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 @csrf.exempt
-@require_api_key
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_member_detail(member_id):
     member = Member.query.get_or_404(member_id)
 
