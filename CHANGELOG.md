@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - Granular RBAC & Security Hardening Milestone
+- **Granular Permissions:** Implemented a sub-role permission system (`perm_crm_view`, `perm_revenue_view`, etc.) for fine-grained management control.
+- **Admin Permission UI:** Launched an interactive permission management interface in Settings for Administrators.
+- **Member Access Control:** Added the ability for Staff to lock/unlock member pilot accounts directly from the management view.
+- **Security Decorators:** Deployed a unified `require_api_or_role` decorator to standardize dual-mode authentication across the platform.
+
 ## [3.9.2] - Membership Commerce & Pilot Feedback Milestone
 - **Payment Gateway Integration:** Refactored payment handling into a standard Adapter pattern with a configurable provider.
 - **Membership Revenue Dashboard:** Integrated live payment tracking into the Manager and Member dashboards.

@@ -221,6 +221,27 @@
                                         {% endif %}
                                     </td>
                                     <td class="py-2 text-slate-400 text-[10px]">{{ user.last_login or 'Never' }}</td>
+                                    <td class="py-2">
+                                        {% if user.role != 'Admin' %}
+                                        <form action="{{ url_for('admin_update_permissions', user_id=user.id) }}" method="POST" class="flex flex-wrap gap-2">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
+                                                <input type="checkbox" name="perm_crm_view" {% if user.perm_crm_view %}checked{% endif %} onchange="this.form.submit()"> CRM
+                                            </label>
+                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
+                                                <input type="checkbox" name="perm_crm_edit" {% if user.perm_crm_edit %}checked{% endif %} onchange="this.form.submit()"> Edit
+                                            </label>
+                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
+                                                <input type="checkbox" name="perm_ops_view" {% if user.perm_ops_view %}checked{% endif %} onchange="this.form.submit()"> Ops
+                                            </label>
+                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
+                                                <input type="checkbox" name="perm_revenue_view" {% if user.perm_revenue_view %}checked{% endif %} onchange="this.form.submit()"> Rev
+                                            </label>
+                                        </form>
+                                        {% else %}
+                                        <span class="text-[9px] font-black text-blue-500 uppercase">All Access</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="py-2 text-right space-x-2">
                                         {% if user.is_locked %}
                                         <form action="{{ url_for('admin_unlock_user', user_id=user.id) }}" method="POST" class="inline">

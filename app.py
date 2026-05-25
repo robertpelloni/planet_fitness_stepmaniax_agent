@@ -32,6 +32,13 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.context_processor
+def inject_utils():
+    def user_is_locked(user_id):
+        u = User.query.get(user_id)
+        return u.is_locked if u else False
+    return dict(user_is_locked=user_is_locked)
+
 def log_security_event(user_id, action):
     log = AuditLog(
         user_id=user_id,
@@ -70,6 +77,25 @@ def require_api_or_role(roles):
             if current_user.role not in roles:
                 return {"error": "Insufficient permissions for this resource."}, 403
 
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def permission_required(permission_attr):
+    """Granular permission check (v4.0.0)"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return login_manager.unauthorized()
+
+            # Admins bypass granular checks
+            if current_user.role == 'Admin':
+                return f(*args, **kwargs)
+
+            if not getattr(current_user, permission_attr, False):
+                flash(f"Insufficient permissions: {permission_attr.replace('perm_', '').replace('_', ' ').title()}")
+                return redirect(url_for('index'))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -226,6 +252,26 @@ def staff_members():
 
     return render_template('staff_members.html', members=members)
 
+@app.route('/staff/members/lock/<int:member_id>', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_lock_member(member_id):
+    """Staff can lock/unlock member pilot access (v4.0.0)"""
+    member = Member.query.get_or_404(member_id)
+    # Check multi-tenant permission
+    if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+        abort(403)
+
+    user = User.query.get(member.user_id)
+    if user:
+        user.is_locked = not user.is_locked
+        db.session.commit()
+        action = "Locked" if user.is_locked else "Unlocked"
+        log_security_event(current_user.id, f"{action} member pilot access: {member.email}")
+        flash(f"Pilot access for {member.name} has been {action.lower()}.")
+
+    return redirect(url_for('staff_members'))
+
 @app.route('/staff/members/update/<int:member_id>', methods=['POST'])
 @login_required
 @role_required(['Admin', 'Staff'])
@@ -278,7 +324,7 @@ def facility_operations():
 
 @app.route('/manager/dashboard')
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@permission_required('perm_ops_view')
 def manager_dashboard():
     """Manager-specific intelligence dashboard (v3.9.0)"""
     franchise_id = current_user.franchise_id
@@ -599,7 +645,7 @@ def telemetry():
 
 @app.route('/update_lead_status', methods=['POST'])
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@permission_required('perm_crm_edit')
 def update_lead_status():
     lead_id = request.form.get('lead_id')
     new_status = request.form.get('status')
@@ -668,6 +714,23 @@ def admin_unlock_user(user_id):
     db.session.commit()
     log_security_event(current_user.id, f"Unlocked user account: {user.username}")
     flash(f"Account for {user.username} has been unlocked.")
+    return redirect(url_for('settings'))
+
+@app.route('/admin/users/update-permissions/<int:user_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_update_permissions(user_id):
+    """Updates granular permissions for a user (v4.0.0)"""
+    user = User.query.get_or_404(user_id)
+
+    user.perm_crm_view = True if request.form.get('perm_crm_view') else False
+    user.perm_crm_edit = True if request.form.get('perm_crm_edit') else False
+    user.perm_ops_view = True if request.form.get('perm_ops_view') else False
+    user.perm_revenue_view = True if request.form.get('perm_revenue_view') else False
+
+    db.session.commit()
+    log_security_event(current_user.id, f"Updated permissions for user: {user.username}")
+    flash(f"Permissions for {user.username} updated.")
     return redirect(url_for('settings'))
 
 @app.route('/admin/users/delete/<int:user_id>', methods=['POST'])
@@ -1158,7 +1221,7 @@ def admin_command_center():
 
 @app.route('/dashboard')
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@permission_required('perm_crm_view')
 def dashboard():
     # Multi-tenant logic: Filter by franchise_id if user is not an Admin
     franchise_id = current_user.franchise_id

@@ -14,6 +14,13 @@ class User(UserMixin, db.Model):
     failed_login_attempts = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
 
+    # Granular Permissions (v4.0.0)
+    perm_crm_view = db.Column(db.Boolean, default=True)
+    perm_crm_edit = db.Column(db.Boolean, default=False)
+    perm_ops_view = db.Column(db.Boolean, default=True)
+    perm_revenue_view = db.Column(db.Boolean, default=False)
+    perm_admin_access = db.Column(db.Boolean, default=False)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

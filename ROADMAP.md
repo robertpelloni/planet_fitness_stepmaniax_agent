@@ -50,6 +50,7 @@ This roadmap outlines the major long-term plans to successfully pitch and place 
 - [x] **Lead Engagement Milestone:** Deployed real-time intent tracking and engagement-based propensity scoring. (v3.8.0)
 - [x] **Autonomous Background Engine Milestone:** Launched centralized heartbeat monitoring and management efficiency dashboards. (v3.9.0)
 - [x] **Commerce & Sentiment Milestone:** Integrated automated payment gateways and pilot feedback dashboards. (v3.9.2)
+- [x] **Enterprise Security Milestone:** Launched granular RBAC and sub-role permission management. (v4.0.0)
 
 ## Phase 8: Scaling & Predictive Intelligence
 - [x] **Predictive Maintenance Engine:** Transition from reactive alerts to ML-based failure prediction.
