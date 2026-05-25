@@ -2,8 +2,9 @@ import sqlite3
 import argparse
 import sys
 from datetime import datetime
-from analytics import calculate_detailed_metrics
+from analytics import calculate_detailed_metrics, calculate_propensity_score
 from werkzeug.security import generate_password_hash
+import secrets
 
 DB_NAME = "crm.db"
 
@@ -12,19 +13,27 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def list_leads(priority=None):
+def list_leads(priority=None, scoring=False):
     conn = get_db()
     cursor = conn.cursor()
     if priority:
-        cursor.execute("SELECT id, company, contact_name, status, priority, follow_up_count FROM leads WHERE priority = ?", (priority,))
+        cursor.execute("SELECT * FROM leads WHERE priority = ?", (priority,))
     else:
-        cursor.execute("SELECT id, company, contact_name, status, priority, follow_up_count FROM leads")
+        cursor.execute("SELECT * FROM leads")
 
-    leads = cursor.fetchall()
-    print(f"{'ID':<10} | {'Company':<25} | {'Contact':<20} | {'Status':<20} | {'Prio':<6} | {'F/U'}")
-    print("-" * 105)
+    leads = [dict(row) for row in cursor.fetchall()]
+
+    if scoring:
+        for lead in leads:
+            lead['score'] = calculate_propensity_score(lead)
+        leads.sort(key=lambda x: x['score'], reverse=True)
+
+    print(f"{'ID':<10} | {'Company':<25} | {'Status':<20} | {'Prio':<6} | {'F/U':<3} | {'Score'}")
+    print("-" * 110)
     for lead in leads:
-        print(f"{lead['id']:<10} | {lead['company']:<25} | {lead['contact_name']:<20} | {lead['status']:<20} | {lead['priority']:<6} | {lead['follow_up_count']}")
+        score_str = f"{lead.get('score', 'N/A')}" if scoring else "-"
+        fu_count = lead.get('follow_up_count', 0) or 0
+        print(f"{lead['id']:<10} | {lead['company']:<25} | {lead['status']:<20} | {lead['priority']:<6} | {fu_count:<3} | {score_str}")
     conn.close()
 
 def update_status(lead_id, status):
@@ -120,6 +129,34 @@ def create_user(username, password, role='Franchisee', franchise_id=None):
     conn.commit()
     conn.close()
 
+def manage_tokens(lead_id=None):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if lead_id:
+        cursor.execute("SELECT id, company, public_token FROM leads WHERE id = ?", (lead_id,))
+        leads = cursor.fetchall()
+    else:
+        cursor.execute("SELECT id, company, public_token FROM leads")
+        leads = cursor.fetchall()
+
+    print(f"{'ID':<15} | {'Company':<25} | {'Public Token'}")
+    print("-" * 80)
+
+    updated_ids = []
+    for lead in leads:
+        token = lead['public_token']
+        if not token:
+            token = secrets.token_urlsafe(16)
+            cursor.execute("UPDATE leads SET public_token = ? WHERE id = ?", (token, lead['id']))
+            updated_ids.append(lead['id'])
+        print(f"{lead['id']:<15} | {lead['company']:<25} | {token}")
+
+    if updated_ids:
+        conn.commit()
+        print(f"\nSuccessfully generated tokens for {len(updated_ids)} leads.")
+    conn.close()
+
 def add_webhook(url, service='Discord', franchise_id=None):
     conn = get_db()
     cursor = conn.cursor()
@@ -138,6 +175,11 @@ def main():
     # List Leads
     list_parser = subparsers.add_parser("list", help="List all leads")
     list_parser.add_argument("--priority", help="Filter by priority (High, Medium, Low)")
+    list_parser.add_argument("--scoring", action="store_true", help="Sort and display by Propensity Score")
+
+    # Tokens
+    token_parser = subparsers.add_parser("tokens", help="Manage prospect access tokens")
+    token_parser.add_argument("--id", help="Lead ID (None for all)")
 
     # Update Status
     status_parser = subparsers.add_parser("status", help="Update lead status")
@@ -169,7 +211,9 @@ def main():
     args = parser.parse_args()
 
     if args.command == "list":
-        list_leads(args.priority)
+        list_leads(args.priority, args.scoring)
+    elif args.command == "tokens":
+        manage_tokens(args.id)
     elif args.command == "status":
         update_status(args.id, args.status)
     elif args.command == "log":

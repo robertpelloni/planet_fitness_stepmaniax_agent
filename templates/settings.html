@@ -1,141 +1,251 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Settings - StepManiaX B2B</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 2rem; max-width: 800px; margin: 0 auto; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #6c757d; margin-bottom: 2rem; }
-        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: bold; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 0.6rem; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { padding: 0.6rem 1.2rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #dee2e6; }
-        th { background-color: #f8f9fa; }
-        .back-link { display: inline-block; margin-bottom: 1rem; color: #007bff; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <div style="font-size: 1.25rem; font-weight: bold;">StepManiaX B2B Management Settings</div>
-        <div><a href="{{ url_for('dashboard') }}" style="color: white; text-decoration: none;">Dashboard</a></div>
+{% extends "base.html" %}
+
+{% block title %}Settings - StepManiaX B2B{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-black text-slate-800 tracking-tight italic uppercase tracking-widest">Platform Settings</h1>
     </div>
-    <div class="container">
-        <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div style="background-color: #d4edda; color: #155724; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #c3e6cb;">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <div class="card">
-            <h3>Add Notification Webhook</h3>
-            <p style="font-size: 0.85rem; color: #666;">Receive real-time alerts for equipment issues and member registrations.</p>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="action" value="add_webhook"/>
-                <div class="form-group">
-                    <label>Webhook URL</label>
-                    <input type="url" name="url" placeholder="https://discord.com/api/webhooks/..." required>
-                </div>
-                <div class="form-group">
-                    <label>Service</label>
-                    <select name="service">
-                        <option value="Discord">Discord</option>
-                        <option value="Slack">Slack</option>
-                    </select>
-                </div>
-                <button type="submit">Add Webhook</button>
-            </form>
+    <!-- Security: Change Password -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-200">
+        <div class="md:col-span-1">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Security Credentials</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Maintain account security by rotating your access credentials regularly.
+            </p>
         </div>
 
-        <div class="card">
-            <h3>Active Webhooks</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>URL</th>
-                        <th>Scope</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for hook in webhooks %}
-                    <tr>
-                        <td>{{ hook.service }}</td>
-                        <td style="font-size: 0.8rem; color: #666;">{{ hook.url[:50] }}...</td>
-                        <td>{{ 'Global' if not hook.franchise_id else hook.franchise_id }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: #999;">No active webhooks found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="change_password"/>
 
-        {% if current_user.role == 'Admin' %}
-        <div class="card" style="border-top-color: #dc3545;">
-            <h3>Provision New User</h3>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="action" value="create_user"/>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" required>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Password</label>
+                            <input type="password" name="current_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">New Password</label>
+                                <input type="password" name="new_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm New Password</label>
+                                <input type="password" name="confirm_password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select name="role">
-                            <option value="Franchisee">Franchisee</option>
-                            <option value="Staff">Staff</option>
-                            <option value="Admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Franchise ID (Optional)</label>
-                        <input type="text" name="franchise_id" placeholder="e.g. epic-detroit">
-                    </div>
-                </div>
-                <button type="submit" style="background-color: #dc3545;">Create User Account</button>
-            </form>
-
-            <h3 style="margin-top: 2rem;">Existing User Accounts</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Role</th>
-                        <th>Franchise ID</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.role }}</td>
-                        <td>{{ user.franchise_id or 'Global' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                        Update Password
+                    </button>
+                </form>
+            </div>
         </div>
-        {% endif %}
     </div>
-</body>
-</html>
+
+    <!-- Webhooks Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1">
+            <h3 class="font-bold text-slate-800">Notification Channels</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Connect external services like Discord or Slack to receive real-time operational alerts and registration notifications.
+            </p>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="add_webhook"/>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Service Type</label>
+                            <select name="service" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="Discord">Discord</option>
+                                <option value="Slack">Slack</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Webhook URL</label>
+                            <input type="url" name="url" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                        Register Webhook
+                    </button>
+                </form>
+
+                <div class="mt-8 border-t border-slate-100 pt-6">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Configured Integrations</h4>
+                    <div class="divide-y divide-slate-50">
+                        {% for hook in webhooks %}
+                        <div class="py-3 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <i class="fa-brands fa-{{ hook.service.lower() }}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-700">{{ hook.service }}</p>
+                                    <p class="text-[10px] text-slate-400 truncate w-48">{{ hook.url }}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-400 uppercase">{{ 'Global' if not hook.franchise_id else hook.franchise_id }}</span>
+                        </div>
+                        {% else %}
+                        <p class="text-xs text-slate-400 italic">No webhooks configured.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Provisioning (Admin Only) -->
+    <!-- Audit Logging (Admin Only) -->
+    <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Security Audit Log</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Real-time tracking of security-sensitive events attributed to your account and fleet scope.
+            </p>
+            {% if current_user.role == 'Admin' %}
+            <form action="{{ url_for('settings') }}" method="GET" class="mt-4">
+                <input type="text" name="q" placeholder="Filter actions..." class="w-full bg-slate-100 border-none rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500" value="{{ request.args.get('q', '') }}">
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr class="text-slate-400 font-black uppercase">
+                                <th class="px-4 py-3">Timestamp</th>
+                                <th class="px-4 py-3">User ID</th>
+                                <th class="px-4 py-3">Action</th>
+                                <th class="px-4 py-3">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {% for log in audit_logs %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-3 font-medium text-slate-500">{{ log.timestamp }}</td>
+                                <td class="px-4 py-3 font-bold text-slate-700">#{{ log.user_id }}</td>
+                                <td class="px-4 py-3 text-slate-600">{{ log.action }}</td>
+                                <td class="px-4 py-3 text-slate-400 font-mono">{{ log.ip_address }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">No audit records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.role == 'Admin' %}
+    <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1">
+            <h3 class="font-bold text-slate-800">User Management</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Provision new administrative, franchise, or staff accounts. Managed accounts inherit the global security policy.
+            </p>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="create_user"/>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Username</label>
+                            <input type="text" name="username" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                            <input type="password" name="password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</label>
+                            <select name="role" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                                <option value="Franchisee">Franchisee</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Franchise ID</label>
+                            <input type="text" name="franchise_id" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
+                        Provision Account
+                    </button>
+                </form>
+
+                <div class="mt-8 border-t border-slate-100 pt-6">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Existing Accounts</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-slate-400 font-black uppercase">
+                                    <th class="pb-2">User</th>
+                                    <th class="pb-2">Role</th>
+                                    <th class="pb-2">Status</th>
+                                    <th class="pb-2">Last Login</th>
+                                    <th class="pb-2 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for user in users %}
+                                <tr>
+                                    <td class="py-2">
+                                        <p class="font-bold text-slate-700">{{ user.username }}</p>
+                                        <p class="text-[10px] text-slate-400 uppercase">{{ user.franchise_id or 'Global' }}</p>
+                                    </td>
+                                    <td class="py-2 text-slate-500">{{ user.role }}</td>
+                                    <td class="py-2">
+                                        {% if user.is_locked %}
+                                            <span class="text-red-500 font-black uppercase text-[9px]">Locked</span>
+                                        {% else %}
+                                            <span class="text-green-500 font-black uppercase text-[9px]">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-2 text-slate-400 text-[10px]">{{ user.last_login or 'Never' }}</td>
+                                    <td class="py-2 text-right space-x-2">
+                                        {% if user.is_locked %}
+                                        <form action="{{ url_for('admin_unlock_user', user_id=user.id) }}" method="POST" class="inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="text-blue-500 hover:text-blue-700 font-black uppercase text-[9px]">Unlock</button>
+                                        </form>
+                                        {% endif %}
+                                        {% if user.id != current_user.id %}
+                                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this user permanently?')">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

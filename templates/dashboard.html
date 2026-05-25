@@ -1,296 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>StepManiaX - Agent Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 2rem; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #007bff; }
-        .card.alert-card { border-top-color: #dc3545; }
-        .card.schedule-card { border-top-color: #28a745; }
-        h3 { margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #dee2e6; }
-        th { background-color: #f8f9fa; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
-        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-        .status-ready { background-color: #d4edda; color: #155724; }
-        .status-active { background-color: #fff3cd; color: #856404; }
-        .severity-Critical { color: #dc3545; font-weight: bold; }
-        .severity-Warning { color: #ffc107; font-weight: bold; }
-        .severity-Info { color: #17a2b8; font-weight: bold; }
-        .uptime-good { color: #28a745; font-weight: bold; }
-        .btn-report { font-size: 0.75rem; background-color: #007bff; color: white; padding: 2px 6px; border-radius: 4px; text-decoration: none; }
-        .btn-report:hover { background-color: #0056b3; }
-        .chart-container { height: 300px; position: relative; }
-        .alert-item { padding: 0.75rem; border-bottom: 1px solid #f8d7da; background-color: #fff8f8; border-radius: 4px; margin-bottom: 0.5rem; }
-        .alert-item:last-child { border-bottom: none; }
-        .alert-meta { font-size: 0.75rem; color: #6c757d; margin-top: 0.25rem; }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <div style="font-size: 1.25rem; font-weight: bold;">
-            StepManiaX B2B Management Dashboard
-            <span style="font-size: 0.8rem; font-weight: normal; background: #555; padding: 2px 8px; border-radius: 10px; margin-left: 10px;">{{ franchise_name }}</span>
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic">COMMAND CENTER</h1>
+            <p class="text-slate-500 font-medium">Global Network Overview • {{ franchise_name }}</p>
         </div>
-        <div style="font-size: 0.9rem;">
-            Welcome, <strong>{{ current_user.username }}</strong> |
-            <a href="{{ url_for('settings') }}" style="color: #adb5bd; text-decoration: none; margin-right: 10px;">Settings</a> |
-            <a href="{{ url_for('logout') }}" style="color: #adb5bd; text-decoration: none; margin-left: 10px;">Logout</a>
+        <div class="flex gap-3">
+            {% if is_admin %}
+            <button class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New Lead
+            </button>
+            {% endif %}
+            <a href="{{ url_for('facility_operations') }}" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-signal text-yellow-400"></i> LIVE OPS
+            </a>
         </div>
     </div>
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div style="background-color: #d1ecf1; color: #0c5460; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #bee5eb;">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        <div class="dashboard-grid">
 
-            <!-- Real-time Usage Metrics -->
-            <div class="card">
-                <h3>Unit Engagement (Total Scans)</h3>
-                <div class="chart-container">
-                    <canvas id="usageChart"></canvas>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for status, count in crm_stats %}
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{{ status }}</p>
+            <p class="text-3xl font-black text-slate-800">{{ count }}</p>
+        </div>
+        {% endfor %}
+        <div class="bg-blue-600 p-6 rounded-2xl shadow-xl text-white">
+            <p class="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Equipment Uptime</p>
+            <p class="text-3xl font-black">98.2%</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Lead Portfolio (Left/Center) -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-black text-slate-800 italic uppercase tracking-wider">Lead Portfolio & Intelligence</h3>
+                    <span class="text-xs text-slate-400 font-bold">{{ leads_list|length }} TARGETS IDENTIFIED</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                                <th class="px-6 py-4">Company / Group</th>
+                                <th class="px-6 py-4">Engagement</th>
+                                <th class="px-6 py-4">Propensity Score</th>
+                                <th class="px-6 py-4">Current Status</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for lead in leads_list %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-400 text-xs">
+                                            {{ lead.id[:2] }}
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm">{{ lead.company }}</p>
+                                            <p class="text-[10px] text-slate-400 font-medium uppercase">{{ lead.contact_name }} • {{ lead.region }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-black text-slate-700">{{ lead.portal_views or 0 }}</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Views</span>
+                                        {% if lead.portal_views and lead.portal_views > 0 %}
+                                        <span class="flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-blue-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden w-24">
+                                            <div class="h-full bg-yellow-400" style="width: {{ lead.propensity_score }}%;"></div>
+                                        </div>
+                                        <span class="text-xs font-black text-slate-600">{{ lead.propensity_score }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider
+                                        {% if 'Pilot' in lead.status %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+                                        {{ lead.status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ url_for('prospect_portal', token=lead.public_token) }}" class="text-slate-400 hover:text-blue-500 transition-colors" title="View Portal">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                        <button class="text-slate-400 hover:text-slate-600 transition-colors" title="Edit Lead">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Historical Usage Trends -->
-            <div class="card">
-                <h3>Historical Usage Trends (7 Days)</h3>
-                <div class="chart-container">
-                    <canvas id="trendChart"></canvas>
+        <!-- Alerts & Metrics (Right) -->
+        <div class="space-y-8">
+            <!-- Active Alerts -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 bg-red-600 text-white flex justify-between items-center">
+                    <h3 class="font-black text-xs uppercase tracking-[0.2em]">Operational Alerts</h3>
+                    <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
                 </div>
-            </div>
-
-            <!-- System Alerts -->
-            <div class="card alert-card">
-                <h3>System Alerts & Health</h3>
-                <div id="alerts-list">
+                <div class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                     {% for alert in alerts %}
-                    <div class="alert-item">
-                        <span class="severity-{{ alert.severity }}">[{{ alert.severity }}]</span> {{ alert.message }}
-                        <div class="alert-meta">{{ alert.timestamp }}</div>
+                    <div class="p-4 hover:bg-red-50 transition-colors" id="alert-{{ alert.id }}">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-black text-red-500 uppercase tracking-widest">{{ alert.severity }}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">{{ alert.timestamp }}</span>
+                        </div>
+                        <p class="text-xs font-bold text-slate-700 leading-relaxed mb-3">{{ alert.message }}</p>
+                        <div class="flex gap-2">
+                            {% if not alert.acknowledged_by %}
+                            <button hx-post="/api/v1/alerts/{{ alert.id }}/acknowledge"
+                                    hx-target="#alert-actions-{{ alert.id }}"
+                                    hx-swap="innerHTML"
+                                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded text-[10px] font-black uppercase transition-all">
+                                Ack
+                            </button>
+                            {% endif %}
+                            <div id="alert-actions-{{ alert.id }}" class="flex gap-2 items-center">
+                                {% if alert.acknowledged_by %}
+                                    <span class="text-[10px] font-bold text-blue-500 italic">Ack by {{ alert.acknowledged_by }}</span>
+                                {% endif %}
+                                <button hx-post="/api/v1/alerts/{{ alert.id }}/resolve"
+                                        hx-target="#alert-{{ alert.id }}"
+                                        hx-swap="outerHTML"
+                                        class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-[10px] font-black uppercase transition-all">
+                                    Resolve
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     {% else %}
-                    <div style="text-align: center; color: #999; padding: 2rem;">All systems operational. No active alerts.</div>
+                    <div class="p-12 text-center text-slate-400 italic text-xs font-medium">
+                        No critical alerts detected.
+                    </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Member Booking Schedule -->
-            <div class="card schedule-card">
-                <h3>Member Booking Schedule</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>Start Time</th>
-                            <th>Duration</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for schedule in schedules %}
-                        <tr>
-                            <td>{{ schedule.member_name }}</td>
-                            <td>{{ schedule.start_time }}</td>
-                            <td>{{ schedule.duration_minutes }} min</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="3" style="text-align: center; color: #999;">No bookings scheduled for today.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Equipment Monitoring -->
-            <div class="card">
-                <h3>Equipment Monitoring (Live Pilots)</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Unit</th>
-                            <th>Uptime</th>
-                            <th>Scans</th>
-                            <th>Avg Sess</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for metric in metrics %}
-                        <tr>
-                            <td>{{ metric.equipment_name }} ({{ metric.location }})</td>
-                            <td><span class="uptime-good">{{ metric.uptime_percent }}%</span></td>
-                            <td>{{ metric.total_scans }}</td>
-                            <td>{{ metric.avg_session_duration }}m</td>
-                            <td>
-                                <a href="{{ url_for('generate_unit_report', unit_id=metric.id) }}" class="btn-report">Report</a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: #999;">No active pilots monitored.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- CRM Status Manager -->
-            <div class="card">
-                <h3>Sales Funnel Management {% if not is_admin %}({{ franchise_name }}){% endif %}</h3>
-                <form action="{{ url_for('update_lead_status') }}" method="POST" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: flex-end;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div style="flex-grow: 1;">
-                        <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 0.25rem;">Select Lead ID</label>
-                        <select name="lead_id" style="width: 100%; padding: 0.4rem; border-radius: 4px; border: 1px solid #ddd;">
-                            <!-- We'll need to pass the list of leads to the template to populate this -->
-                            {% for lead in leads_list %}
-                            <option value="{{ lead.id }}">{{ lead.company }} ({{ lead.id }})</option>
-                            {% endfor %}
-                        </select>
+            <!-- Equipment Quick View -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-black text-xs text-slate-400 uppercase tracking-[0.2em] mb-6">Unit Performance</h3>
+                <div class="space-y-6">
+                    {% for unit in metrics %}
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-700">{{ unit.equipment_name }}</span>
+                            <span class="text-[10px] font-black text-green-600">{{ unit.uptime_percent }}%</span>
+                        </div>
+                        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500" style="width: {{ unit.uptime_percent }}%;"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                            <span>Scans: {{ unit.total_scans }}</span>
+                            <span>{{ unit.maintenance_status }}</span>
+                        </div>
                     </div>
-                    <div style="flex-grow: 1;">
-                        <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 0.25rem;">New Status</label>
-                        <select name="status" style="width: 100%; padding: 0.4rem; border-radius: 4px; border: 1px solid #ddd;">
-                            <option value="Identified">Identified</option>
-                            <option value="Researching">Researching</option>
-                            <option value="Ready for Outreach">Ready for Outreach</option>
-                            <option value="Outreach Active">Outreach Active</option>
-                            <option value="Discovery Call Scheduled">Discovery Call Scheduled</option>
-                            <option value="Pilot MOU Signed">Pilot MOU Signed</option>
-                            <option value="Closed">Closed</option>
-                        </select>
-                    </div>
-                    <button type="submit" style="padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Update</button>
-                </form>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in crm_stats %}
-                        <tr>
-                            <td><span class="status-badge {% if row.status == 'Ready for Outreach' %}status-ready{% elif row.status == 'Outreach Active' %}status-active{% endif %}">{{ row.status }}</span></td>
-                            <td>{{ row.count }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Member Onboarding & Retention -->
-            <div class="card schedule-card">
-                <h3>Member Onboarding & Retention</h3>
-                <div style="display: flex; justify-content: space-around; padding: 1rem 0;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ onboarding_stats.get('Completed', 0) }}</div>
-                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Completed</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 2rem; font-weight: bold; color: #007bff;">{{ onboarding_stats.get('Registered', 0) }}</div>
-                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Registered</div>
-                    </div>
-                    <div style="text-align: center;">
-                        {% set total = onboarding_stats.get('Completed', 0) + onboarding_stats.get('Registered', 0) %}
-                        {% set conv = (onboarding_stats.get('Completed', 0) / total * 100) if total > 0 else 0 %}
-                        <div style="font-size: 2rem; font-weight: bold; color: #17a2b8;">{{ conv | round(1) }}%</div>
-                        <div style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Conv Rate</div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <a href="{{ url_for('member_onboarding') }}" target="_blank" style="font-size: 0.85rem; color: #007bff; text-decoration: none; border: 1px solid #007bff; padding: 4px 12px; border-radius: 20px;">Open Member Portal &rarr;</a>
+                    {% endfor %}
                 </div>
             </div>
-
-            <!-- Resources Card -->
-            <div class="card">
-                <h3>Technical Resources</h3>
-                <div style="font-size: 0.9rem; line-height: 1.6;">
-                    <strong>Manufacturer Specs:</strong>
-                    <ul style="margin: 0.5rem 0; padding-left: 1.2rem; color: #666;">
-                        <li>Footprint: Compact All-In-One</li>
-                        <li>Power: Standard 110v Outlet</li>
-                        <li>SLA: 48hr Service Guarantee</li>
-                    </ul>
-                    <a href="{{ url_for('serve_resources', filename='manufacturer-alignment.md') }}" style="color: #007bff; text-decoration: none; font-weight: bold;">View Alignment Docs &rarr;</a>
-                </div>
-            </div>
-
         </div>
     </div>
-
-    <script>
-        // 1. Current Engagement Chart
-        const ctx = document.getElementById('usageChart').getContext('2d');
-        const usageChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [{% for metric in metrics %}'{{ metric.location }}',{% endfor %}],
-                datasets: [{
-                    label: 'Total Scans (Engagement)',
-                    data: [{% for metric in metrics %}{{ metric.total_scans }},{% endfor %}],
-                    backgroundColor: 'rgba(0, 123, 255, 0.7)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Total Session Scans' }
-                    }
-                }
-            }
-        });
-
-        // 2. Historical Trend Chart
-        fetch('/api/v1/analytics/usage')
-            .then(response => response.json())
-            .then(data => {
-                const ctxTrend = document.getElementById('trendChart').getContext('2d');
-                new Chart(ctxTrend, {
-                    type: 'line',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Daily Session Scans',
-                            data: data.data,
-                            borderColor: 'rgba(40, 167, 69, 1)',
-                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Total Scans' }
-                            }
-                        }
-                    }
-                });
-            });
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,42 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>StepManiaX B2B Agent - Login</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
-        h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; color: #666; }
-        input { width: 100%; padding: 0.5rem; box-sizing: border-box; }
-        button { width: 100%; padding: 0.75rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .flash { color: red; text-align: center; margin-bottom: 1rem; }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <h2>B2B Agent Login</h2>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        <form method="POST">
+{% extends "base.html" %}
+
+{% block title %}Login - StepManiaX B2B{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-12">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 p-8 text-center">
+            <div class="inline-block bg-yellow-400 text-black px-3 py-1 rounded-md font-black text-2xl mb-4">SMX</div>
+            <h2 class="text-white text-2xl font-bold">Welcome Back</h2>
+            <p class="text-slate-400 text-sm mt-2 font-medium">B2B Management Platform</p>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" required>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest block">Username</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" name="username" required
+                        class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                        placeholder="your@email.com">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" required>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest block">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" name="password" required
+                        class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                        placeholder="••••••••">
+                </div>
             </div>
-            <button type="submit">Login</button>
+
+            <div class="flex items-center">
+                <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-yellow-400 focus:ring-yellow-400 border-slate-300 rounded">
+                <label for="remember" class="ml-2 block text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    Remember Me
+                </label>
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-yellow-400 hover:bg-yellow-500 text-black rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-sm">
+                Authorize Access
+            </button>
+
+            <div class="text-center">
+                <a href="{{ url_for('member_onboarding') }}" class="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+                    Register for Pilot →
+                </a>
+            </div>
         </form>
     </div>
-</body>
-</html>
+
+    <p class="mt-8 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] text-center">
+        Secured by StepManiaX Autonomous Engine
+    </p>
+</div>
+{% endblock %}

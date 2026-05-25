@@ -1,4 +1,4 @@
-import requests
+from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import csv
 import time
@@ -20,20 +20,22 @@ def scrape_leadership(group):
     """
     name = group['name']
     url = group['url']
-    print(f"--- Scraping {name} at {url} ---")
+    print(f"--- Scraping {name} via Playwright at {url} ---")
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-
+    page = browser.new_page()
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
+        page.goto(url, wait_until="load", timeout=30000)
+        # Scroll to ensure dynamic content loads
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(2)
+        content = page.content()
+    except Exception as e:
         print(f"Error fetching {url}: {e}")
         return []
+    finally:
+        page.close()
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(content, 'html.parser')
     leads = []
 
     # NFP Specific Parsing
@@ -70,27 +72,21 @@ def scrape_leadership(group):
     return leads
 
 def save_to_csv(leads, filename):
-    """
-    Saves the extracted leads to a CSV file.
-    """
     if not leads:
-        print("No leads found to save in this run.")
+        print("No leads found to save.")
         return
-
     keys = leads[0].keys()
-    try:
-        with open(filename, 'w', newline='', encoding='utf-8') as output_file:
-            dict_writer = csv.DictWriter(output_file, fieldnames=keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(leads)
-        print(f"Successfully saved leads to {filename}")
-    except IOError as e:
-        print(f"Error saving file: {e}")
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        writer.writerows(leads)
+    print(f"Saved {len(leads)} leads to {filename}")
 
 if __name__ == "__main__":
-    all_leads = []
-    for group in TARGET_GROUPS:
-        time.sleep(1) # Polite delay
-        all_leads.extend(scrape_leadership(group))
-
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        all_leads = []
+        for group in TARGET_GROUPS:
+            all_leads.extend(scrape_leadership_playwright(browser, group))
+        browser.close()
     save_to_csv(all_leads, OUTPUT_FILE)

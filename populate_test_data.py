@@ -39,13 +39,20 @@ def populate():
     ]
     cursor.executemany("INSERT INTO alert (severity, message, timestamp, is_resolved, equipment_id) VALUES (?, ?, ?, ?, ?)", alerts)
 
-    # 5. Members
+    # 5. Members and Member Users
     cursor.execute("DELETE FROM member")
+
+    # Member user for Flynn Group
+    flynn_member_user_id = 4
+    cursor.execute("INSERT INTO user (id, username, password_hash, role, franchise_id) VALUES (?, ?, ?, ?, ?)",
+                   (flynn_member_user_id, 'member@flynngroup.com', generate_password_hash('member123'), 'Member', 'FLY-002'))
+
     members = [
-        ('Alice Wonder', 'alice@example.com', 'Completed', '2026-05-10', 'EPIC-001', None),
-        ('Bob Builder', 'bob@example.com', 'Registered', '2026-05-15', 'EPIC-001', None)
+        ('Alice Wonder', 'alice@example.com', 'Completed', '2026-05-10', 'EPIC-001', None, 500, 0.8),
+        ('Bob Builder', 'bob@example.com', 'Registered', '2026-05-15', 'EPIC-001', None, 100, 0.2),
+        ('Flynn Member', 'member@flynngroup.com', 'Registered', '2026-05-20', 'FLY-002', flynn_member_user_id, 250, 0.5)
     ]
-    cursor.executemany("INSERT INTO member (name, email, onboarding_status, registration_date, franchise_id, user_id) VALUES (?, ?, ?, ?, ?, ?)", members)
+    cursor.executemany("INSERT INTO member (name, email, onboarding_status, registration_date, franchise_id, user_id, points, engagement_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", members)
 
     conn.commit()
     conn.close()

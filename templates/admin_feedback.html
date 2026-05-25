@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}User Feedback Dashboard - StepManiaX{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">User Feedback Dashboard</h1>
+            <p class="text-slate-500 font-medium">Monitoring Pilot Performance & Satisfaction</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600 text-white px-4 py-2 rounded-xl shadow-lg flex items-center gap-3">
+                <span class="text-sm font-black italic uppercase tracking-wider">Fleet Avg Rating: {{ "%.1f"|format(avg_rating) }}/5.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Category Distribution</h3>
+            <div class="h-64">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Rating Trends</h3>
+            <div class="h-64">
+                <canvas id="ratingTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback List -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+            <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Recent Pilot Feedback</h3>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ feedback_list|length }} SUBMISSIONS</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                        <th class="px-6 py-4">Timestamp</th>
+                        <th class="px-6 py-4">Member</th>
+                        <th class="px-6 py-4">Franchise</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Rating</th>
+                        <th class="px-6 py-4">Comment</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in feedback_list %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 text-xs font-medium text-slate-400">{{ item.timestamp }}</td>
+                        <td class="px-6 py-4">
+                            <p class="text-xs font-bold text-slate-700">{{ item.member_name }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-tighter">{{ item.company }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-slate-100 text-slate-600">{{ item.category }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex text-yellow-400 text-[10px]">
+                                {% for i in range(item.rating) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-600 leading-relaxed max-w-xs truncate" title="{{ item.comment }}">
+                            {{ item.comment }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 italic text-sm">No feedback submitted yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Category Chart
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ categories|tojson }},
+            datasets: [{
+                data: {{ category_counts|tojson }},
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }
+            }
+        }
+    });
+
+    // Rating Trend Chart (Simplified for now)
+    const trendCtx = document.getElementById('ratingTrendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_labels|tojson }},
+            datasets: [{
+                label: 'Avg Rating',
+                data: {{ trend_data|tojson }},
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { min: 1, max: 5, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+{% endblock %}

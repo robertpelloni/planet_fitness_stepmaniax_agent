@@ -1,6 +1,7 @@
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import analytics
 from notifications import send_notification
 from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
 
@@ -32,6 +33,31 @@ def monitor_health():
         if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
              generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
 
+        # D. Heartbeat / Offline Check (Critical if no heartbeat > 10 mins)
+        if unit['last_heartbeat']:
+            last_hb = datetime.strptime(unit['last_heartbeat'], "%Y-%m-%d %H:%M:%S")
+            diff = (datetime.now() - last_hb).total_seconds()
+            if diff > 600: # 10 minutes
+                generate_alert(cursor, "Critical", f"UNIT OFFLINE: {unit['equipment_name']} at {unit['location']} has not reported a heartbeat for > 10 minutes.", unit['id'])
+        else:
+            generate_alert(cursor, "Warning", f"Heartbeat Missing: {unit['equipment_name']} at {unit['location']} has never reported a heartbeat.", unit['id'])
+
+        # E. Predictive Health Calculation (v3.7.0)
+        unit_data = dict(unit)
+        score = analytics.calculate_predictive_health_score(unit_data)
+        cursor.execute("UPDATE equipment_metric SET predictive_health_score = ? WHERE id = ?", (score, unit['id']))
+
+    # 2. Lead Cadence Processing (v3.9.0)
+    process_cadence(cursor)
+
+    # 3. Automation Heartbeat (v3.9.0)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("""
+        INSERT INTO automation_heartbeat (task_name, last_run, status)
+        VALUES ('Health Monitor', ?, 'Healthy')
+        ON CONFLICT(task_name) DO UPDATE SET last_run=excluded.last_run, status='Healthy'
+    """, (timestamp,))
+
     conn.commit()
     conn.close()
     print("Health Monitor check complete.")
@@ -46,8 +72,8 @@ def generate_alert(cursor, severity, message, equipment_id):
         return
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-    cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved) VALUES (?, ?, ?, 0)",
-                   (severity, message, timestamp))
+    cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved, equipment_id) VALUES (?, ?, ?, 0, ?)",
+                   (severity, message, timestamp, equipment_id))
     print(f"Alert Generated: [{severity}] {message}")
 
     # Send Notification (Franchise filtering)
@@ -60,6 +86,24 @@ def generate_alert(cursor, severity, message, equipment_id):
     emoji = "⚠️" if severity == "Warning" else "🚨"
     with app.app_context():
         send_notification(f"{emoji} [{severity}] {message}", franchise_id=fid)
+
+def process_cadence(cursor):
+    """
+    Identifies leads due for follow-up and notifies the admin.
+    """
+    threshold_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+    query = """
+    SELECT id, company, follow_up_count FROM leads
+    WHERE status = 'Outreach Active' AND last_contact_date < ?
+    """
+    cursor.execute(query, (threshold_date,))
+    due_leads = cursor.fetchall()
+
+    for lead in due_leads:
+        msg = f"🔔 FOLLOW-UP DUE: {lead['company']} is ready for Cadence Touch #{lead['follow_up_count'] + 1}."
+        print(msg)
+        with app.app_context():
+            send_notification(msg)
 
 import time
 

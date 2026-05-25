@@ -10,6 +10,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee', 'Member', 'Staff'
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    last_login = db.Column(db.String(50))
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    is_locked = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -28,6 +31,8 @@ class EquipmentMetric(db.Model):
     avg_session_duration = db.Column(db.Float, default=0.0) # In minutes
     total_sessions = db.Column(db.Integer, default=0)
     maintenance_status = db.Column(db.String(50), default='Operational') # 'Operational', 'Needs Maintenance'
+    last_heartbeat = db.Column(db.String(50))
+    predictive_health_score = db.Column(db.Float, default=100.0)
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,14 +40,19 @@ class Alert(db.Model):
     message = db.Column(db.String(250), nullable=False)
     timestamp = db.Column(db.String(50), nullable=False)
     is_resolved = db.Column(db.Boolean, default=False)
+    acknowledged_by = db.Column(db.String(100))
+    resolved_at = db.Column(db.String(50))
+    resolved_by = db.Column(db.String(100))
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'), nullable=True)
 
 class MemberSchedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
     member_name = db.Column(db.String(100), nullable=False)
     start_time = db.Column(db.String(50), nullable=False)
     duration_minutes = db.Column(db.Integer, default=10)
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'))
+    status = db.Column(db.String(20), default='Scheduled') # 'Scheduled', 'Completed', 'No-show'
 
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,6 +62,8 @@ class Member(db.Model):
     onboarding_status = db.Column(db.String(50), default='Registered') # 'Registered', 'In Progress', 'Completed'
     registration_date = db.Column(db.String(50), nullable=False)
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    points = db.Column(db.Integer, default=0)
+    engagement_score = db.Column(db.Float, default=0.0)
 
 class Lead(db.Model):
     __tablename__ = 'leads'
@@ -70,6 +82,8 @@ class Lead(db.Model):
     projected_annual_profit = db.Column(db.Float)
     follow_up_count = db.Column(db.Integer, default=0)
     last_contact_date = db.Column(db.String(50))
+    public_token = db.Column(db.String(100), unique=True)
+    portal_views = db.Column(db.Integer, default=0)
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'
@@ -88,5 +102,37 @@ class Webhook(db.Model):
 class TelemetryHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'), nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
     timestamp = db.Column(db.String(50), nullable=False)
     scans_count = db.Column(db.Integer, default=0)
+
+class AuditLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    action = db.Column(db.String(250), nullable=False)
+    ip_address = db.Column(db.String(50))
+    timestamp = db.Column(db.String(50), nullable=False)
+
+class AutomationHeartbeat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_name = db.Column(db.String(100), unique=True, nullable=False)
+    last_run = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(50), default='Healthy')
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
+    franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    rating = db.Column(db.Integer, nullable=False) # 1-5 scale
+    comment = db.Column(db.Text)
+    category = db.Column(db.String(50), default='General') # 'Equipment', 'Support', 'Experience'
+    timestamp = db.Column(db.String(50), nullable=False)
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(10), default='USD')
+    status = db.Column(db.String(20), default='Pending') # 'Pending', 'Completed', 'Failed'
+    transaction_id = db.Column(db.String(100), unique=True)
+    timestamp = db.Column(db.String(50), nullable=False)
