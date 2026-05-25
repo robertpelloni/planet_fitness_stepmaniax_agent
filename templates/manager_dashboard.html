@@ -137,6 +137,27 @@
             </div>
         </div>
 
+        <!-- Revenue & Payments (v3.9.2) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Recent Revenue</h3>
+                <i class="fa-solid fa-money-bill-trend-up text-green-500"></i>
+            </div>
+            <div class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
+                {% for payment in recent_payments %}
+                <div class="p-4 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-700">${{ "%.2f"|format(payment.amount) }}</p>
+                        <p class="text-[9px] text-slate-400 font-medium uppercase">{{ payment.timestamp }}</p>
+                    </div>
+                    <span class="text-[10px] font-black text-slate-500">{{ payment.transaction_id[:10] }}...</span>
+                </div>
+                {% else %}
+                <div class="p-12 text-center text-slate-400 italic text-xs">Waiting for transactions...</div>
+                {% endfor %}
+            </div>
+        </div>
+
         <!-- Automation Efficiency Heartbeats -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-3">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">

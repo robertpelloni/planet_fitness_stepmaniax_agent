@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.2] - Membership Commerce & Pilot Feedback Milestone
+- **Payment Gateway Integration:** Refactored payment handling into a standard Adapter pattern with a configurable provider.
+- **Membership Revenue Dashboard:** Integrated live payment tracking into the Manager and Member dashboards.
+- **Feedback Collection System:** Launched a pilot feedback interface for gym members to submit ratings and comments.
+- **Sentiment Dashboard:** Developed the User Feedback Dashboard (`/admin/feedback`) featuring category distribution and rating trends.
+- **Sentiment-Driven Propensity:** Integrated feedback ratings into the analytical lead scoring engine in `analytics.py`.
+- **Production Hardening:** Defaulted application to production-safe debug settings and secured payment transaction flows.
+
 ## [3.9.1] - User Feedback & Sentiment Analytics Milestone
 - **Feedback Collection System:** Launched a pilot feedback interface for gym members to submit ratings and comments.
 - **Sentiment Dashboard:** Developed the User Feedback Dashboard (`/admin/feedback`) featuring category distribution and rating trends.

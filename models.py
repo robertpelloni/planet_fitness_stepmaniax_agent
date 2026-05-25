@@ -127,3 +127,12 @@ class Feedback(db.Model):
     comment = db.Column(db.Text)
     category = db.Column(db.String(50), default='General') # 'Equipment', 'Support', 'Experience'
     timestamp = db.Column(db.String(50), nullable=False)
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(10), default='USD')
+    status = db.Column(db.String(20), default='Pending') # 'Pending', 'Completed', 'Failed'
+    transaction_id = db.Column(db.String(100), unique=True)
+    timestamp = db.Column(db.String(50), nullable=False)

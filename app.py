@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog, AutomationHeartbeat, Feedback
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog, AutomationHeartbeat, Feedback, Payment
 from datetime import datetime
 import subprocess
 import config
@@ -11,6 +11,7 @@ import analytics
 import secrets
 from report_generator import generate_report
 from notifications import send_notification
+from gateways import get_payment_gateway
 
 app = Flask(__name__)
 # Secret key should be loaded from environment for production
@@ -295,7 +296,15 @@ def manager_dashboard():
         metric_ids = [u.id for u in units]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
 
-    # 6. Security & Access Audit
+    # 6. Revenue & Payments (v3.9.2)
+    if is_admin:
+        recent_payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
+    else:
+        # Get all members in this franchise
+        m_ids = [m.id for m in Member.query.filter_by(franchise_id=franchise_id).all()]
+        recent_payments = Payment.query.filter(Payment.member_id.in_(m_ids)).order_by(Payment.timestamp.desc()).all()
+
+    # 7. Security & Access Audit
     if is_admin:
         security_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
     else:
@@ -310,6 +319,7 @@ def manager_dashboard():
                            automation_status=automation_status,
                            alerts=alerts,
                            security_logs=security_logs,
+                           recent_payments=recent_payments,
                            franchise_name=franchise_name)
 
 @app.route('/staff/dashboard')
@@ -376,12 +386,16 @@ def member_dashboard():
     chart_labels = sorted_dates[-7:] # Last 7 days
     chart_data = [daily_stats[d] for d in chart_labels]
 
+    # Payments (v3.9.2)
+    payments = Payment.query.filter_by(member_id=member.id).order_by(Payment.timestamp.desc()).all()
+
     return render_template('member_dashboard.html',
                            member=member,
                            equipment=equipment,
                            upcoming_sessions=upcoming_sessions,
                            chart_labels=chart_labels,
-                           chart_data=chart_data)
+                           chart_data=chart_data,
+                           payments=payments)
 
 @app.route('/member/submit-feedback', methods=['POST'])
 @login_required
@@ -448,6 +462,44 @@ def member_book_session():
 
     flash(f"Session booked for {formatted_start}!")
     return redirect(url_for('member_dashboard'))
+
+@app.route('/api/v1/payments', methods=['POST'])
+@csrf.exempt
+@require_api_key
+def api_process_payment():
+    """Processes membership payments via configured gateway (v3.9.2)"""
+    data = request.get_json()
+    if not data or 'member_id' not in data or 'amount' not in data:
+        return {"error": "Invalid payment data"}, 400
+
+    member = Member.query.get(data['member_id'])
+    if not member:
+        return {"error": "Member not found"}, 404
+
+    # Utilize Gateway Adapter
+    gateway = get_payment_gateway(provider_type=os.environ.get('PAYMENT_PROVIDER', 'mock'))
+    result = gateway.process_charge(
+        amount=float(data['amount']),
+        currency=data.get('currency', 'USD'),
+        description=f"Membership Fee - Member {member.id}"
+    )
+
+    if result['status'] == 'success':
+        payment = Payment(
+            member_id=member.id,
+            amount=result['amount'],
+            currency=result['currency'],
+            status='Completed',
+            transaction_id=result['transaction_id'],
+            timestamp=result['timestamp']
+        )
+        db.session.add(payment)
+        db.session.commit()
+
+        log_security_event(None, f"Payment Processed: {result['transaction_id']} for Member {member.id}")
+        return {"status": "success", "transaction_id": result['transaction_id']}, 201
+    else:
+        return {"error": "Payment failed", "details": result.get('error')}, 400
 
 @app.route('/api/v1/telemetry', methods=['POST'])
 @csrf.exempt # Exempting for machine-to-machine API calls
@@ -1145,4 +1197,6 @@ def init_db():
     print(f"Database tables created in {db_path}.")
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Default to production-safe settings; use environment for debug
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, port=5000)
