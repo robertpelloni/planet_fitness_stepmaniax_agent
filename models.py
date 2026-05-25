@@ -118,3 +118,12 @@ class AutomationHeartbeat(db.Model):
     task_name = db.Column(db.String(100), unique=True, nullable=False)
     last_run = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), default='Healthy')
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
+    franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    rating = db.Column(db.Integer, nullable=False) # 1-5 scale
+    comment = db.Column(db.Text)
+    category = db.Column(db.String(50), default='General') # 'Equipment', 'Support', 'Experience'
+    timestamp = db.Column(db.String(50), nullable=False)

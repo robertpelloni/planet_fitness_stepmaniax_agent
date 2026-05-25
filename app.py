@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog, AutomationHeartbeat
+from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, Webhook, Lead, OutreachLog, TelemetryHistory, AuditLog, AutomationHeartbeat, Feedback
 from datetime import datetime
 import subprocess
 import config
@@ -382,6 +382,36 @@ def member_dashboard():
                            upcoming_sessions=upcoming_sessions,
                            chart_labels=chart_labels,
                            chart_data=chart_data)
+
+@app.route('/member/submit-feedback', methods=['POST'])
+@login_required
+def member_submit_feedback():
+    """Handles pilot feedback submissions (v3.9.1)"""
+    if current_user.role != 'Member':
+        abort(403)
+
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    rating = request.form.get('rating')
+    category = request.form.get('category')
+    comment = request.form.get('comment')
+
+    if not rating:
+        flash("Please provide a rating.")
+        return redirect(url_for('member_dashboard'))
+
+    feedback = Feedback(
+        member_id=member.id if member else None,
+        franchise_id=member.franchise_id if member else None,
+        rating=int(rating),
+        category=category,
+        comment=comment,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    db.session.add(feedback)
+    db.session.commit()
+
+    flash("Thank you for your feedback! It helps us improve the StepManiaX experience.")
+    return redirect(url_for('member_dashboard'))
 
 @app.route('/member/book', methods=['POST'])
 @login_required
@@ -864,6 +894,50 @@ def prospect_portal(token):
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
 
+@app.route('/admin/feedback')
+@login_required
+@role_required(['Admin'])
+def admin_feedback():
+    """Feedback Analytics Dashboard (v3.9.1)"""
+    feedback_raw = db.session.query(Feedback, Member.name, Lead.company)\
+        .outerjoin(Member, Feedback.member_id == Member.id)\
+        .outerjoin(Lead, Feedback.franchise_id == Lead.id)\
+        .order_by(Feedback.timestamp.desc()).all()
+
+    feedback_list = []
+    for f, m_name, company in feedback_raw:
+        feedback_list.append({
+            "timestamp": f.timestamp,
+            "member_name": m_name or "Anonymous",
+            "company": company or "Global",
+            "category": f.category,
+            "rating": f.rating,
+            "comment": f.comment
+        })
+
+    avg_rating = db.session.query(db.func.avg(Feedback.rating)).scalar() or 0
+
+    # Category distribution
+    cat_counts = db.session.query(Feedback.category, db.func.count(Feedback.id))\
+        .group_by(Feedback.category).all()
+    categories = [c[0] for c in cat_counts]
+    category_counts = [c[1] for c in cat_counts]
+
+    # Simple rating trend (by day)
+    trend_raw = db.session.query(db.func.substr(Feedback.timestamp, 1, 10), db.func.avg(Feedback.rating))\
+        .group_by(db.func.substr(Feedback.timestamp, 1, 10))\
+        .order_by(db.func.substr(Feedback.timestamp, 1, 10)).all()
+    trend_labels = [t[0] for t in trend_raw]
+    trend_data = [round(t[1], 1) for t in trend_raw]
+
+    return render_template('admin_feedback.html',
+                           feedback_list=feedback_list,
+                           avg_rating=avg_rating,
+                           categories=categories,
+                           category_counts=category_counts,
+                           trend_labels=trend_labels,
+                           trend_data=trend_data)
+
 @app.route('/admin/optimization')
 @login_required
 @role_required(['Admin'])
@@ -1031,6 +1105,7 @@ def dashboard():
         # Calculate real-time pilot engagement
         member_count = Member.query.filter_by(franchise_id=lead.id).count()
         total_points = db.session.query(db.func.sum(Member.points)).filter_by(franchise_id=lead.id).scalar() or 0
+        avg_feedback = db.session.query(db.func.avg(Feedback.rating)).filter_by(franchise_id=lead.id).scalar() or 5.0
 
         lead_dict = {
             'num_clubs': lead.num_clubs,
@@ -1041,7 +1116,8 @@ def dashboard():
                 'member_count': member_count,
                 'total_points': total_points
             },
-            'portal_views': lead.portal_views
+            'portal_views': lead.portal_views,
+            'avg_feedback_rating': avg_feedback
         }
         lead.propensity_score = analytics.calculate_propensity_score(lead_dict)
 

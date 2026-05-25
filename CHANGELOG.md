@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.1] - User Feedback & Sentiment Analytics Milestone
+- **Feedback Collection System:** Launched a pilot feedback interface for gym members to submit ratings and comments.
+- **Sentiment Dashboard:** Developed the User Feedback Dashboard (`/admin/feedback`) featuring category distribution and rating trends.
+- **Sentiment-Driven Propensity:** Integrated feedback ratings into the analytical lead scoring engine in `analytics.py`.
+- **Database Expansion:** Added the `Feedback` model to track member sentiment across all pilot locations.
+
 ## [3.9.0] - Autonomous Background Engine Milestone
 - **Centralized Background Orchestration:** Migrated lead follow-up logic into the unified `health_monitor.py` execution loop.
 - **Automation Heartbeat System:** Launched the `AutomationHeartbeat` model to track the health and last-run timestamps of all background tasks.

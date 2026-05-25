@@ -109,6 +109,45 @@
                 {% endfor %}
             </div>
         </div>
+
+        <!-- User Feedback (v3.9.1) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-comment-dots text-blue-500"></i>
+                Pilot Feedback
+            </h3>
+            <form action="{{ url_for('member_submit_feedback') }}" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rating</label>
+                        <select name="rating" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ - Very Good</option>
+                            <option value="3">⭐⭐⭐ - Satisfactory</option>
+                            <option value="2">⭐⭐ - Fair</option>
+                            <option value="1">⭐ - Poor</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</label>
+                        <select name="category" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="Equipment">Equipment Performance</option>
+                            <option value="Experience">Workout Experience</option>
+                            <option value="Support">Staff Support</option>
+                            <option value="General">General Feedback</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Your Comments</label>
+                    <textarea name="comment" rows="3" placeholder="How was your session today? Any suggestions for improvement?" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95">
+                    Submit Feedback
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

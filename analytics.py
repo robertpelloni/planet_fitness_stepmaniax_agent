@@ -102,6 +102,11 @@ def calculate_propensity_score(lead_data):
     elif views > 5: score += 15
     elif views > 0: score += 10
 
+    # 7. Sentiment Signal (v3.9.1)
+    avg_rating = lead_data.get('avg_feedback_rating', 5.0)
+    if avg_rating >= 4.5: score += 10
+    elif avg_rating < 3.0: score -= 15
+
     # Cap at 100
     return min(100, score)
 
