@@ -50,7 +50,11 @@ def monitor_health():
     # 2. Lead Cadence Processing (v3.9.0)
     process_cadence(cursor)
 
-    # 3. Automation Heartbeat (v3.9.0)
+    # 3. Database Backup (v4.4.0)
+    from backup_job import run_backup
+    run_backup()
+
+    # 4. Automation Heartbeat (v3.9.0)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute("""
         INSERT INTO automation_heartbeat (task_name, last_run, status)

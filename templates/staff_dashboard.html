@@ -69,21 +69,10 @@
         </div>
 
         <!-- Hourly Usage Distribution -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:col-span-2">
             <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Hourly Peak-Usage Distribution</h3>
-            <div class="h-48">
+            <div class="h-64">
                 <canvas id="hourlyUsageChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Live Activity Feed (Recent Scans) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Live Activity Feed</h3>
-                <span class="text-[10px] font-bold text-slate-400">REAL-TIME</span>
-            </div>
-            <div class="divide-y divide-slate-100 h-48 overflow-y-auto" hx-get="{{ url_for('staff.manager_api_activity') }}" hx-trigger="every 10s">
-                <div class="p-4 text-center text-slate-400 italic text-sm">Initializing feed...</div>
             </div>
         </div>
     </div>

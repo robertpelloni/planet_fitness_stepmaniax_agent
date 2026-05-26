@@ -90,10 +90,10 @@ def prospect_portal(token):
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
 
+# Standardized resource server for internal docs
 @app.route('/resources/<path:filename>')
 @login_required
 def serve_resources(filename):
-    # Standardized resource server for internal docs
     return send_from_directory('technical_docs', filename)
 
 # Database Initialization Command

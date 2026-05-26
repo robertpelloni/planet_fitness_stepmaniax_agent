@@ -1,12 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, send_from_directory
+from flask import Blueprint, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import login_required, current_user
-from models import db, User, EquipmentMetric, Alert, Member, Lead, TelemetryHistory, AutomationHeartbeat, Feedback
+from models import db, EquipmentMetric, Alert, Member, Lead, TelemetryHistory, AutomationHeartbeat, User, Feedback, Payment
 from blueprints.decorators import role_required, permission_required
 from report_generator import generate_report
 import analytics
 import secrets
 import subprocess
 import os
+from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -231,6 +232,7 @@ def admin_command_center():
 
     # Active Sessions (Mocking for now as we don't have a 'session' table yet,
     # but we can count unique member_ids in TelemetryHistory from last hour)
+    one_hour_ago = datetime.now().timestamp() - 3600
     # Actually our timestamp is a string, so we'd need to convert.
     # For now let's just count distinct member_ids from the last 10 telemetry entries as 'live'
     live_sessions = db.session.query(TelemetryHistory.member_id).distinct().limit(10).count()
@@ -250,7 +252,7 @@ def admin_command_center():
 
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@permission_required('perm_crm_edit')
 def update_lead_status():
     lead_id = request.form.get('lead_id')
     new_status = request.form.get('status')
@@ -300,6 +302,34 @@ def admin_delete_user(user_id):
     log_security_event(current_user.id, f"Deleted user account: {username}")
     flash(f"Account for {username} and associated member data deleted.")
     return redirect(url_for('auth.settings'))
+
+@admin_bp.route('/system-health')
+@login_required
+@role_required(['Admin'])
+def admin_system_health():
+    """System Health Monitoring Dashboard (v4.4.0)"""
+    automation_status = AutomationHeartbeat.query.all()
+    # Check for heartbeat gaps
+    health_reports = []
+    for task in automation_status:
+        last_run = datetime.strptime(task.last_run, "%Y-%m-%d %H:%M:%S")
+        gap_seconds = (datetime.now() - last_run).total_seconds()
+        status = "Healthy" if gap_seconds < 120 else "Delayed" if gap_seconds < 300 else "Critical Gap"
+        health_reports.append({
+            "task_name": task.task_name,
+            "last_run": task.last_run,
+            "status": status,
+            "gap_mins": round(gap_seconds / 60, 1)
+        })
+
+    # Check for recent backups
+    backups = []
+    if os.path.exists('backups'):
+        backups = sorted(os.listdir('backups'), reverse=True)[:5]
+
+    return render_template('admin_system_health.html',
+                           health_reports=health_reports,
+                           backups=backups)
 
 @admin_bp.route('/generate_report/<int:unit_id>')
 @login_required

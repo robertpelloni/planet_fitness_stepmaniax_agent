@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.4.0] - System Health & Data Integrity Milestone
+- **Automated Database Backups:** Implemented a robust timestamped backup system using the `sqlite3.backup` API, integrated into the core health monitoring loop.
+- **System Health Dashboard:** Launched the `/admin/system-health` portal for real-time monitoring of automation heartbeats and task latency.
+- **Data Integrity Verification:** Added automated integrity pulse checks to ensure background sales and monitoring tasks remain healthy.
+- **Architecture Refinement:** Completed the modular refactor by finalizing the migration of all monolithic routes into namespaced Flask Blueprints.
+
 ## [4.3.0] - Staff Operations & Real-time Metrics Milestone
 - **Full Blueprint Migration:** Modularized application logic into `auth`, `admin`, `staff`, `member`, and `api` blueprints for scalability.
 - **Real-time Staff Dashboard:** Enhanced staff portal with HTMX-powered usage metrics and asynchronous incident alerting.

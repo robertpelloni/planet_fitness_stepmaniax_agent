@@ -1,19 +1,20 @@
 # Memory
 
 ## Core Vision & Progress
-The repository is focused on the complete autonomous execution of a B2B sales pipeline for StepManiaX cardio units targeting Planet Fitness franchise groups.
+The repository is dedicated to the autonomous execution of a B2B sales pipeline for StepManiaX cardio units targeting Planet Fitness franchise groups.
 
-## Architectural Observations (v4.3.0)
-- **Blueprint Architecture:** The application has been fully refactored into modular Flask Blueprints (`auth`, `admin`, `staff`, `member`, `api`). This allows for clean separation of concerns and role-based data isolation.
-- **Namespaced Routing:** All templates and redirects now use namespaced endpoints (e.g., `staff.facility_operations`) instead of global names.
-- **HTMX Live Monitoring:** Real-time updates for equipment status, alerts, and member activity are powered by HTMX polling, providing staff with sub-minute visibility into club operations.
-- **RBAC & Multi-Tenancy:** Robust role-based access control is enforced at the blueprint and decorator level, ensuring strict data isolation between different franchise groups.
+## Architectural Observations (v4.4.0)
+- **Modular Blueprint Architecture:** The application logic is fully decoupled into `auth`, `admin`, `staff`, `member`, and `api` blueprints. This structure supports high maintainability and role-based data isolation.
+- **System Integrity (v4.4.0):** Database integrity is now secured via an automated, timestamped backup system (`backup_job.py`) using the `sqlite3.backup` API, integrated into the core monitoring loop.
+- **Heartbeat & Pulse Monitoring:** Background automation tasks (Lead Scraper, Health Monitor, Outreach Cadence) are monitored in real-time via the `AutomationHeartbeat` model and visualized in the System Health dashboard.
+- **Reactive Infrastructure:** HTMX is utilized for sub-minute UI updates across all operational dashboards, including live metrics and member activity feeds.
 
 ## Key Design Traits
-- **Lean Entry Point:** `app.py` serves as a minimal configuration and blueprint registration hub.
-- **Partial Template Architecture:** Metrics and feeds are organized into `templates/partials/` for high-frequency HTMX updates.
-- **Security-First:** Persistent audit logging and automated account lockout policies are standard across all portals.
+- **Namespaced Routing:** Strict enforcement of namespaced `url_for` calls (e.g., `staff.dashboard`) ensures correct endpoint resolution post-refactor.
+- **Hybrid Auth:** Concurrent support for session-based user authentication and machine-to-machine API-Key authorization.
+- **Financial Intelligence:** The `analytics.py` engine calculates LTV-based ROI, factoring in real-world member engagement and conversion metrics.
 
-## Future Milestones
-- ML-based failure prediction for equipment maintenance.
-- Automated generation of high-fidelity sales collateral based on real-time pilot engagement data.
+## Future Focus
+- Integration of ML-based hardware failure prediction.
+- Expansion of autonomous outreach with multi-channel CRM synchronization.
+- Automated generation of high-fidelity B2B marketing collateral.
