@@ -138,6 +138,7 @@
         </div>
 
         <!-- Revenue & Payments (v3.9.2) -->
+        {% if current_user.role == 'Admin' or current_user.perm_revenue_view %}
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Recent Revenue</h3>
@@ -157,6 +158,12 @@
                 {% endfor %}
             </div>
         </div>
+        {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center justify-center text-center opacity-50 grayscale">
+            <i class="fa-solid fa-lock text-3xl text-slate-300 mb-4"></i>
+            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Revenue Access Restricted</p>
+        </div>
+        {% endif %}
 
         <!-- Automation Efficiency Heartbeats -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-3">
