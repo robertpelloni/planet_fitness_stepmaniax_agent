@@ -1,0 +1,15 @@
+[Unit]
+Description=StepManiaX Background Health Monitor
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/smx-agent
+Environment="PATH=/opt/smx-agent/venv/bin"
+ExecStart=/opt/smx-agent/venv/bin/python3 health_monitor.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

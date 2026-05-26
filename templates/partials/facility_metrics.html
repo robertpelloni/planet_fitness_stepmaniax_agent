@@ -1,0 +1,41 @@
+{% for unit in metrics %}
+<div class="bg-white rounded-xl p-6 border-2 transition-all {{ 'online-glow border-green-500' if unit.is_online else 'offline-glow border-red-500' }}">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h3 class="text-lg font-bold text-slate-800">{{ unit.equipment_name }}</h3>
+            <p class="text-xs text-slate-500 uppercase tracking-widest">{{ unit.location }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ 'bg-green-400' if unit.is_online else 'bg-red-400' }} opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 {{ 'bg-green-500' if unit.is_online else 'bg-red-500' }}"></span>
+            </span>
+            <span class="text-xs font-bold {{ 'text-green-600' if unit.is_online else 'text-red-600' }}">
+                {{ 'LIVE' if unit.is_online else 'OFFLINE' }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3 mt-4">
+        <div class="bg-slate-50 p-3 rounded-lg">
+            <p class="text-[10px] text-slate-400 uppercase font-bold">Total Scans</p>
+            <p class="text-lg font-black text-slate-700">{{ unit.total_scans }}</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg">
+            <p class="text-[10px] text-slate-400 uppercase font-bold">Uptime</p>
+            <p class="text-lg font-black text-slate-700">{{ unit.uptime_percent|round(1) }}%</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg">
+            <p class="text-[10px] text-slate-400 uppercase font-bold">Stability</p>
+            <p class="text-lg font-black {{ 'text-blue-600' if unit.predictive_health_score > 90 else 'text-yellow-600' if unit.predictive_health_score > 75 else 'text-red-600' }}">
+                {{ unit.predictive_health_score|round(1) }}
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+        <span class="text-[10px] text-slate-400">Heartbeat: {{ unit.last_heartbeat if unit.last_heartbeat else 'Never' }}</span>
+        <span class="text-xs font-medium text-slate-600 italic">{{ unit.maintenance_status }}</span>
+    </div>
+</div>
+{% endfor %}

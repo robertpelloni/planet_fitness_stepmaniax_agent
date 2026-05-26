@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Pilot Onboarding - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-8">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-blue-600 p-10 text-center text-white">
+            <h2 class="text-3xl font-black italic tracking-tight">JOIN THE PILOT</h2>
+            <p class="text-blue-100 mt-2 font-medium">Interactive Cardio • Real-time Retention Tracking</p>
+        </div>
+
+        <form method="POST" class="p-10 space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Full Name</label>
+                    <input type="text" name="name" required placeholder="Member Name"
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Club Location</label>
+                    <select name="franchise_id" required
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm appearance-none">
+                        {% for lead in leads %}
+                        <option value="{{ lead.id }}">{{ lead.company }} ({{ lead.region }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Email Address</label>
+                <input type="email" name="email" required placeholder="name@email.com"
+                    class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Create Account Password</label>
+                <input type="password" name="password" required placeholder="••••••••"
+                    class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-sm">
+                    Activate Membership
+                </button>
+            </div>
+
+            <p class="text-center text-xs text-slate-400 leading-relaxed px-4">
+                By activating, you agree to participate in the StepManiaX 90-day pilot program for facility engagement analysis.
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

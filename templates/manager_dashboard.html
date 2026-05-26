@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Manager Intelligence</h1>
+            <p class="text-slate-500 font-medium">Franchise Operations Center • {{ franchise_name }}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url_for('staff.staff_dashboard') }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-desktop"></i> Staff View
+            </a>
+            <a href="{{ url_for('staff.facility_operations') }}" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-signal text-yellow-400"></i> LIVE OPS
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Grid: Stability & Alerts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Equipment Stability (Predictive Intelligence) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-bolt-lightning text-yellow-500"></i> Equipment Stability & Predictive Health
+                </h3>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stability Analysis</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for unit in units %}
+                    <div class="p-4 rounded-xl border border-slate-100 bg-white shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-black text-slate-800 uppercase tracking-tight">{{ unit.equipment_name }}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase italic">{{ unit.location }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-black {% if unit.predictive_health_score > 90 %}text-blue-600{% elif unit.predictive_health_score > 75 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                    {{ unit.predictive_health_score }}%
+                                </p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Stability Score</p>
+                            </div>
+                        </div>
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full {% if unit.predictive_health_score > 90 %}bg-blue-500{% elif unit.predictive_health_score > 75 %}bg-yellow-400{% else %}bg-red-600{% endif %}"
+                                 style="width: {{ unit.predictive_health_score }}%;"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                            <span class="text-slate-400">Uptime: <span class="text-slate-700">{{ unit.uptime_percent }}%</span></span>
+                            <span class="{% if unit.maintenance_status == 'Operational' %}text-green-600{% else %}text-red-500{% endif %}">{{ unit.maintenance_status }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex items-center gap-4 border-l border-slate-100 pl-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Access Audit</p>
+                        <div class="space-y-1">
+                            {% for log in security_logs %}
+                            <p class="text-[9px] font-medium text-slate-500 italic">
+                                {{ log.timestamp.split(' ')[1] }} - {{ log.action[:20] }}...
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Alerts -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 bg-red-600 text-white flex justify-between items-center">
+                <h3 class="font-black text-xs uppercase tracking-widest">Operational Risks</h3>
+                <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
+            </div>
+            <div class="divide-y divide-slate-100" hx-get="{{ url_for('staff.staff_api_alerts') }}" hx-trigger="every 30s">
+                {% include 'partials/staff_alerts.html' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Grid: Schedules & Automation -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Live Activity Feed -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Live Activity Feed</h3>
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+            </div>
+            <div class="divide-y divide-slate-100" hx-get="{{ url_for('staff.manager_api_activity') }}" hx-trigger="every 10s">
+                {% include 'partials/manager_activity.html' %}
+            </div>
+        </div>
+
+        <!-- Staff Schedule & Member Reservations -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Member Reservations & Staffing Demand</h3>
+                <span class="text-[10px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase">{{ schedules|length }} Active Bookings</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                            <th class="px-6 py-4">Time</th>
+                            <th class="px-6 py-4">Member</th>
+                            <th class="px-6 py-4">Equipment</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for booking in schedules %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-700">{{ booking.start_time }}</td>
+                            <td class="px-6 py-4 text-xs font-medium text-slate-600">{{ booking.member_name }}</td>
+                            <td class="px-6 py-4 text-xs text-slate-500">{{ booking.equipment_id }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-50 text-blue-600">
+                                    {{ booking.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 italic text-xs">No upcoming reservations.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Revenue & Payments (v3.9.2) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Recent Revenue</h3>
+                <i class="fa-solid fa-money-bill-trend-up text-green-500"></i>
+            </div>
+            <div class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
+                {% for payment in recent_payments %}
+                <div class="p-4 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-700">${{ "%.2f"|format(payment.amount) }}</p>
+                        <p class="text-[9px] text-slate-400 font-medium uppercase">{{ payment.timestamp }}</p>
+                    </div>
+                    <span class="text-[10px] font-black text-slate-500">{{ payment.transaction_id[:10] }}...</span>
+                </div>
+                {% else %}
+                <div class="p-12 text-center text-slate-400 italic text-xs">Waiting for transactions...</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Automation Efficiency Heartbeats -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-3">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Management Efficiency & Automation</h3>
+                <i class="fa-solid fa-microchip text-blue-500"></i>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+                {% for task in automation_status %}
+                <div class="flex items-center gap-4">
+                    <div class="w-2 h-2 rounded-full {{ 'bg-green-500 animate-pulse' if task.status == 'Healthy' else 'bg-red-500' }}"></div>
+                    <div>
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-tight">{{ task.task_name }}</p>
+                        <p class="text-[10px] text-slate-400 font-medium italic">Last Pulse: {{ task.last_run }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 italic">Autonomous monitors active.</p>
+                {% endfor %}
+                <div class="flex items-center gap-4 border-l border-slate-100 pl-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                        <div class="flex items-center gap-2 text-xs font-black text-blue-600 italic">
+                            <i class="fa-solid fa-circle-check"></i> Lead Engine Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

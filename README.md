@@ -6,20 +6,26 @@ This repository serves as a hybrid **B2B sales workspace and automated data-gath
 
 The overarching strategy relies on the **"Rogue Franchise Loophole"**: bypassing the rigid, exclusive corporate procurement contracts of Planet Fitness by directly targeting regional Franchise Group owners who possess local operational leeway. The core offering is a **Zero-Risk Pilot Framework**—a 90-day, $0 hardware lease trial designed to track member retention and serve as a trigger for larger commercial contracts.
 
-To execute this, the project architecture is split into two components:
+To execute this, the project architecture is split into three components:
 1. **Markdown Sales Collateral:** Professionally formatted, strictly corporate-toned B2B assets (pitch decks, outreach emails, MOUs) ready for dispatch.
 2. **Python Lead Generation:** Automated scripting frameworks to scrape B2B directories and identify high-value regional targets.
+3. **Sales Automation & Analytics:** Tools to model ROI (`roi_calculator.py`) and generate personalized outreach assets (`generate_personalized_assets.py`) dynamically from CRM data.
 
 *All generated content rigorously adheres to a strict corporate fitness tone. Words like "arcade" or "gamer" are banned in favor of "Next-Generation Gamified HIIT" and "Member Retention."*
 
-## Automated Pipeline Execution
+## Autonomous Agent Workflow: How to Use
 
-To accelerate Phase 2 (Lead Generation), this repository includes an automated Python scraping pipeline.
+This repository is optimized for autonomous execution. To launch the complete B2B campaign pipeline (Lead Gen -> ROI Analysis -> Asset Generation), execute:
 
-Operators (or autonomous agents with access to a shell) can run the entire technical setup and scraping process with a single command:
 ```bash
-./pipeline.sh
+bash launch_campaign.sh
 ```
+
+### Components of the Campaign:
+- **Lead Discovery:** `scrape_leads.py` targets regional franchise group directories.
+- **Financial Modeling:** `roi_calculator.py` projects membership retention lift benefits.
+- **Personalization:** `generate_personalized_assets.py` creates tailored emails in `outreach/generated/`.
+- **Governance:** State is tracked in `crm.json` and performance in `kpi-tracker.md`.
 
 This script will:
 1. Verify Python 3 installation.

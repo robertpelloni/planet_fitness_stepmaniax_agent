@@ -13,5 +13,11 @@ env/
 # Secrets
 .env
 
+# CRM Database
+crm.db
+
+# Logs
+*.log
+
 # Jules AI session logs (auto-generated)
 .jules/sessions/
