@@ -58,14 +58,8 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 font-black text-slate-700 text-sm">{{ member.points }}</td>
-                    <td class="px-6 py-4 text-right flex justify-end gap-3 items-center">
-                        <form action="{{ url_for('staff_lock_member', member_id=member.id) }}" method="POST" class="inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="submit" class="transition-colors {% if member.user_id and user_is_locked(member.user_id) %}text-red-500 hover:text-red-700{% else %}text-slate-300 hover:text-slate-500{% endif %}" title="Toggle Lock">
-                                <i class="fa-solid fa-{% if member.user_id and user_is_locked(member.user_id) %}lock{% else %}lock-open{% endif %}"></i>
-                            </button>
-                        </form>
-                        <form action="{{ url_for('staff_update_member_status', member_id=member.id) }}" method="POST" class="inline-block">
+                    <td class="px-6 py-4 text-right">
+                        <form action="{{ url_for('staff.staff_update_member_status', member_id=member.id) }}" method="POST" class="inline-block">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <select name="status" onchange="this.form.submit()" class="text-xs bg-white border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="Registered" {% if member.onboarding_status == 'Registered' %}selected{% endif %}>Registered</option>

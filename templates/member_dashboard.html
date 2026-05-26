@@ -43,7 +43,7 @@
                 <i class="fa-solid fa-bolt text-yellow-400"></i>
                 Quick Booking
             </h3>
-            <form action="{{ url_for('member_book_session') }}" method="POST" class="space-y-4">
+            <form action="{{ url_for('member.member_book_session') }}" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Unit</label>
@@ -139,7 +139,7 @@
                 <i class="fa-solid fa-comment-dots text-blue-500"></i>
                 Pilot Feedback
             </h3>
-            <form action="{{ url_for('member_submit_feedback') }}" method="POST" class="space-y-4">
+            <form action="{{ url_for('member.member_submit_feedback') }}" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-1">
