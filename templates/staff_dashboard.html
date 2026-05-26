@@ -14,10 +14,10 @@
             <p class="text-slate-500 font-medium">{{ franchise_name }}</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ url_for('facility_operations') }}" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2">
+            <a href="{{ url_for('staff.facility_operations') }}" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2">
                 <i class="fa-solid fa-signal"></i> LIVE OPS
             </a>
-            <a href="{{ url_for('staff_members') }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+            <a href="{{ url_for('staff.staff_members') }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
                 <i class="fa-solid fa-users"></i> Members
             </a>
         </div>

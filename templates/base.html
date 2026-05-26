@@ -26,26 +26,27 @@
                 <div class="hidden md:flex items-center space-x-6">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role in ['Admin', 'Franchisee'] %}
-                            <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Portfolio</a>
-                            <a href="{{ url_for('manager_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Manager Ops</a>
+                            <a href="{{ url_for('admin.dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Portfolio</a>
+                            <a href="{{ url_for('staff.manager_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Manager Ops</a>
                         {% endif %}
 
                         {% if current_user.role == 'Admin' %}
-                            <a href="{{ url_for('admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
-                            <a href="{{ url_for('admin_optimization') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Optimization</a>
-                            <a href="{{ url_for('admin_feedback') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Feedback</a>
+                            <a href="{{ url_for('admin.admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
+                            <a href="{{ url_for('admin.admin_optimization') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Optimization</a>
+                            <a href="{{ url_for('admin.admin_feedback') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Feedback</a>
+                            <a href="{{ url_for('admin.admin_security') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Security</a>
                         {% endif %}
 
                         {% if current_user.role in ['Admin', 'Staff'] %}
-                            <a href="{{ url_for('staff_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Staff Portal</a>
-                            <a href="{{ url_for('facility_operations') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Live Ops</a>
+                            <a href="{{ url_for('staff.staff_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Staff Portal</a>
+                            <a href="{{ url_for('staff.facility_operations') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Live Ops</a>
                         {% endif %}
 
                         {% if current_user.role == 'Member' %}
-                            <a href="{{ url_for('member_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">My Progress</a>
+                            <a href="{{ url_for('member.member_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">My Progress</a>
                         {% endif %}
 
-                        <a href="{{ url_for('settings') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Settings</a>
+                        <a href="{{ url_for('auth.settings') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Settings</a>
                     {% endif %}
                 </div>
 
@@ -55,9 +56,9 @@
                             <p class="text-xs text-slate-400 leading-none">{{ current_user.role }}</p>
                             <p class="text-sm font-bold">{{ current_user.username }}</p>
                         </div>
-                        <a href="{{ url_for('logout') }}" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm transition-colors">Logout</a>
+                        <a href="{{ url_for('auth.logout') }}" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm transition-colors">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-bold transition-colors">Login</a>
+                        <a href="{{ url_for('auth.login') }}" class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-bold transition-colors">Login</a>
                     {% endif %}
                 </div>
             </div>

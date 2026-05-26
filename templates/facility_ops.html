@@ -32,7 +32,7 @@
 
 <!-- Live Status Bar -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-     hx-get="{{ url_for('staff_api_metrics', view='ops') }}"
+     hx-get="{{ url_for('staff.staff_api_metrics', view='ops') }}"
      hx-trigger="every 30s">
     {% include 'partials/facility_metrics.html' %}
 </div>
@@ -89,7 +89,7 @@
             <span class="text-[10px] text-red-200 uppercase font-bold">Real-time Priority</span>
         </div>
         <div class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto"
-             hx-get="{{ url_for('staff_api_alerts') }}"
+             hx-get="{{ url_for('staff.staff_api_alerts') }}"
              hx-trigger="every 10s">
             {% include 'partials/staff_alerts.html' %}
         </div>

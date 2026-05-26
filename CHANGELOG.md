@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.0.0] - Granular RBAC & Security Hardening Milestone
-- **Granular Permissions:** Implemented a sub-role permission system (`perm_crm_view`, `perm_revenue_view`, etc.) for fine-grained management control.
-- **Admin Permission UI:** Launched an interactive permission management interface in Settings for Administrators.
-- **Member Access Control:** Added the ability for Staff to lock/unlock member pilot accounts directly from the management view.
-- **Security Decorators:** Deployed a unified `require_api_or_role` decorator to standardize dual-mode authentication across the platform.
+## [4.2.0] - Blueprint Architecture & Security Intelligence Milestone
+- **Blueprint Refactoring:** Completed the major architectural migration, modularizing the application into `auth`, `admin`, `staff`, `member`, and `api` blueprints for enhanced maintainability.
+- **Security Intelligence Dashboard:** Launched the `/admin/security` portal featuring Chart.js visualizations for audit log trends and failed login detection.
+- **Threat Detection Feed:** Integrated a real-time high-severity incident feed for tracking account lockouts and unauthorized access attempts.
+- **Namespaced Routing:** Standardized all internal routing to use blueprint-namespaced resolution (e.g., `auth.login`).
 
 ## [3.9.2] - Membership Commerce & Pilot Feedback Milestone
 - **Payment Gateway Integration:** Refactored payment handling into a standard Adapter pattern with a configurable provider.

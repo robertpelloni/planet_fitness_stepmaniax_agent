@@ -1,21 +1,21 @@
 # Memory
 
+## Core Vision & Progress
+The repository is currently in **Phase 4: Scaling & Infrastructure Hardening (v4.2.0)**.
+The primary goal is the complete automation of a B2B sales pipeline for Planet Fitness, while maintaining a robust production-grade management platform for pilots.
+
 ## Architectural Observations
-- **Hybrid Pillar Strategy:** The project architecture consists of three pillars: Markdown B2B Collateral, Python Lead Generation scripts, and a Flask-based Web Monitoring Dashboard.
-- **Data Persistence:** Transitioned from flat JSON files to a structured SQLite database (`crm.db`) for scalable lead tracking and equipment telemetry.
-- **Centralized Analytics:** Financial modeling (ROI/LTV) is consolidated in `analytics.py` to ensure consistency across CLI tools, automated asset generation, and the web dashboard.
-- **Multi-Tenant Security:** Implemented role-based access control (RBAC) and data isolation using `franchise_id` to support global admins and regional staff.
-- **Production-Ready Ingestion:** The telemetry API and health monitor utilize a high-concurrency Gunicorn/Systemd stack with background health daemons for 24/7 reliability.
-- **Enterprise Security Hardening:** Implemented automated brute-force protection (lockout after 5 failures) and persistent audit logging (`AuditLog` model) for all security-sensitive events.
-- **Optimization Intelligence:** Built a strategic recommendation engine that bridges raw telemetry with actionable B2B outcomes (e.g., secondary deployment triggers based on session intensity).
+- **Blueprint Architecture (v4.2.0):** The application is fully modularized into Blueprints (`auth`, `admin`, `staff`, `member`, `api`). This decoupling prevents `app.py` from becoming a bottleneck and clarifies role-based boundaries.
+- **Security First:** Security is a first-class citizen with persistent audit logging (`AuditLog`), brute-force protection, and a dedicated Security Intelligence dashboard.
+- **Analytical Propensity:** The lead scoring engine in `analytics.py` is the "brain" of the sales pipeline, now factoring in real-world pilot engagement and sentiment.
+- **Multi-Tenant Isolation:** Data is strictly isolated by `franchise_id` across all dashboards and APIs.
 
-## Discovered Traits
-- **Franchise Site Autonomy:** Franchise Groups maintain independent web presences, which are rich sources of executive bios and operational regions often missing from corporate portals.
-- **Pathing Standardization:** Use absolute path resolution for `crm.db` to prevent context issues when executing scripts from different directory levels.
-- **Tone Consistency:** High-level stakeholders respond better to "Retention Lift" and "Gamified HIIT" than "Engagement" or "Exergaming."
+## Key Design Patterns
+- **Gateway Adapter:** Used for payment processing to allow provider swapping without logic changes.
+- **Decorator-Based RBAC:** Role and permission enforcement are centralized in `blueprints/decorators.py`.
+- **Hybrid Auth:** Supports both user sessions (OIDC-like) and Machine-to-Machine API Keys.
 
-## Design Preferences
-- **Corporate Professionalism:** Maintain a professional B2B tone; strictly avoid "arcade" or "video game" terminology in all user-facing assets.
-- **Single Source of Truth:** `VERSION.md` is the authoritative source for versioning.
-- **Document-First Development:** Core strategies and scripts must be documented in Markdown before or alongside implementation.
-- **Autonomous Ready:** Tools should be designed for one-button execution (e.g., `launch_campaign.sh`, `production_check.sh`).
+## Future Focus
+- Hardening the autonomous outreach engine.
+- Expanding real-time telemetry analytics.
+- Automating the generation of high-fidelity B2B marketing assets based on real pilot data.

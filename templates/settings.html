@@ -113,7 +113,7 @@
                 Real-time tracking of security-sensitive events attributed to your account and fleet scope.
             </p>
             {% if current_user.role == 'Admin' %}
-            <form action="{{ url_for('settings') }}" method="GET" class="mt-4">
+            <form action="{{ url_for('auth.settings') }}" method="GET" class="mt-4">
                 <input type="text" name="q" placeholder="Filter actions..." class="w-full bg-slate-100 border-none rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500" value="{{ request.args.get('q', '') }}">
             </form>
             {% endif %}
@@ -221,36 +221,15 @@
                                         {% endif %}
                                     </td>
                                     <td class="py-2 text-slate-400 text-[10px]">{{ user.last_login or 'Never' }}</td>
-                                    <td class="py-2">
-                                        {% if user.role != 'Admin' %}
-                                        <form action="{{ url_for('admin_update_permissions', user_id=user.id) }}" method="POST" class="flex flex-wrap gap-2">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
-                                                <input type="checkbox" name="perm_crm_view" {% if user.perm_crm_view %}checked{% endif %} onchange="this.form.submit()"> CRM
-                                            </label>
-                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
-                                                <input type="checkbox" name="perm_crm_edit" {% if user.perm_crm_edit %}checked{% endif %} onchange="this.form.submit()"> Edit
-                                            </label>
-                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
-                                                <input type="checkbox" name="perm_ops_view" {% if user.perm_ops_view %}checked{% endif %} onchange="this.form.submit()"> Ops
-                                            </label>
-                                            <label class="flex items-center gap-1 text-[9px] font-bold text-slate-500">
-                                                <input type="checkbox" name="perm_revenue_view" {% if user.perm_revenue_view %}checked{% endif %} onchange="this.form.submit()"> Rev
-                                            </label>
-                                        </form>
-                                        {% else %}
-                                        <span class="text-[9px] font-black text-blue-500 uppercase">All Access</span>
-                                        {% endif %}
-                                    </td>
                                     <td class="py-2 text-right space-x-2">
                                         {% if user.is_locked %}
-                                        <form action="{{ url_for('admin_unlock_user', user_id=user.id) }}" method="POST" class="inline">
+                                        <form action="{{ url_for('admin.admin_unlock_user', user_id=user.id) }}" method="POST" class="inline">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                             <button type="submit" class="text-blue-500 hover:text-blue-700 font-black uppercase text-[9px]">Unlock</button>
                                         </form>
                                         {% endif %}
                                         {% if user.id != current_user.id %}
-                                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this user permanently?')">
+                                        <form action="{{ url_for('admin.admin_delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this user permanently?')">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                             <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors">
                                                 <i class="fa-solid fa-trash-can"></i>
