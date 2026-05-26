@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user
-from models import db, Member, EquipmentMetric, MemberSchedule, TelemetryHistory, Payment, Feedback
+from models import db, Member, EquipmentMetric, TelemetryHistory, Payment, Feedback
 from datetime import datetime
 
 member_bp = Blueprint('member', __name__)
@@ -26,6 +26,7 @@ def member_dashboard():
     equipment = EquipmentMetric.query.filter_by(franchise_id=member.franchise_id).all()
 
     # Get member's upcoming sessions
+    from models import MemberSchedule
     upcoming_sessions = db.session.query(
         MemberSchedule.start_time,
         MemberSchedule.duration_minutes,
@@ -109,6 +110,7 @@ def member_book_session():
         flash("Invalid date format.")
         return redirect(url_for('member.member_dashboard'))
 
+    from models import MemberSchedule
     new_booking = MemberSchedule(
         member_id=member.id,
         member_name=member.name,

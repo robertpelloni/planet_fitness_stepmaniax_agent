@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, current_app
+from flask import Blueprint, request, abort
 from flask_login import login_required, current_user
 from models import db, User, Member, EquipmentMetric, TelemetryHistory, Payment, Alert
 from blueprints.decorators import require_api_or_role, require_api_key, role_required
@@ -14,7 +14,6 @@ api_bp = Blueprint('api', __name__)
 @require_api_or_role(['Admin', 'Member'])
 def api_process_payment():
     """Processes membership payments via configured gateway (v3.9.2)"""
-    from blueprints.auth import log_security_event
     data = request.get_json()
     if not data or 'member_id' not in data or 'amount' not in data:
         return {"error": "Invalid payment data"}, 400
@@ -43,6 +42,7 @@ def api_process_payment():
         db.session.add(payment)
         db.session.commit()
 
+        from blueprints.auth import log_security_event
         log_security_event(None, f"Payment Processed: {result['transaction_id']} for Member {member.id}")
         return {"status": "success", "transaction_id": result['transaction_id']}, 201
     else:
@@ -285,12 +285,12 @@ def api_create_member():
 @api_bp.route('/v1/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 @require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_member_detail(member_id):
-    from blueprints.auth import log_security_event
     member = Member.query.get_or_404(member_id)
 
     # Multi-tenant isolation for session-based users
     if current_user.is_authenticated:
         if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+            from blueprints.auth import log_security_event
             log_security_event(current_user.id, f"Unauthorized member access attempt: Member {member_id}")
             abort(403)
 

@@ -1,10 +1,9 @@
 import os
-import secrets
-from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import LoginManager, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 
-from models import db, User, Lead, Member, EquipmentMetric, Alert, MemberSchedule, Feedback
+from models import db, User, Lead
 import analytics
 
 # Import Blueprints
@@ -13,7 +12,6 @@ from blueprints.admin import admin_bp
 from blueprints.staff import staff_bp
 from blueprints.member import member_bp
 from blueprints.api import api_bp
-from blueprints.decorators import permission_required
 
 app = Flask(__name__)
 # Secret key should be loaded from environment for production
@@ -65,15 +63,7 @@ def index():
 @login_required
 def dashboard():
     # Deprecated main route; redirect to specific dashboards based on role
-    if current_user.role == 'Admin':
-        return redirect(url_for('admin.dashboard'))
-    elif current_user.role == 'Staff':
-        return redirect(url_for('staff.staff_dashboard'))
-    elif current_user.role == 'Member':
-        return redirect(url_for('member.member_dashboard'))
-    elif current_user.role == 'Franchisee':
-         return redirect(url_for('staff.manager_dashboard'))
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('index'))
 
 @app.route('/prospect/<token>')
 def prospect_portal(token):
@@ -87,6 +77,10 @@ def prospect_portal(token):
     lead.portal_views += 1
     db.session.commit()
 
+    # Log engagement
+    from blueprints.auth import log_security_event
+    log_security_event(None, f"Prospect Portal Viewed: {lead.company} (Token: {token})")
+
     # Calculate personalized metrics
     metrics = analytics.calculate_detailed_metrics(
         num_clubs=lead.num_clubs,
@@ -95,6 +89,12 @@ def prospect_portal(token):
     )
 
     return render_template('prospect_portal.html', lead=lead, metrics=metrics)
+
+@app.route('/resources/<path:filename>')
+@login_required
+def serve_resources(filename):
+    # Standardized resource server for internal docs
+    return send_from_directory('technical_docs', filename)
 
 # Database Initialization Command
 @app.cli.command("init-db")

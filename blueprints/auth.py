@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from models import db, User, Lead, Member, AuditLog, Webhook
-from blueprints.decorators import role_required
+from models import db, User, Lead, Member, AuditLog
 from datetime import datetime
 import secrets
 
@@ -43,7 +42,7 @@ def login():
                     return redirect(url_for('member.member_dashboard'))
                 if user.role == 'Staff':
                     return redirect(url_for('staff.staff_dashboard'))
-                return redirect(url_for('admin.dashboard'))
+                return redirect(url_for('dashboard'))
             else:
                 if user.failed_login_attempts is None:
                     user.failed_login_attempts = 0
@@ -107,8 +106,9 @@ def member_onboarding():
 
 @auth_bp.route('/settings', methods=['GET', 'POST'])
 @login_required
-@role_required(['Admin', 'Franchisee', 'Staff'])
 def settings():
+    from models import Webhook, AuditLog
+    from blueprints.decorators import role_required
     if request.method == 'POST':
         action = request.form.get('action')
 

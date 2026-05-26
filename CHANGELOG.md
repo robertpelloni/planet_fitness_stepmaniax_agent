@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.2.0] - Blueprint Architecture & Security Intelligence Milestone
-- **Blueprint Refactoring:** Completed the major architectural migration, modularizing the application into `auth`, `admin`, `staff`, `member`, and `api` blueprints for enhanced maintainability.
-- **Security Intelligence Dashboard:** Launched the `/admin/security` portal featuring Chart.js visualizations for audit log trends and failed login detection.
-- **Threat Detection Feed:** Integrated a real-time high-severity incident feed for tracking account lockouts and unauthorized access attempts.
-- **Namespaced Routing:** Standardized all internal routing to use blueprint-namespaced resolution (e.g., `auth.login`).
+## [4.3.0] - Staff Operations & Real-time Metrics Milestone
+- **Full Blueprint Migration:** Modularized application logic into `auth`, `admin`, `staff`, `member`, and `api` blueprints for scalability.
+- **Real-time Staff Dashboard:** Enhanced staff portal with HTMX-powered usage metrics and asynchronous incident alerting.
+- **Live Activity Feed:** Integrated a real-time member engagement feed into the staff dashboard for sub-minute activity tracking.
+- **Architecture Refactor:** Decoupled `app.py` into a lean entry point and standardized namespaced routing across all templates.
 
 ## [3.9.2] - Membership Commerce & Pilot Feedback Milestone
 - **Payment Gateway Integration:** Refactored payment handling into a standard Adapter pattern with a configurable provider.

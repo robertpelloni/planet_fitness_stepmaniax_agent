@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user
-from models import db, User, EquipmentMetric, Alert, MemberSchedule, Member, TelemetryHistory, AutomationHeartbeat, Payment, Lead
+from models import db, User, EquipmentMetric, Alert, Member, TelemetryHistory, AutomationHeartbeat, Payment, Lead
 from blueprints.decorators import role_required
 from datetime import datetime
 
@@ -16,11 +16,13 @@ def staff_dashboard():
     if is_admin:
         metrics = EquipmentMetric.query.all()
         alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
+        from models import MemberSchedule
         schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
+        from models import MemberSchedule
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
 
     return render_template('staff_dashboard.html',
@@ -40,12 +42,14 @@ def facility_operations():
         metrics = EquipmentMetric.query.all()
         alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
         today = datetime.now().strftime("%Y-%m-%d")
+        from models import MemberSchedule
         schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(20).all()
         today = datetime.now().strftime("%Y-%m-%d")
+        from models import MemberSchedule
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids), MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
 
     # Determine online status (heartbeat within last 5 minutes)
@@ -108,6 +112,7 @@ def manager_dashboard():
         units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
 
     # 2. Staff Schedule & Reservations
+    from models import MemberSchedule
     if is_admin:
         schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).limit(20).all()
     else:
@@ -137,7 +142,6 @@ def manager_dashboard():
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
 
     # 6. Revenue & Payments (v3.9.2)
-    from models import AuditLog
     if is_admin:
         recent_payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
     else:
@@ -146,6 +150,7 @@ def manager_dashboard():
         recent_payments = Payment.query.filter(Payment.member_id.in_(m_ids)).order_by(Payment.timestamp.desc()).all()
 
     # 7. Security & Access Audit
+    from models import AuditLog
     if is_admin:
         security_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
     else:
@@ -201,7 +206,7 @@ def staff_api_maintenance():
 
 @staff_bp.route('/api/activity')
 @login_required
-@role_required(['Admin', 'Franchisee'])
+@role_required(['Admin', 'Staff', 'Franchisee'])
 def manager_api_activity():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
