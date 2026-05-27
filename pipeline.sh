@@ -30,6 +30,8 @@ source venv/bin/activate
 if [ -f "requirements.txt" ]; then
     echo "[INFO] Installing dependencies from requirements.txt..."
     pip install -r requirements.txt --quiet
+    echo "[INFO] Installing Playwright browsers..."
+    playwright install --with-deps chromium
     echo "[OK] Dependencies installed."
 else
     echo "[WARNING] requirements.txt not found. Skipping dependency installation."

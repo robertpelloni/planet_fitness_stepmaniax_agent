@@ -1,6 +1,9 @@
-# TODO
+# TODO - Immediate Actions
 
-Ordered by priority:
+## Infrastructure & Maintenance (v4.4.x)
+- [ ] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
+- [ ] Add unit tests for `backup_job.py` to verify snapshot integrity.
+- [ ] Implement automated restoration test in a staging environment.
 
 1. [x] Complete project audit and initialize standard documentation.
 2. [x] **Phase 1.2:** Build the "Interactive Cardio" Pitch Deck (`pitch-deck.md`).

@@ -1,6 +1,11 @@
-# Roadmap
+# ROADMAP - StepManiaX B2B Sales Automation
 
-This roadmap outlines the major long-term plans to successfully pitch and place StepManiaX units in Planet Fitness locations via regional franchisees.
+## Phase 12: Scalability & Enterprise Hardening (v4.5.0 - v5.0.0)
+- **Multi-Region Cluster Support:** Implement shard-based data isolation for international franchise expansion (UK, Canada, Mexico).
+- **ML-Based Outreach Optimization:** Train a local LLM fine-tuned on Planet Fitness franchise group communication patterns to increase Discovery Call conversion rates by > 15%.
+- **Biometric Telemetry Ingestion:** Support secure NFC/Biometric member check-ins on SMX units to eliminate manual scan entry.
+- **Enterprise Reporting API:** Launch a GraphQL endpoint for large franchise groups to pull raw engagement data into their corporate BI tools.
+- **Automated Service Dispatch:** Integrate with gym maintenance platforms (e.g., ServiceChannel) to automatically trigger work orders for SMX hardware repairs.
 
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
