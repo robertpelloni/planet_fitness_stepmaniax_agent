@@ -1,0 +1,209 @@
+from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask_login import login_user, logout_user, login_required, current_user
+from models import db, User, Lead, Member, AuditLog, Webhook
+from datetime import datetime
+from blueprints.decorators import role_required
+import secrets
+
+auth_bp = Blueprint('auth', __name__)
+
+def log_security_event(user_id, action):
+    from flask import request
+    log = AuditLog(
+        user_id=user_id,
+        action=action,
+        ip_address=request.remote_addr,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    db.session.add(log)
+    db.session.commit()
+
+import re
+
+def is_password_complex(password):
+    """
+    Validates password complexity:
+    - Minimum 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one digit
+    - At least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one digit."
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least one special character."
+    return True, ""
+
+from extensions import limiter
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
+
+        if user:
+            if user.is_locked:
+                log_security_event(user.id, f"Login attempt on locked account: {username}")
+                flash('Account is locked due to too many failed attempts. Please contact an administrator.')
+                return render_template('login.html')
+
+            if user.check_password(password):
+                remember = True if request.form.get('remember') else False
+                user.failed_login_attempts = 0
+                user.last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                db.session.commit()
+                login_user(user, remember=remember)
+                log_security_event(user.id, f"Successful login: {username}")
+
+                if user.role == 'Member':
+                    return redirect(url_for('member.member_dashboard'))
+                if user.role == 'Staff':
+                    return redirect(url_for('staff.staff_dashboard'))
+                return redirect(url_for('dashboard'))
+            else:
+                if user.failed_login_attempts is None:
+                    user.failed_login_attempts = 0
+                user.failed_login_attempts += 1
+                if user.failed_login_attempts >= 5:
+                    user.is_locked = True
+                    log_security_event(user.id, f"Account locked after 5 failures: {username}")
+                else:
+                    log_security_event(user.id, f"Failed login attempt: {username} (Attempt {user.failed_login_attempts})")
+                db.session.commit()
+
+        flash('Invalid username or password')
+    return render_template('login.html')
+
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    username = current_user.username
+    user_id = current_user.id
+    logout_user()
+    log_security_event(user_id, f"User logged out: {username}")
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/onboard', methods=['GET', 'POST'])
+def member_onboarding():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        franchise_id = request.form.get('franchise_id')
+
+        if not all([name, email, password, franchise_id]):
+            log_security_event(None, f"Incomplete onboarding attempt for email: {email}")
+            flash("All fields are required.")
+            return redirect(url_for('auth.member_onboarding'))
+
+        if User.query.filter_by(username=email).first():
+            log_security_event(None, f"Onboarding attempt with existing email: {email}")
+            flash("An account with this email already exists.")
+            return redirect(url_for('auth.member_onboarding'))
+
+        # 1. Create User
+        new_user = User(username=email, role='Member', franchise_id=franchise_id)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.flush()
+
+        # 2. Create Member Record
+        new_member = Member(
+            name=name,
+            email=email,
+            user_id=new_user.id,
+            franchise_id=franchise_id,
+            registration_date=datetime.now().strftime("%Y-%m-%d"),
+            onboarding_status='Registered'
+        )
+        db.session.add(new_member)
+        db.session.commit()
+
+        flash("Registration successful! Please login to your pilot portal.")
+        return redirect(url_for('auth.login'))
+
+    # Get available franchise locations for the dropdown
+    leads = Lead.query.filter(Lead.status.contains('Pilot')).all()
+    return render_template('onboarding_portal.html', leads=leads)
+
+@auth_bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin', 'Franchisee', 'Staff'])
+def settings():
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'change_password':
+            current_pw = request.form.get('current_password')
+            new_pw = request.form.get('new_password')
+            confirm_pw = request.form.get('confirm_password')
+
+            if not current_user.check_password(current_pw):
+                flash("Current password incorrect.")
+            elif new_pw != confirm_pw:
+                flash("New passwords do not match.")
+            else:
+                is_valid, msg = is_password_complex(new_pw)
+                if not is_valid:
+                    flash(msg)
+                else:
+                    current_user.set_password(new_pw)
+                    db.session.commit()
+                    log_security_event(current_user.id, "Password changed successfully")
+                    flash("Password updated successfully!")
+            return redirect(url_for('auth.settings'))
+
+        if action == 'add_webhook':
+            url = request.form.get('url')
+            service = request.form.get('service')
+            new_hook = Webhook(
+                url=url,
+                service=service,
+                franchise_id=current_user.franchise_id if current_user.role != 'Admin' else None
+            )
+            db.session.add(new_hook)
+            db.session.commit()
+            flash(f"Webhook added successfully for {service}")
+
+        elif action == 'create_user' and current_user.role == 'Admin':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            role = request.form.get('role')
+            franchise_id = request.form.get('franchise_id')
+
+            if User.query.filter_by(username=username).first():
+                flash("User already exists.")
+            else:
+                new_user = User(username=username, role=role, franchise_id=franchise_id if franchise_id else None)
+                new_user.set_password(password)
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f"User {username} created successfully as {role}.")
+
+        return redirect(url_for('auth.settings'))
+
+    search_query = request.args.get('q', '')
+
+    if current_user.role == 'Admin':
+        webhooks = Webhook.query.all()
+        users = User.query.all()
+        audit_base = AuditLog.query
+        if search_query:
+            audit_base = audit_base.filter(AuditLog.action.contains(search_query))
+        audit_logs = audit_base.order_by(AuditLog.timestamp.desc()).limit(50).all()
+    else:
+        webhooks = Webhook.query.filter_by(franchise_id=current_user.franchise_id).all()
+        users = []
+        audit_logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(10).all()
+
+    return render_template('settings.html', webhooks=webhooks, users=users, audit_logs=audit_logs)

@@ -1,0 +1,26 @@
+<div class="overflow-x-auto">
+    <table class="w-full text-left">
+        <thead>
+            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                <th class="pb-2 px-2">Unit</th>
+                <th class="pb-2 px-2">Status</th>
+                <th class="pb-2 px-2">Last Service</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+            {% for unit in metrics %}
+            <tr>
+                <td class="py-3 px-2 text-xs font-bold text-slate-700">{{ unit.equipment_name }}</td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase
+                        {% if unit.maintenance_status == 'Operational' %}bg-green-100 text-green-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {{ unit.maintenance_status }}
+                    </span>
+                </td>
+                <td class="py-3 px-2 text-xs text-slate-500">{{ unit.last_service_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

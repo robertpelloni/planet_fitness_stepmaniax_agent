@@ -1,0 +1,130 @@
+{
+  "leads": [
+    {
+      "id": "EPIC-001",
+      "company": "EPIC Fitness Group",
+      "contact_name": "Bryan Rief",
+      "title": "Co-founder & CEO",
+      "email": "bryan.rief@epicfitnessgroup.com",
+      "region": "Michigan",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "President of Michigan Fitness Association.",
+      "roi_projection": {
+        "num_clubs": 50,
+        "retention_lift": 0.03,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 1212815.55
+      }
+    },
+    {
+      "id": "PFM-001",
+      "company": "PF Michigan Group",
+      "contact_name": "Keith Bertram",
+      "title": "President",
+      "email": "keith.bertram@epicfitnessgroup.com",
+      "region": "Michigan/Ohio",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "Recently promoted to President.",
+      "roi_projection": {
+        "num_clubs": 24,
+        "retention_lift": 0.02,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 386560.1
+      }
+    },
+    {
+      "id": "OGP-001",
+      "company": "Ohana Growth Partners",
+      "contact_name": "Justin Drummond",
+      "title": "President",
+      "email": "j.drummond@ohanagp.com",
+      "region": "Multi-state (Michigan Focus)",
+      "status": "Ready for Outreach",
+      "priority": "High",
+      "notes": "Expanding in Michigan via acquisition.",
+      "roi_projection": {
+        "num_clubs": 10,
+        "retention_lift": 0.03,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 242563.11
+      }
+    },
+    {
+      "id": "FLY-001",
+      "company": "Flynn Group",
+      "contact_name": "Stan DeMartinis Jr.",
+      "title": "President, Flynn Fitness",
+      "email": "s.demartinis@flynn.com",
+      "region": "Multi-state (VT, CT, RI, NJ, MD, MA)",
+      "status": "Identified",
+      "priority": "High",
+      "notes": "Acquired 37 clubs from Alder Partners.",
+      "roi_projection": {
+        "num_clubs": 37,
+        "retention_lift": 0.03,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 897483.5
+      }
+    },
+    {
+      "id": "CDM-001",
+      "company": "CDM Fitness Holdings",
+      "contact_name": "Lane Milliken",
+      "title": "Director of Operations",
+      "email": "l.milliken@fitearth.com",
+      "region": "New England / WA",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "88+ locations.",
+      "roi_projection": {
+        "num_clubs": 88,
+        "retention_lift": 0.02,
+        "avg_monthly_fee": 15.0,
+        "projected_annual_profit": 1417387.0
+      }
+    },
+    {
+      "id": "ECP-001",
+      "company": "ECP-PF Holdings",
+      "contact_name": "Ryan Berk",
+      "title": "CEO",
+      "email": "r.berk@planetfitness.com",
+      "region": "Multi-state (CT, NY, TN)",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Owned by TowerBrook.",
+      "roi_projection": null
+    },
+    {
+      "id": "NFP-001",
+      "company": "National Fitness Partners",
+      "contact_name": "Stephen Kindler, Jr.",
+      "title": "President & CEO",
+      "email": "s.kindler@nfpfit.com",
+      "region": "PA/Multi-state",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Deep industry roots.",
+      "roi_projection": null
+    },
+    {
+      "id": "UFP-001",
+      "company": "United Fitness Partners",
+      "contact_name": "Cullen Barbato",
+      "title": "CEO",
+      "email": "cullenbarbato@unitedpf.com",
+      "region": "Multi-state",
+      "status": "Identified",
+      "priority": "Medium",
+      "notes": "Strong involvement in PFIFC.",
+      "roi_projection": null
+    }
+  ],
+  "campaign_config": {
+    "target_metric": "90-Day Pilot Placement",
+    "pilot_cost": "$0",
+    "last_updated": "2024-05-20"
+  }
+}

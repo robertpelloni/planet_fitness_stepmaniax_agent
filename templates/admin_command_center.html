@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Global Command Center - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Global Command Center</h1>
+            <p class="text-slate-500 font-medium">Fleet-Wide Operational Intelligence</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('admin.admin_optimization') }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-blue-500"></i> Optimization
+            </a>
+            <div class="bg-blue-600 text-white px-4 py-2 rounded-xl shadow-lg flex items-center gap-3">
+                <div class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                </div>
+                <span class="text-sm font-black italic uppercase tracking-wider">{{ live_sessions }} LIVE SESSIONS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Fleet Units</p>
+            <p class="text-3xl font-black text-slate-800">{{ total_units }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Fleet Avg Uptime</p>
+            <p class="text-3xl font-black text-green-600">{{ avg_uptime }}%</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cumulative Scans</p>
+            <p class="text-3xl font-black text-blue-600">{{ "{:,}".format(total_scans) }}</p>
+        </div>
+        <div class="bg-red-600 p-6 rounded-2xl shadow-xl text-white">
+            <p class="text-[10px] font-black text-red-200 uppercase tracking-widest mb-1">Active Alerts</p>
+            <p class="text-3xl font-black">{{ active_alerts }}</p>
+        </div>
+    </div>
+
+    <!-- Automation & Efficiency (v3.9.0) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-blue-500"></i> Automation & Management Efficiency
+            </h3>
+            <div class="flex items-center gap-4">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Autonomous Background Engine</span>
+                <form action="{{ url_for('admin.admin_launch_campaign') }}" method="POST" onsubmit="return confirm('Initiate Autonomous Sales Sequence?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 uppercase tracking-tighter">
+                        <i class="fa-solid fa-rocket"></i> Launch Pipeline
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for task in automation_status %}
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full {{ 'bg-green-500 animate-pulse' if task.status == 'Healthy' else 'bg-red-500' }}"></div>
+                <div>
+                    <p class="text-xs font-black text-slate-700 uppercase">{{ task.task_name }}</p>
+                    <p class="text-[10px] text-slate-400 font-medium italic">Last heartbeat: {{ task.last_run }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-400 italic">No autonomous tasks reported yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Security & Logs Stack -->
+        <div class="space-y-8">
+            <!-- Recent Security Audit (v4.7.0) -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-red-500"></i> Security Audit
+                    </h3>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    {% for log, username in recent_security %}
+                    <div class="p-4 hover:bg-slate-50 transition-colors">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-black text-slate-700 uppercase">{{ username or 'System' }}</span>
+                            <span class="text-[8px] text-slate-400 font-medium">{{ log.timestamp }}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight">{{ log.action }}</p>
+                    </div>
+                    {% else %}
+                    <p class="p-6 text-xs text-slate-400 italic">No security events logged.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- System Logs (v3.9.0) -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-700 shadow-xl overflow-hidden">
+            <div class="p-6 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-blue-400"></i> System Log Stream
+                </h3>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">Live</span>
+            </div>
+            <div class="p-6 font-mono text-[10px] text-blue-400 leading-relaxed overflow-y-auto max-h-[300px]"
+                 hx-get="{{ url_for('admin.admin_api_logs') }}"
+                 hx-trigger="every 5s">
+                Initializing stream...
+            </div>
+            </div>
+        </div>
+
+        <!-- Fleet Map (Simulated) -->
+        <div class="lg:col-span-2 bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden min-h-[400px]">
+            <h3 class="font-black text-xs text-slate-500 uppercase tracking-[0.2em] mb-6">Global Deployment Map</h3>
+            <div class="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
+                <i class="fa-solid fa-earth-americas text-[300px]"></i>
+            </div>
+
+            <div class="relative z-10 space-y-4">
+                {% for unit in metrics %}
+                <div class="flex items-center gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs {{ 'bg-green-500/20 text-green-500' if unit.uptime_percent > 95 else 'bg-red-500/20 text-red-500' }}">
+                        {{ unit.id }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm">{{ unit.equipment_name }}</p>
+                        <p class="text-[10px] text-slate-500 uppercase font-bold">{{ unit.location }}</p>
+                    </div>
+                    <div class="flex items-center gap-6 text-right">
+                        <div>
+                            <p class="text-xs font-black {{ 'text-blue-500' if unit.predictive_health_score > 90 else 'text-yellow-500' if unit.predictive_health_score > 75 else 'text-red-500' }}">
+                                {{ unit.predictive_health_score|round(1) }}
+                            </p>
+                            <p class="text-[10px] text-slate-500 font-medium">Stability</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black {{ 'text-green-500' if unit.uptime_percent > 95 else 'text-red-500' }}">{{ unit.uptime_percent }}%</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Uptime</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Global Alert Feed -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-1">
+            <div class="p-6 bg-red-50 border-b border-red-100 flex justify-between items-center">
+                <h3 class="font-black text-xs text-red-600 uppercase tracking-widest">Global Incident Feed</h3>
+                <i class="fa-solid fa-bolt text-red-500 animate-pulse"></i>
+            </div>
+            <div class="divide-y divide-slate-100">
+                {% for alert in alerts %}
+                <div class="p-6 hover:bg-red-50 transition-colors space-y-3" id="alert-{{ alert.id }}">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-black text-red-500 uppercase tracking-widest">{{ alert.severity }}</span>
+                        <span class="text-[10px] text-slate-400 font-medium">{{ alert.timestamp }}</span>
+                    </div>
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed">{{ alert.message }}</p>
+                    <div class="flex gap-2">
+                        {% if not alert.acknowledged_by %}
+                        <button hx-post="/api/v1/alerts/{{ alert.id }}/acknowledge"
+                                hx-target="#alert-actions-{{ alert.id }}"
+                                hx-swap="innerHTML"
+                                class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded text-[10px] font-black uppercase transition-all">
+                            Acknowledge
+                        </button>
+                        {% endif %}
+                        <div id="alert-actions-{{ alert.id }}" class="flex gap-2">
+                            {% if alert.acknowledged_by %}
+                                <span class="text-[10px] font-bold text-blue-500 italic">Ack by {{ alert.acknowledged_by }}</span>
+                            {% endif %}
+                            <button hx-post="/api/v1/alerts/{{ alert.id }}/resolve"
+                                    hx-target="#alert-{{ alert.id }}"
+                                    hx-swap="outerHTML"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-[10px] font-black uppercase transition-all">
+                                Resolve
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-12 text-center text-slate-400 italic text-xs font-medium">
+                    No active global incidents.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

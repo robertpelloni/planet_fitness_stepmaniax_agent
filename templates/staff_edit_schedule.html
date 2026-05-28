@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{% if schedule %}Edit{% else %}Create{% endif %} Schedule - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
+            {% if schedule %}Edit{% else %}New{% endif %} Session Schedule
+        </h1>
+        <p class="text-slate-500 font-medium">Manage member booking details</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <form method="POST" class="p-8 space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Member Name</label>
+                    <input type="text" name="member_name" required
+                        value="{{ schedule.member_name if schedule else '' }}"
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                        placeholder="John Doe">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Status</label>
+                    <select name="status" class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                        <option value="Scheduled" {% if schedule and schedule.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                        <option value="Completed" {% if schedule and schedule.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        <option value="No-show" {% if schedule and schedule.status == 'No-show' %}selected{% endif %}>No-show</option>
+                        <option value="Cancelled" {% if schedule and schedule.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Equipment Unit</label>
+                <select name="equipment_id" required class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                    {% for unit in units %}
+                    <option value="{{ unit.id }}" {% if schedule and schedule.equipment_id == unit.id %}selected{% endif %}>
+                        {{ unit.equipment_name }} ({{ unit.location }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Start Time</label>
+                    <input type="datetime-local" name="start_time" required
+                        value="{{ schedule.start_time if schedule else '' }}"
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Duration (Minutes)</label>
+                    <input type="number" name="duration_minutes" required min="5" max="60" step="5"
+                        value="{{ schedule.duration_minutes if schedule else 15 }}"
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                </div>
+            </div>
+
+            <div class="pt-4 flex gap-4">
+                <button type="submit" class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-xs">
+                    {% if schedule %}Update{% else %}Create{% endif %} Booking
+                </button>
+                <a href="{{ url_for('staff.staff_dashboard') }}" class="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition-all text-center uppercase tracking-widest text-xs">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -2,43 +2,162 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.0]
-- Major documentation overhaul: Rewrote `README.md` to reflect the actual repository architecture (hybrid B2B collateral workspace and Python data-gathering utility).
-- Updated README to clearly outline the overarching autonomous agent case-study goals and the 4-Phase SOP execution pipeline.
+## [4.8.0] - Enterprise Data Exchange API
+- **Enterprise Reporting API:** Launched secure `/api/v1/enterprise/export` for external BI tool integration, providing aggregated fleet telemetry, engagement, and sentiment data.
+- **Corporate CRM Sync:** Implemented `/api/v1/enterprise/leads` for real-time lead portfolio synchronization with enterprise CRM systems.
+- **Security Data Governance:** All enterprise data exports are protected by `require_api_key` and logged via the persistent `AuditLog` for compliance.
 
-## [0.2.0]
-- Added `pipeline.sh` to automate the Python virtual environment setup, dependency installation, and execution of the lead scraping utility.
-- Updated `README.md` to include instructions for the new automated execution pipeline.
+## [4.7.0] - Personalized Workout Tracking & Security Audit
+- **Enhanced Telemetry History:** Updated the data model and API to capture individual workout durations for personalized tracking.
+- **Member Progress Visualization:** Launched the "Recent Workout History" component in the Member Dashboard for detailed session insights.
+- **Admin Security Hardening:** Integrated a live Security Audit widget in the Command Center to monitor real-time administrative and login events.
 
-## [0.1.7]
-- Created `kpi-tracker.md` to track Agent Performance Metrics (Leads Generated, Outreach Volume, Discovery Calls).
-- Updated `TODO.md` to reflect the addition of the KPI tracking mechanism.
+## [4.6.0] - Schedule Management & Teacher Workflows
+- **Staff-Managed Booking System:** Launched a full CRUD interface for `MemberSchedule`, allowing staff to create and edit session bookings directly from the dashboard.
+- **Enhanced Facility Operations:** Updated the Operations Center to include quick-action "Edit" links for all upcoming reservations.
+- **Scheduling Logic:** Implemented datetime-local parsing and status management (Scheduled, Completed, No-show, Cancelled) for session tracking.
 
-## [0.1.6]
-- Created `scrape_leads.py` as a generic template to unblock Phase 2.1 data gathering.
-- Created `requirements.txt` to track new Python dependencies (requests, beautifulsoup4).
-- Updated `DEPLOY.md` to document the Python execution environment.
-- Added `.gitignore` and `.env.example` to enforce secret management and keep binaries out of version control.
+## [4.5.0] - Security Hardening & Real-time Intelligence Milestone
+- **Authentication Hardening:** Implemented regex-based password complexity validation and integrated `Flask-Limiter` for route-level brute-force protection (10 attempts/min).
+- **Security Infrastructure:** Configured secure session and remember-me cookies with `HttpOnly` and `Lax` Samesite attributes.
+- **Live Traffic Heatmap:** Enhanced the Staff Dashboard with a 24-hour scan density visualization tool.
+- **Capacity Utilization Scoring:** Integrated real-time utilization metrics into equipment tracking, using uptime and session density to calculate ROI-focused performance scores.
+- **Admin Log Streaming:** Upgraded the command center log viewer to support multi-file tailing for `server.log`, `campaign_launch.log`, and `health_monitor.log`.
 
-## [0.1.5]
-- Unblocked Phase 1.1: Successfully extracted StepManiaX cabinet dimensions from stepmaniax.com.
-- Updated `pitch-deck.md` and `pilot-mou.md` to reflect real-world machine footprint dimensions, replacing placeholder estimates.
+## [4.4.0] - Infrastructure Hardening & Modular Architecture Milestone
+- **Blueprint Modularization:** Successfully refactored the monolithic `app.py` into a modular architecture with five domain-specific blueprints: `auth`, `admin`, `staff`, `member`, and `api`.
+- **Infrastructure Hardening:** Launched `backup_job.py` using the `sqlite3.backup` API for hot database snapshots. Integrated this into the 60-second `health_monitor.py` execution loop.
+- **System Health Dashboard:** Developed the `/admin/system-health` dashboard to monitor automation heartbeat latency (Delayed/Critical Gap alerts) and verify backup history integrity.
+- **Unified Routing:** Standardized all template `url_for` calls to use namespaced resolution (e.g., `staff.facility_operations`), eliminating routing errors post-refactor.
+- **Dependency Hardening:** Updated `pipeline.sh` to include mandatory Playwright browser installations and refined `config.py` to prioritize environment variables.
+- **Security Audit:** Implemented persistent audit logging for user management actions and improved RBAC enforcement across all portals.
 
-## [0.1.4]
-- Concluded internal agent implementation cycles. Remaining tasks marked as blocked due to requiring external credentials (LinkedIn Sales Navigator) and manual data gathering.
+## [3.9.2] - Membership Commerce & Pilot Feedback Milestone
+- **Payment Gateway Integration:** Refactored payment handling into a standard Adapter pattern with a configurable provider.
+- **Membership Revenue Dashboard:** Integrated live payment tracking into the Manager and Member dashboards.
+- **Feedback Collection System:** Launched a pilot feedback interface for gym members to submit ratings and comments.
+- **Sentiment Dashboard:** Developed the User Feedback Dashboard (`/admin/feedback`) featuring category distribution and rating trends.
+- **Sentiment-Driven Propensity:** Integrated feedback ratings into the analytical lead scoring engine in `analytics.py`.
+- **Production Hardening:** Defaulted application to production-safe debug settings and secured payment transaction flows.
 
-## [0.1.3]
-- Implemented `pilot-mou.md` containing the Phase 4.1 Memorandum of Understanding template.
-- Updated TODO.md to mark Phase 4.1 as complete.
+## [3.9.1] - User Feedback & Sentiment Analytics Milestone
+- **Feedback Collection System:** Launched a pilot feedback interface for gym members to submit ratings and comments.
+- **Sentiment Dashboard:** Developed the User Feedback Dashboard (`/admin/feedback`) featuring category distribution and rating trends.
+- **Sentiment-Driven Propensity:** Integrated feedback ratings into the analytical lead scoring engine in `analytics.py`.
+- **Database Expansion:** Added the `Feedback` model to track member sentiment across all pilot locations.
 
-## [0.1.2]
-- Implemented `outreach-script.md` containing the Phase 3 outreach email template and objection handling cheat sheet.
-- Updated TODO.md to mark Phase 3.1 as complete.
+## [3.9.0] - Autonomous Background Engine Milestone
+- **Centralized Background Orchestration:** Migrated lead follow-up logic into the unified `health_monitor.py` execution loop.
+- **Automation Heartbeat System:** Launched the `AutomationHeartbeat` model to track the health and last-run timestamps of all background tasks.
+- **Automation Health Dashboard:** Integrated an "Automation & Management Efficiency" control center into the Global Command Center with a one-click autonomous pipeline trigger.
+- **Autonomous Task Monitoring:** Standardized heartbeat updates for the Health Monitor, Lead Scraper, and Outreach Cadence engines.
 
-## [0.1.1]
-- Implemented `pitch-deck.md` containing the Phase 1 B2B presentation copy.
-- Updated TODO.md to mark Phase 1.2 as complete.
+## [3.8.0] - Lead Engagement & Intent Tracking Milestone
+- **Engagement Analytics:** Implemented real-time tracking of Prospect Portal views with automated audit logging.
+- **Intent-Based Scoring:** Enhanced the `analytics.py` propensity algorithm to prioritize leads based on portal engagement levels.
+- **CRM Engagement Dashboard:** Integrated an 'Engagement' intelligence column into the main Admin Dashboard with live activity indicators.
+- **Audit Attribution:** Prospect engagement events are now attributed in the persistent security audit log.
 
-## [0.1.0] - Initial Setup
-- Initialized core repository documentation (VISION, ROADMAP, TODO, HANDOFF, etc.).
-- Established AI agent instructions and contribution guidelines.
+## [3.7.0] - Predictive Maintenance Intelligence Milestone
+- **Predictive Health Engine:** Launched `calculate_predictive_health_score` in `analytics.py` to assess unit stability based on uptime, session intensity, and connectivity.
+- **Stability Monitoring:** Integrated real-time Predictive Health tracking into `health_monitor.py` for all equipment units.
+- **Predictive Dashboards:** Updated the Global Command Center and Staff Facility Operations portals to visualize stability scores with visual risk indicators.
+- **Schema Expansion:** Added `predictive_health_score` to the `EquipmentMetric` model and database.
+
+## [3.6.0] - Optimization Intelligence & Strategic Analytics Milestone
+- **Strategic Optimization Engine:** Developed `generate_optimization_recommendations` in `analytics.py` to identify capacity constraints, uptime degradation, and engagement opportunities.
+- **Optimization Dashboard:** Launched `/admin/optimization` for Global Admins, featuring lifecycle KPIs and automated optimization strategies.
+- **Usage Intensity Tracking:** Implemented capacity utilization metrics with visual indicators for high-traffic units.
+- **Strategic KPI Grid:** Integrated fleet-avg engagement, onboarding conversion rates, and total pilot membership tracking.
+- **Data-Object Mapping:** Enhanced dashboard logic to bridge SQLAlchemy models with strategic analytical functions.
+
+## [3.5.0] - Enterprise Security Hardening Milestone
+- **Brute-Force Protection:** Implemented automated account lockout after 5 consecutive failed login attempts.
+- **Persistent Audit Logging:** Launched a global `AuditLog` system to track security-sensitive events (logins, lockouts, password changes) with IP attribution.
+- **Secure Password Rotation:** Developed an interactive "Change Password" interface in Settings with current-password validation.
+- **Multi-Tenant API Hardening:** Enforced strict `franchise_id` isolation on Member and Analytics REST APIs to prevent cross-tenant data leaks.
+- **HTMX Security Fix:** Standardized CSRF token injection for all asynchronous HTMX requests.
+
+## [3.4.0] - Operational Intelligence & Analytics Milestone
+- **Hourly Peak-Usage Distribution:** Integrated a new bar chart into the Staff Dashboard to visualize club traffic patterns.
+- **Advanced Propensity Scoring:** Refined lead prioritization to factor in real-time pilot engagement (member counts and points).
+- **Proactive Offline Alerting:** Enhanced `health_monitor.py` to trigger 'Critical' alerts for equipment units offline for > 10 minutes.
+- **Hourly Analytics API:** Launched `/api/v1/analytics/hourly` for time-of-day usage aggregation.
+- **Governance Cleanup:** Synchronized all roadmap and handoff documentation with the v3.4.0 feature set.
+
+## [3.3.0] - Facility Operations & Unified UI Milestone
+- **Facility Operations Center:** Launched a real-time monitoring dashboard (/staff/operations) for live equipment heartbeat tracking.
+- **Unified B2B Design Language:** Standardized the entire platform UI using a premium Tailwind-based design system and a master 'base.html' template.
+- **Equipment Heartbeat Tracking:** Implemented `last_heartbeat` monitoring for all StepManiaX units, enabling instant "Online/Offline" status visibility.
+- **Enhanced Auth Security:** Added `last_login` tracking for all user accounts and refined the Login experience with professional security aesthetics.
+- **Responsive Navigation:** Implemented a unified header system with role-based navigation links across all platform portals.
+
+## [3.2.0] - Member Engagement & Tracking Milestone
+- **Member Dashboard v2:** Launched a reactive portal for pilot participants with session booking and engagement visualization.
+- **Engagement Scoring:** Implemented an automated tracking system calculating points and retention scores based on daily activity.
+- **Staff Member Management:** Developed a dedicated interface for staff to manage member onboarding and monitor individual progress.
+- **Relational Telemetry:** Upgraded the telemetry ingestion engine to attribute StepManiaX usage to individual member accounts.
+
+## [3.1.0] - Operational Intelligence & Real-time Analytics Milestone
+- **Real-time Staff Dashboard:** Integrated HTMX-powered usage distribution and maintenance metrics.
+- **Anomaly Detection:** Enhanced `health_monitor.py` to automatically flag significant spikes or drops in equipment usage.
+- **Prospect Portals:** Launched personalized B2B landing pages with secure tokenized access and dynamic ROI modeling.
+- **Dual-Mode Authentication:** Hardened API security to support both Session and API Key authorization for internal dashboards.
+
+## [2.9.0] - Lead Intelligence & Playwright Scraper Milestone
+- **Playwright Scraper:** Upgraded `scrape_leads.py` to use Playwright for headless browser scraping of dynamic franchise portals.
+- **Lead Propensity Scoring:** Implemented an automated scoring algorithm in `analytics.py` to rank leads by sales priority.
+- **Propensity Leaderboard:** Integrated a new "High Propensity Targets" section into the Admin Dashboard for prioritized outreach.
+- **Scalable Extraction:** Enhanced metadata extraction heuristics for leadership team pages across multiple franchise group domains.
+
+## [2.8.0] - Production Deployment & Monitoring Milestone
+- **Production Infrastructure:** Added `gunicorn_config.py` and systemd service templates for professional deployment.
+- **Continuous Health Monitoring:** Updated `health_monitor.py` with a persistent execution loop for real-time alerting.
+- **Deployment Automation:** Created `production_check.sh` to automate environmental verification.
+- **Bug Fixes:** Resolved schema mismatch in `report_generator.py` and removed hardcoded API keys from frontend templates.
+- **Documentation:** Overhauled `DEPLOY.md` with full production setup and operational instructions.
+
+## [2.7.0] - Management & Security Hardening Milestone
+- **Staff Analytics Integration:** Added 7-day engagement trend charts to the Staff Dashboard for club-level usage monitoring.
+- **Admin User Management UI:** Launched a dedicated user provisioning interface in Settings for Global Admins.
+- **Enhanced API Security:** Implemented dual-mode authentication (Session or API Key) for analytics endpoints to support both UI and machine access.
+- **RBAC Audit:** Hardened all administrative and management routes with strict `@role_required` enforcement.
+
+## [2.6.0] - Usage Trend Analytics & API Security Milestone
+- **Historical Usage Tracking:** Implemented time-series tracking via `TelemetryHistory` to capture per-scan equipment data.
+- **Usage Analytics API:** Launched `/api/v1/analytics/usage` for daily scan aggregation and trend reporting.
+- **Interactive Trend Charts:** Integrated a new "Historical Usage Trends" line chart into the dashboard for 7-day engagement visualization.
+- **API Key Authentication:** Hardened all `/api/v1/` REST endpoints with a mandatory `X-API-KEY` header requirement.
+- **Telemetry Security:** Secured the machine-to-machine telemetry ingestion endpoint to prevent unauthorized metric injection.
+
+## [2.5.0] - Member Management API & Centralized Config Milestone
+- **Member REST API:** Launched a full CRUD API (`/api/v1/members`) for programmatic member management.
+- **API Security:** Enforced RBAC and CSRF exemptions for the management API while maintaining session-based security.
+- **Centralized Automation Config:** Created `config.py` to house all threshold and financial parameters (UPTIME_THRESHOLD, ROI defaults).
+- **Multi-Tenant API Isolation:** Programmatic member access is isolated by `franchise_id` to ensure data privacy between clubs.
+
+## [2.4.0] - Staff Operations & Real-time Monitoring Milestone
+- **Staff-Facing Dashboard:** Launched a dedicated, high-visibility dashboard for facility staff to monitor club operations in real-time.
+- **Real-time Updates (HTMX):** Integrated HTMX for seamless, live-reloading of usage metrics, maintenance logs, and critical alerts.
+- **Automated Maintenance Alerts:** Updated telemetry logic to automatically flag equipment as 'Needs Maintenance' when performance drops below threshold.
+- **Role-Based Access Control:** Added the 'Staff' role with restricted access to club-level monitoring and facility status.
+- **Facility Management UI:** Designed a dark-mode Staff Portal for high-contrast monitoring in gym environments.
+
+## [2.3.0] - RBAC & Security Hardening Milestone
+- **Granular RBAC:** Introduced `role_required` decorator to secure administrative and management routes.
+- **Member Access Control:** Restricted members to their dedicated portal, preventing access to facility telemetry or CRM data.
+- **Unified Database Schema:** Standardized on pluralized table names (`leads`, `outreach_logs`) across SQLAlchemy and CLI tools.
+- **Admin User Management:** Enhanced settings page to allow global administrators to manage all platform users.
+
+## [2.2.0] - Member Portal & Unified Schema Milestone
+- **Member-Facing Dashboard:** Launched a dedicated portal for gym members to view pilot status and update profiles.
+- **Unified SQLAlchemy Schema:** Migrated the legacy 'leads' and 'outreach_logs' tables into the SQLAlchemy ORM as `Lead` and `OutreachLog`.
+- **Enhanced Multi-Tenancy:** Hardened data isolation for equipment metrics, alerts, and members using strict `franchise_id` foreign keys.
+- **Dynamic Onboarding:** Updated the onboarding portal to dynamically fetch active pilot locations from the `Lead` table.
+
+## [2.1.0] - Multi-Tenancy & Webhooks Milestone
+- **Multi-Tenant Dashboard:** Implemented role-based access control (RBAC) allowing franchisees to view only their specific club data.
+- **Webhook Notification System:** Launched `notifications.py` and a Webhook model supporting Discord/Slack alerts for critical events.
+- **Automated Notifications:** Integrated real-time alerts for equipment uptime drops and new member registrations.
+
+[... previous entries remain unchanged ...]

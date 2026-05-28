@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepManiaX Pilot Proposal - {{ lead.company }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+    <div class="bg-slate-900 py-24 px-6 text-center text-white relative overflow-hidden">
+        <!-- Abstract Background -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <span class="inline-block bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6">Exclusive Pilot Review</span>
+            <h1 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-6">PARTNERSHIP OPPORTUNITY</h1>
+            <p class="text-xl text-slate-400 font-medium">Strategic Proposal for <span class="text-white font-bold">{{ lead.company }}</span></p>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6 -mt-16 relative z-20 pb-24">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="p-8 md:p-12">
+                <div class="prose prose-slate max-w-none">
+                    <h2 class="text-3xl font-black text-slate-800 italic uppercase tracking-tight mb-6">The High-Retention Advantage</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        We've identified <span class="font-bold text-slate-900">{{ lead.company }}</span> as a high-potential partner for our regional StepManiaX deployment.
+                        With <span class="font-bold text-slate-900">{{ lead.num_clubs }} clubs</span> in the <span class="font-bold text-slate-900">{{ lead.region }}</span> region,
+                        the opportunity to transform cardio floors into interactive entertainment hubs is substantial.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Annual Profit Lift</p>
+                        <p class="text-3xl font-black text-blue-600">${{ "{:,.0f}".format(metrics.annual_net_profit) }}</p>
+                        <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase">Portfolio Wide</p>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Retention Delta</p>
+                        <p class="text-3xl font-black text-green-600">+{{ lead.retention_lift * 100 }}%</p>
+                        <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase">Target Impact</p>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ROI Multiple</p>
+                        <p class="text-3xl font-black text-yellow-500">{{ metrics.roi_multiple }}x</p>
+                        <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase">Hardware Yield</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-black text-slate-800 uppercase italic">Why StepManiaX?</h3>
+                        <ul class="space-y-4">
+                            <li class="flex gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">Differentiated Amenities</p>
+                                    <p class="text-xs text-slate-500">Stand out in the HVLP market with high-engagement interactive units.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">Data-Driven Insights</p>
+                                    <p class="text-xs text-slate-500">Real-time telemetry and member engagement tracking standard.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">Zero Capital Risk</p>
+                                    <p class="text-xs text-slate-500">Managed pilot program with full hardware maintenance included.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="text-lg font-black italic mb-4 uppercase tracking-tight">Pilot Configuration</h3>
+                            <div class="space-y-4 text-sm">
+                                <div class="flex justify-between border-b border-slate-800 pb-2">
+                                    <span class="text-slate-500">Duration</span>
+                                    <span class="font-bold">90 Days</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-800 pb-2">
+                                    <span class="text-slate-500">Units/Club</span>
+                                    <span class="font-bold">2 Units</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-800 pb-2">
+                                    <span class="text-slate-500">Maintenance</span>
+                                    <span class="font-bold text-green-400">Included</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Analytics</span>
+                                    <span class="font-bold text-green-400">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 opacity-20 text-6xl">
+                            <i class="fa-solid fa-rocket"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16 text-center">
+                    <p class="text-slate-500 font-medium mb-6 uppercase tracking-widest text-[10px] font-black">Authorized Discovery Phase</p>
+                    <a href="mailto:sales@smx-agent.fit?subject=Pilot%20Inquiry%3A%20{{ lead.company }}"
+                        class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black px-12 py-5 rounded-2xl font-black italic text-lg shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-tighter">
+                        Schedule Discovery Call
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-12 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">
+        StepRevolution B2B Autonomous Engine • Strictly Confidential Proposal for {{ lead.company }}
+    </footer>
+</body>
+</html>

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Member Dashboard - StepManiaX{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile & Summary -->
+    <div class="lg:col-span-1 space-y-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+            <div class="w-24 h-24 rounded-full bg-yellow-400 mx-auto flex items-center justify-center text-3xl font-black text-black mb-4 shadow-inner">
+                {{ member.name[0] }}
+            </div>
+            <h2 class="text-2xl font-black text-slate-800">{{ member.name }}</h2>
+            <p class="text-slate-500 font-medium text-sm">{{ member.email }}</p>
+
+            <div class="mt-6 flex justify-center gap-4">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Points</p>
+                    <p class="text-xl font-black text-blue-600">{{ member.points }}</p>
+                </div>
+                <div class="w-px h-8 bg-slate-100 self-center"></div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Engagement</p>
+                    <p class="text-xl font-black text-green-600">{{ "%.0f"|format(member.engagement_score * 100) }}%</p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-slate-100">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Onboarding Status</p>
+                <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
+                    <span class="text-sm font-bold text-slate-700">{{ member.onboarding_status }}</span>
+                    <i class="fa-solid fa-circle-check text-green-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-2xl p-8 text-white shadow-xl">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
+                Quick Booking
+            </h3>
+            <form action="{{ url_for('member.member_book_session') }}" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Unit</label>
+                    <select name="equipment_id" class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-yellow-400">
+                        {% for unit in equipment %}
+                        <option value="{{ unit.id }}">{{ unit.equipment_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</label>
+                    <input type="datetime-local" name="start_time" required class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-yellow-400">
+                </div>
+                <button type="submit" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-black rounded-xl font-bold transition-all shadow-lg active:scale-95">
+                    Reserve Slot
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Progress Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center justify-between">
+                Activity Breakdown
+                <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Last 7 Days</span>
+            </h3>
+            <div class="h-64">
+                <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Workout History (v4.7.0) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Recent Workout History</h3>
+                <i class="fa-solid fa-person-running text-slate-400"></i>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                            <th class="px-6 py-4">Date/Time</th>
+                            <th class="px-6 py-4">Unit</th>
+                            <th class="px-6 py-4">Scans</th>
+                            <th class="px-6 py-4">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for workout in workout_history %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-700">{{ workout.timestamp }}</td>
+                            <td class="px-6 py-4 text-xs">{{ workout.equipment }}</td>
+                            <td class="px-6 py-4 text-xs font-black text-blue-600">{{ workout.scans }}</td>
+                            <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ workout.duration }} min</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 italic text-sm">No workouts recorded yet. Get moving!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upcoming Sessions -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Your Scheduled Sessions</h3>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">{{ upcoming_sessions|length }} Upcoming</span>
+            </div>
+            <div class="divide-y divide-slate-100">
+                {% for session in upcoming_sessions %}
+                <div class="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-50 text-blue-500 w-10 h-10 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800">{{ session.start_time }}</p>
+                            <p class="text-xs text-slate-500 font-medium">{{ session.equipment_name }} • {{ session.duration_minutes }} min</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase {{ 'bg-blue-100 text-blue-700' if session.status == 'Scheduled' else 'bg-green-100 text-green-700' }}">
+                        {{ session.status }}
+                    </span>
+                </div>
+                {% else %}
+                <div class="p-12 text-center">
+                    <div class="text-slate-200 text-4xl mb-2">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium italic">No sessions scheduled. Book one on the left!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Payments (v3.9.2) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Membership Payments</h3>
+                <i class="fa-solid fa-credit-card text-slate-400"></i>
+            </div>
+            <div class="divide-y divide-slate-100">
+                {% for payment in payments %}
+                <div class="p-6 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                    <div>
+                        <p class="font-bold text-slate-800">${{ "%.2f"|format(payment.amount) }} {{ payment.currency }}</p>
+                        <p class="text-[10px] text-slate-400 font-medium uppercase">{{ payment.timestamp }} • {{ payment.transaction_id }}</p>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-green-100 text-green-700">
+                        {{ payment.status }}
+                    </span>
+                </div>
+                {% else %}
+                <div class="p-12 text-center text-slate-400 italic text-sm">No payment history found.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- User Feedback (v3.9.1) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-comment-dots text-blue-500"></i>
+                Pilot Feedback
+            </h3>
+            <form action="{{ url_for('member.member_submit_feedback') }}" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rating</label>
+                        <select name="rating" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ - Very Good</option>
+                            <option value="3">⭐⭐⭐ - Satisfactory</option>
+                            <option value="2">⭐⭐ - Fair</option>
+                            <option value="1">⭐ - Poor</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</label>
+                        <select name="category" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="Equipment">Equipment Performance</option>
+                            <option value="Experience">Workout Experience</option>
+                            <option value="Support">Staff Support</option>
+                            <option value="General">General Feedback</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Your Comments</label>
+                    <textarea name="comment" rows="3" placeholder="How was your session today? Any suggestions for improvement?" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95">
+                    Submit Feedback
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|tojson }},
+            datasets: [{
+                label: 'Points Earned',
+                data: {{ chart_data|tojson }},
+                backgroundColor: '#3b82f6',
+                borderRadius: 8,
+                barThickness: 20
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}
