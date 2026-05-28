@@ -83,6 +83,16 @@ def initialize_db():
         print("Adding region_cluster to leads...")
         cursor.execute("ALTER TABLE leads ADD COLUMN region_cluster TEXT DEFAULT 'US-EAST-1'")
 
+    # Hardware Check-in migrations (v5.2.0)
+    cursor.execute("PRAGMA table_info(member)")
+    member_columns = [column[1] for column in cursor.fetchall()]
+    if "biometric_token" not in member_columns:
+        print("Adding biometric_token to member table...")
+        cursor.execute("ALTER TABLE member ADD COLUMN biometric_token TEXT UNIQUE")
+    if "nfc_uid" not in member_columns:
+        print("Adding nfc_uid to member table...")
+        cursor.execute("ALTER TABLE member ADD COLUMN nfc_uid TEXT UNIQUE")
+
     for col, definition in migrations.items():
         if col not in columns:
             print(f"Adding {col} column...")

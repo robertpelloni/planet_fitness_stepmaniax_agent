@@ -5,7 +5,7 @@
 - [x] **MFA & Multi-Tenant Hardening:** Secure per-user authentication and data isolation.
 - [x] **Multi-Region Cluster Support:** Data sharding and filtering by geographic region (v5.1.0).
 - **Enterprise GraphQL Ingestion:** Support for third-party BI tools to query fleet-wide engagement.
-- **Biometric Check-in Integration:** Direct SMX hardware support for member identification.
+- [x] **Biometric Check-in Integration:** Direct SMX hardware support for member identification (v5.2.0).
 
 ## Phase 12: Scalability & Enterprise Hardening (v4.6.0 - v5.0.0) [COMPLETED]
 - [x] **Advanced Scheduling & Class Management:** Complete the teacher/staff interface for granular session control.

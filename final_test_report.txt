@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0 -- /app/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /app
+plugins: base-url-2.1.0, playwright-0.8.0
+collecting ... ERROR: file or directory not found: tests/integration/test_member_api.py
+
+collected 0 items
+
+============================ no tests ran in 0.01s =============================

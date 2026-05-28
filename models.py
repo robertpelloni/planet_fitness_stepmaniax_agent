@@ -77,6 +77,8 @@ class Member(db.Model):
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
     points = db.Column(db.Integer, default=0)
     engagement_score = db.Column(db.Float, default=0.0)
+    biometric_token = db.Column(db.String(100), unique=True)
+    nfc_uid = db.Column(db.String(50), unique=True)
 
 class Lead(db.Model):
     __tablename__ = 'leads'

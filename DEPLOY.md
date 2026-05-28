@@ -70,6 +70,8 @@ server {
 - **Enterprise Data Exchange:** (v4.8.0)
   - `GET /api/v1/enterprise/export`: Pull aggregated fleet telemetry, engagement, and sentiment.
   - `GET /api/v1/enterprise/leads`: Synchronize lead portfolio with corporate CRM.
+- **Hardware Check-in Integration:** (v5.2.0)
+  - `POST /api/v1/telemetry/check-in`: Process secure NFC/Biometric check-ins.
 
 ## 8. Multi-Factor Authentication & API Governance (v4.9.0)
 ### API Key Governance

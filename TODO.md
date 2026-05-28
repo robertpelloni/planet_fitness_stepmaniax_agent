@@ -1,6 +1,7 @@
 # TODO - Immediate Actions
 
-## Infrastructure & Maintenance (v5.1.x)
+## Infrastructure & Maintenance (v5.2.x)
+- [x] **Hardware Check-in API:** Secure NFC/Biometric check-in endpoint (v5.2.0).
 - [x] **Multi-Region Filtering:** Admin dashboard now supports `?region=` filtering (v5.1.0).
 - [ ] Implement log rotation for `server.log` and `campaign_launch.log`.
 - [ ] Add unit tests for `backup_job.py`.

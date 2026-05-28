@@ -340,6 +340,112 @@ def api_sync_members():
     db.session.commit()
     return results, 200
 
+@api_bp.route('/api/v1/telemetry/check-in', methods=['POST'])
+@require_api_key
+def api_hardware_checkin():
+    """
+    Hardware Check-in Integration (v5.2.0): Process secure NFC and biometric check-ins
+    directly from SMX commercial units.
+    """
+    data = request.get_json()
+    if not data:
+        return {"error": "Invalid check-in packet"}, 400
+
+    nfc_uid = data.get('nfc_uid')
+    biometric_token = data.get('biometric_token')
+    equipment_id = data.get('equipment_id')
+
+    if not equipment_id:
+        return {"error": "Equipment ID required"}, 400
+
+    member = None
+    if nfc_uid:
+        member = Member.query.filter_by(nfc_uid=nfc_uid).first()
+    elif biometric_token:
+        member = Member.query.filter_by(biometric_token=biometric_token).first()
+
+    if not member:
+        return {"error": "Member not identified"}, 404
+
+    # Log the check-in as a session start
+    history = TelemetryHistory(
+        equipment_id=equipment_id,
+        member_id=member.id,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        scans_count=1 # Initial check-in scan
+    )
+    db.session.add(history)
+
+    # Update member stats
+    member.points += 1
+    db.session.commit()
+
+    return {
+        "status": "success",
+        "member_name": member.name,
+        "points_total": member.points
+    }, 200
+
+@api_bp.route('/api/v1/auth/member-login', methods=['POST'])
+@require_api_key
+def api_member_login():
+    """
+    Secure Member Auth (v5.3.0): Token-based authentication for external member dashboards.
+    """
+    data = request.get_json()
+    if not data or 'email' not in data or 'password' not in data:
+        return {"error": "Email and password required"}, 400
+
+    user = User.query.filter_by(username=data['email'], role='Member').first()
+    if user and user.check_password(data['password']):
+        if user.is_locked:
+            return {"error": "Account is locked"}, 403
+
+        member = Member.query.filter_by(user_id=user.id).first()
+        return {
+            "status": "authenticated",
+            "member_id": member.id if member else None,
+            "name": member.name if member else user.username,
+            "session_token": secrets.token_urlsafe(32) # Mock session token for stateless dashboard
+        }, 200
+
+    return {"error": "Invalid credentials"}, 401
+
+@api_bp.route('/api/v1/schedules/book', methods=['POST'])
+@require_api_key
+def api_book_session():
+    """
+    Stateless Scheduling (v5.3.0): External booking management for SMX units.
+    """
+    data = request.get_json()
+    if not data or not all(k in data for k in ['member_id', 'equipment_id', 'start_time']):
+        return {"error": "Missing booking details"}, 400
+
+    # Concurrency Guard: Check for existing booking on that unit at that time
+    existing = MemberSchedule.query.filter_by(
+        equipment_id=data['equipment_id'],
+        start_time=data['start_time'].replace('T', ' ')
+    ).first()
+
+    if existing:
+        return {"error": "Slot already occupied"}, 409
+
+    new_booking = MemberSchedule(
+        member_id=data['member_id'],
+        member_name=data.get('member_name', 'External Booking'),
+        equipment_id=data['equipment_id'],
+        start_time=data['start_time'].replace('T', ' '),
+        duration_minutes=int(data.get('duration_minutes', 15)),
+        status='Scheduled'
+    )
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return {
+        "status": "confirmed",
+        "booking_id": new_booking.id
+    }, 201
+
 @api_bp.route('/api/v1/enterprise/export', methods=['GET'])
 @require_api_or_role(['Admin'])
 def api_enterprise_export():

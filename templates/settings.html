@@ -207,6 +207,39 @@
         </div>
     </div>
 
+    {% if current_user.role == 'Member' %}
+    <!-- Member: Hardware Tokens (v5.2.0) -->
+    <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1">
+            <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest">Hardware Check-in</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                Manage your secure NFC and biometric tokens for instant check-in on StepManiaX units.
+            </p>
+        </div>
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="update_hardware_tokens"/>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">NFC UID</label>
+                            <input type="text" name="nfc_uid" value="{{ current_user.member.nfc_uid if current_user.member else '' }}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biometric Token</label>
+                            <input type="text" name="biometric_token" value="{{ current_user.member.biometric_token if current_user.member else '' }}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                        Update Hardware Tokens
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if current_user.role == 'Admin' %}
     <div class="pt-8 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="md:col-span-1">

@@ -341,6 +341,15 @@ def settings():
             log_security_event(current_user.id, "API key rotated")
             flash("New API Key generated.")
 
+        elif action == 'update_hardware_tokens':
+            member = Member.query.filter_by(user_id=current_user.id).first()
+            if member:
+                member.nfc_uid = request.form.get('nfc_uid')
+                member.biometric_token = request.form.get('biometric_token')
+                db.session.commit()
+                log_security_event(current_user.id, "Hardware check-in tokens updated")
+                flash("Hardware tokens updated successfully.")
+
         return redirect(url_for('auth.settings'))
 
     search_query = request.args.get('q', '')
