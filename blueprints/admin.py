@@ -129,16 +129,31 @@ def admin_launch_campaign():
 @login_required
 @role_required(['Admin'])
 def admin_command_center():
+    region = request.args.get('region')
     automation_status = AutomationHeartbeat.query.all()
-    total_units = EquipmentMetric.query.count()
-    active_alerts = Alert.query.filter_by(is_resolved=False).count()
-    total_scans = db.session.query(db.func.sum(EquipmentMetric.total_scans)).scalar() or 0
-    avg_uptime = db.session.query(db.func.avg(EquipmentMetric.uptime_percent)).scalar() or 0
+
+    query_metrics = EquipmentMetric.query
+    if region:
+        query_metrics = query_metrics.filter_by(region_cluster=region)
+
+    metrics = query_metrics.all()
+    total_units = len(metrics)
+
+    active_alerts_query = Alert.query.filter_by(is_resolved=False)
+    if region:
+        metric_ids = [m.id for m in metrics]
+        active_alerts_query = active_alerts_query.filter(Alert.equipment_id.in_(metric_ids))
+    active_alerts = active_alerts_query.count()
+
+    total_scans = sum(m.total_scans for m in metrics)
+    avg_uptime = sum(m.uptime_percent for m in metrics) / total_units if total_units > 0 else 0
 
     from models import TelemetryHistory
-    live_sessions = db.session.query(TelemetryHistory.member_id).distinct().limit(10).count()
-
-    metrics = EquipmentMetric.query.all()
+    live_sessions_query = db.session.query(TelemetryHistory.member_id).distinct()
+    if region:
+        metric_ids = [m.id for m in metrics]
+        live_sessions_query = live_sessions_query.filter(TelemetryHistory.equipment_id.in_(metric_ids))
+    live_sessions = live_sessions_query.limit(10).count()
     alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
 
     # Recent Security Audit (v4.7.0)

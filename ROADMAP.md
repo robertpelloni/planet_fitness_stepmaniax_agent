@@ -3,6 +3,7 @@
 ## Phase 13: Live Ops & Enterprise Maturity (v5.0.0+)
 - [x] **Live Ops Intelligence Center:** High-visibility Wallboard for real-time facility monitoring.
 - [x] **MFA & Multi-Tenant Hardening:** Secure per-user authentication and data isolation.
+- [x] **Multi-Region Cluster Support:** Data sharding and filtering by geographic region (v5.1.0).
 - **Enterprise GraphQL Ingestion:** Support for third-party BI tools to query fleet-wide engagement.
 - **Biometric Check-in Integration:** Direct SMX hardware support for member identification.
 

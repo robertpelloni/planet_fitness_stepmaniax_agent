@@ -72,6 +72,17 @@ def initialize_db():
             print(f"Adding {col} column to user table...")
             cursor.execute(f"ALTER TABLE user ADD COLUMN {col} {definition}")
 
+    # Regional Cluster migrations (v5.1.0)
+    cursor.execute("PRAGMA table_info(equipment_metric)")
+    eq_columns = [column[1] for column in cursor.fetchall()]
+    if "region_cluster" not in eq_columns:
+        print("Adding region_cluster to equipment_metric...")
+        cursor.execute("ALTER TABLE equipment_metric ADD COLUMN region_cluster TEXT DEFAULT 'US-EAST-1'")
+
+    if "region_cluster" not in columns:
+        print("Adding region_cluster to leads...")
+        cursor.execute("ALTER TABLE leads ADD COLUMN region_cluster TEXT DEFAULT 'US-EAST-1'")
+
     for col, definition in migrations.items():
         if col not in columns:
             print(f"Adding {col} column...")

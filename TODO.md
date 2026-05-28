@@ -1,6 +1,7 @@
 # TODO - Immediate Actions
 
-## Infrastructure & Maintenance (v5.0.x)
+## Infrastructure & Maintenance (v5.1.x)
+- [x] **Multi-Region Filtering:** Admin dashboard now supports `?region=` filtering (v5.1.0).
 - [ ] Implement log rotation for `server.log` and `campaign_launch.log`.
 - [ ] Add unit tests for `backup_job.py`.
 - [ ] Implement automated restoration test in a staging environment.

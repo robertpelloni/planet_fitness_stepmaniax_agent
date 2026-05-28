@@ -45,6 +45,7 @@ class EquipmentMetric(db.Model):
     maintenance_status = db.Column(db.String(50), default='Operational') # 'Operational', 'Needs Maintenance'
     last_heartbeat = db.Column(db.String(50))
     predictive_health_score = db.Column(db.Float, default=100.0)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,6 +97,7 @@ class Lead(db.Model):
     last_contact_date = db.Column(db.String(50))
     public_token = db.Column(db.String(100), unique=True)
     portal_views = db.Column(db.Integer, default=0)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'
