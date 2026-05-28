@@ -413,3 +413,54 @@ def api_enterprise_leads():
         "count": len(lead_data),
         "leads": lead_data
     }, 200
+
+@api_bp.route('/api/v1/analytics/live-occupancy', methods=['GET'])
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
+def api_live_occupancy():
+    """Live Occupancy Analytics (v5.0.0): Real-time unit intensity and staff presence."""
+    if current_user.is_authenticated:
+        franchise_id = current_user.franchise_id
+        is_admin = (current_user.role == 'Admin')
+    else:
+        franchise_id = request.args.get('franchise_id')
+        is_admin = not franchise_id
+
+    if is_admin:
+        units = EquipmentMetric.query.all()
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    unit_intensity = []
+    total_active_scans = 0
+
+    for u in units:
+        # Intensity based on scans in the last 15 minutes
+        from datetime import timedelta
+        cutoff = (datetime.now() - timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+        recent_scans = TelemetryHistory.query.filter(
+            TelemetryHistory.equipment_id == u.id,
+            TelemetryHistory.timestamp >= cutoff
+        ).count()
+
+        intensity = min(1.0, recent_scans / 10.0) # Scale 0-1
+        unit_intensity.append({
+            "unit_id": u.id,
+            "name": u.equipment_name,
+            "intensity": intensity,
+            "scans": recent_scans
+        })
+        total_active_scans += recent_scans
+
+    # Simulated staff presence from schedules
+    from models import MemberSchedule
+    active_shifts = MemberSchedule.query.filter(
+        MemberSchedule.status == 'Scheduled',
+        MemberSchedule.start_time.contains(datetime.now().strftime("%Y-%m-%d"))
+    ).count()
+
+    return {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "total_active_scans": total_active_scans,
+        "active_staff": active_shifts,
+        "units": unit_intensity
+    }, 200

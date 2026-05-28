@@ -22,3 +22,5 @@ requests==2.31.0
 soupsieve==2.5
 typing_extensions==4.10.0
 urllib3==2.2.1
+pyotp==2.9.0
+qrcode==7.4.2

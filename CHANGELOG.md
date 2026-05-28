@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - Live Ops Intelligence Center
+- **Live Ops Wallboard:** Launched a high-visibility facility intelligence center featuring real-time unit intensity heatmaps and staff presence tracking.
+- **Real-time Occupancy Analytics:** Implemented `/api/v1/analytics/live-occupancy` to provide millisecond-accurate scan density data via HTMX polling.
+- **Wallboard UI:** Developed a high-contrast, dark-mode wallboard optimized for high-traffic gym environments.
+- **Enterprise Milestone:** Completed Phase 12 goals, establishing a production-grade, secure management ecosystem for StepManiaX pilots.
+
+## [4.9.0] - Multi-Factor Auth & API Governance
+- **Multi-Factor Authentication:** Launched TOTP-based 2FA (Google Authenticator compatible) for all management accounts.
+- **Per-User API Keys:** Transitioned from a static global API key to decentralized, per-user API keys with secure rotation capabilities.
+- **Self-Service Password Recovery:** Implemented a secure, token-based "Forgot Password" workflow with complexity enforcement.
+- **UI Hardening:** Integrated MFA enrollment and API governance into the platform Settings.
+
 ## [4.8.0] - Enterprise Data Exchange API
 - **Enterprise Reporting API:** Launched secure `/api/v1/enterprise/export` for external BI tool integration, providing aggregated fleet telemetry, engagement, and sentiment data.
 - **Corporate CRM Sync:** Implemented `/api/v1/enterprise/leads` for real-time lead portfolio synchronization with enterprise CRM systems.

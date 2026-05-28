@@ -39,14 +39,17 @@ def permission_required(permission_attr):
 def require_api_or_role(roles):
     """Advanced decorator for v3.9.2 that handles API-Key (Global scope) or Role-Based session access."""
     from flask import request
-    import config
+    from models import User
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             # 1. Check for valid API Key (provides Global scope)
             api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-            if api_key and api_key == config.API_KEY:
-                return f(*args, **kwargs)
+            if api_key:
+                user = User.query.filter_by(api_key=api_key).first()
+                if user:
+                    # Optional: Set current_user or scope based on user
+                    return f(*args, **kwargs)
 
             # 2. Check for Authenticated Session
             if not current_user.is_authenticated:
@@ -63,11 +66,16 @@ def require_api_or_role(roles):
 def require_api_key(f):
     """Simple API Key or Session check for public/semi-public APIs."""
     from flask import request
-    import config
+    from models import User
     @wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-        if (api_key and api_key == config.API_KEY) or (current_user and current_user.is_authenticated):
+        if api_key:
+            user = User.query.filter_by(api_key=api_key).first()
+            if user:
+                return f(*args, **kwargs)
+
+        if current_user and current_user.is_authenticated:
             return f(*args, **kwargs)
         return {"error": "Unauthorized access. API-KEY or Session required."}, 401
     return decorated_function

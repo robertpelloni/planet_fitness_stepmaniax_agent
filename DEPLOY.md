@@ -71,7 +71,14 @@ server {
   - `GET /api/v1/enterprise/export`: Pull aggregated fleet telemetry, engagement, and sentiment.
   - `GET /api/v1/enterprise/leads`: Synchronize lead portfolio with corporate CRM.
 
-## 8. Integration Testing (v4.5.0)
+## 8. Multi-Factor Authentication & API Governance (v4.9.0)
+### API Key Governance
+API keys are now generated per-user. Users can rotate their keys in the **Settings > Enterprise Access** section. The global `SMX_API_KEY` in `config.py` is deprecated.
+
+### MFA Enrollment
+Management accounts should enable TOTP-based 2FA. Enrollment is available in **Settings > Enterprise Access**. Once enabled, a verification code is required during the login sequence.
+
+## 9. Integration Testing (v4.5.0)
 To verify UI integrity and core user flows, execute the Playwright integration suite:
 ```bash
 pytest tests/integration/test_ui.py

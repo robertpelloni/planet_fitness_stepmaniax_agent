@@ -289,3 +289,27 @@ def manager_dashboard():
                            security_logs=security_logs,
                            recent_payments=recent_payments,
                            franchise_name=franchise_name)
+
+@staff_bp.route('/staff/live-ops')
+@login_required
+@role_required(['Admin', 'Staff', 'Franchisee'])
+def live_ops_wallboard():
+    """Live Ops Intelligence Center (v5.0.0): Real-time facility wallboard."""
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+
+    if is_admin:
+        units = EquipmentMetric.query.all()
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    from models import Lead
+    franchise_name = "Global Fleet"
+    if franchise_id:
+        lead = Lead.query.get(franchise_id)
+        if lead:
+            franchise_name = lead.company
+
+    return render_template('live_ops_wallboard.html',
+                           units=units,
+                           franchise_name=franchise_name)

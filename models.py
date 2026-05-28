@@ -12,6 +12,13 @@ class User(UserMixin, db.Model):
     failed_login_attempts = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
 
+    # Security Enhancements (v4.9.0)
+    mfa_secret = db.Column(db.String(32))
+    mfa_enabled = db.Column(db.Boolean, default=False)
+    api_key = db.Column(db.String(64), unique=True)
+    reset_token = db.Column(db.String(100), unique=True)
+    reset_token_expiry = db.Column(db.String(50))
+
     # Granular Permissions (v4.0.0)
     perm_crm_view = db.Column(db.Boolean, default=True)
     perm_crm_edit = db.Column(db.Boolean, default=False)

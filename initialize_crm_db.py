@@ -59,6 +59,19 @@ def initialize_db():
         "portal_views": "INTEGER DEFAULT 0"
     }
 
+    # User table migrations (v4.9.0)
+    cursor.execute("PRAGMA table_info(user)")
+    user_columns = [column[1] for column in cursor.fetchall()]
+    user_migrations = {
+        "mfa_secret": "TEXT",
+        "mfa_enabled": "BOOLEAN DEFAULT 0",
+        "api_key": "TEXT UNIQUE"
+    }
+    for col, definition in user_migrations.items():
+        if col not in user_columns:
+            print(f"Adding {col} column to user table...")
+            cursor.execute(f"ALTER TABLE user ADD COLUMN {col} {definition}")
+
     for col, definition in migrations.items():
         if col not in columns:
             print(f"Adding {col} column...")
