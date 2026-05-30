@@ -246,14 +246,24 @@ def staff_api_alerts():
 def live_ops_wallboard():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        units = EquipmentMetric.query.all()
+        query = EquipmentMetric.query
+        if region:
+            query = query.filter_by(region_cluster=region)
+        units = query.all()
+        all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
     else:
         units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        all_regions = []
 
     franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global Fleet"
+    if region:
+        franchise_name += f" - {region}"
 
     return render_template('live_ops_wallboard.html',
                            units=units,
-                           franchise_name=franchise_name)
+                           franchise_name=franchise_name,
+                           all_regions=all_regions,
+                           current_region=region)

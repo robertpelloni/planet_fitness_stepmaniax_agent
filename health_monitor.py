@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta
 import analytics
 from notifications import send_notification
@@ -7,11 +9,21 @@ from app import app, db
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
 
+# --- Log Rotation Setup ---
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+logger = logging.getLogger('health_monitor')
+handler = RotatingFileHandler('logs/health_monitor.log', maxBytes=10240, backupCount=10)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 def monitor_health():
     """
     Scans equipment metrics and generates alerts for operational anomalies.
     """
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Health Monitor...")
+    logger.info("Starting Health Monitor...")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -64,7 +76,7 @@ def monitor_health():
 
     conn.commit()
     conn.close()
-    print("Health Monitor check complete.")
+    logger.info("Health Monitor check complete.")
 
 def generate_alert(cursor, severity, message, equipment_id):
     """
@@ -77,7 +89,7 @@ def generate_alert(cursor, severity, message, equipment_id):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved, equipment_id) VALUES (?, ?, ?, 0, ?)",
                    (severity, message, timestamp, equipment_id))
-    print(f"Alert Generated: [{severity}] {message}")
+    logger.warning(f"Alert Generated: [{severity}] {message}")
 
     # Send Notification (Franchise filtering)
     cursor.execute("SELECT location FROM equipment_metric WHERE id = ?", (equipment_id,))
@@ -104,7 +116,7 @@ def process_cadence(cursor):
 
     for lead in due_leads:
         msg = f"🔔 FOLLOW-UP DUE: {lead['company']} is ready for Cadence Touch #{lead['follow_up_count'] + 1}."
-        print(msg)
+        logger.info(msg)
         with app.app_context():
             send_notification(msg)
 
@@ -115,5 +127,5 @@ if __name__ == "__main__":
         try:
             monitor_health()
         except Exception as e:
-            print(f"Health Monitor encountered an error: {e}")
+            logger.error(f"Health Monitor encountered an error: {e}")
         time.sleep(60)

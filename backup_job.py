@@ -1,10 +1,22 @@
 import sqlite3
 import os
 import shutil
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
 BACKUP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backups')
+
+# --- Log Rotation Setup ---
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+logger = logging.getLogger('backup_job')
+handler = RotatingFileHandler('logs/backup_job.log', maxBytes=10240, backupCount=10)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def run_backup():
     """
@@ -25,13 +37,13 @@ def run_backup():
         source.close()
         dest.close()
 
-        print(f"[{datetime.now()}] Backup successful: {backup_file}")
+        logger.info(f"Backup successful: {backup_file}")
 
         # Log to heartbeat
         log_heartbeat('Database Backup', 'Healthy')
         return True
     except Exception as e:
-        print(f"[{datetime.now()}] Backup failed: {e}")
+        logger.error(f"Backup failed: {e}")
         log_heartbeat('Database Backup', f'Failed: {e}')
         return False
 
@@ -48,7 +60,7 @@ def log_heartbeat(task_name, status):
         conn.commit()
         conn.close()
     except Exception as e:
-        print(f"Failed to log heartbeat for {task_name}: {e}")
+        logger.error(f"Failed to log heartbeat for {task_name}: {e}")
 
 if __name__ == "__main__":
     run_backup()

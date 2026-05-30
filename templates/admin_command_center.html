@@ -10,6 +10,23 @@
             <p class="text-slate-500 font-medium">Fleet-Wide Operational Intelligence</p>
         </div>
         <div class="flex items-center gap-4">
+            {% if all_regions %}
+            <div class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Region</span>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('admin.admin_command_center') }}"
+                       class="px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all {% if not current_region %}bg-slate-900 text-white{% else %}text-slate-500 hover:bg-slate-100{% endif %}">
+                        All
+                    </a>
+                    {% for region in all_regions %}
+                    <a href="{{ url_for('admin.admin_command_center', region=region) }}"
+                       class="px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all {% if current_region == region %}bg-slate-900 text-white{% else %}text-slate-500 hover:bg-slate-100{% endif %}">
+                        {{ region }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             <a href="{{ url_for('admin.admin_optimization') }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-blue-500"></i> Optimization
             </a>

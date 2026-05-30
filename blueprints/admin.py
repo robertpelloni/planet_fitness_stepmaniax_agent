@@ -28,12 +28,34 @@ def dashboard():
     # Multi-tenant logic: Filter by franchise_id if user is not an Admin
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).group_by(Lead.status).all()
-        metrics = EquipmentMetric.query.all()
-        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
-        leads_list = Lead.query.all()
+        query_leads = Lead.query
+        query_metrics = EquipmentMetric.query
+        query_members = Member.query
+
+        if region:
+            query_leads = query_leads.filter_by(region_cluster=region)
+            query_metrics = query_metrics.filter_by(region_cluster=region)
+            query_members = query_members.filter(Member.franchise_id.in_(
+                db.session.query(Lead.id).filter_by(region_cluster=region)
+            ))
+
+        crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count'))
+        if region: crm_stats = crm_stats.filter_by(region_cluster=region)
+        crm_stats = crm_stats.group_by(Lead.status).all()
+
+        metrics = query_metrics.all()
+
+        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id))
+        if region:
+            onboarding_stats = onboarding_stats.filter(Member.franchise_id.in_(
+                db.session.query(Lead.id).filter_by(region_cluster=region)
+            ))
+        onboarding_stats = onboarding_stats.group_by(Member.onboarding_status).all()
+
+        leads_list = query_leads.all()
     else:
         crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).filter_by(id=franchise_id).group_by(Lead.status).all()
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
@@ -82,8 +104,12 @@ def dashboard():
         leads_list.sort(key=lambda x: x.propensity_score, reverse=True)
 
     franchise_name = "Global Admin"
+    if region:
+        franchise_name = f"Global Admin - {region}"
     if not is_admin and leads_list:
         franchise_name = leads_list[0].company
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
 
     return render_template('dashboard.html',
                            crm_stats=crm_stats,
@@ -93,7 +119,9 @@ def dashboard():
                            leads_list=leads_list,
                            onboarding_stats=onboarding_dict,
                            is_admin=is_admin,
-                           franchise_name=franchise_name)
+                           franchise_name=franchise_name,
+                           all_regions=all_regions,
+                           current_region=region)
 
 @admin_bp.route('/feedback')
 @login_required
@@ -207,6 +235,7 @@ def admin_launch_campaign():
 @role_required(['Admin'])
 def admin_command_center():
     region = request.args.get('region')
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
     automation_status = AutomationHeartbeat.query.all()
 
     query_metrics = EquipmentMetric.query
@@ -245,7 +274,9 @@ def admin_command_center():
                            metrics=metrics,
                            alerts=alerts,
                            automation_status=automation_status,
-                           recent_security=recent_security)
+                           recent_security=recent_security,
+                           all_regions=all_regions,
+                           current_region=region)
 
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required

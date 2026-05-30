@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.5.0]
+- **Multi-Region Cluster Support:** Implemented `region_cluster` filtering across Admin and Staff dashboards to support international expansion.
+- **Enhanced Background Logging:** Integrated `RotatingFileHandler` into `health_monitor.py` and `backup_job.py`.
+
 ## [5.4.1]
 - **Repository Consolidation:** Successfully merged `feat/lead-research-v0.4.0` containing advanced hardware integration, MFA, and enterprise API features.
 - **Security Hardening:** Integrated TOTP-based Multi-Factor Authentication and secure session cookie policies.

@@ -509,8 +509,13 @@ def api_live_occupancy():
         franchise_id = request.args.get('franchise_id')
         is_admin = not franchise_id
 
+    region = request.args.get('region')
+
     if is_admin:
-        units = EquipmentMetric.query.all()
+        query = EquipmentMetric.query
+        if region:
+            query = query.filter_by(region_cluster=region)
+        units = query.all()
     else:
         units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
 
