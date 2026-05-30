@@ -15,6 +15,7 @@ env/
 
 # CRM Database
 crm.db
+backups/
 
 # Logs
 *.log
