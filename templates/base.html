@@ -39,7 +39,8 @@
 
                         {% if current_user.role in ['Admin', 'Staff'] %}
                             <a href="{{ url_for('staff.staff_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Staff Portal</a>
-                            <a href="{{ url_for('staff.facility_operations') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Live Ops</a>
+                            <a href="{{ url_for('staff.facility_operations') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Ops Center</a>
+                            <a href="{{ url_for('staff.live_ops_wallboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-black text-yellow-400">LIVE OPS</a>
                         {% endif %}
 
                         {% if current_user.role == 'Member' %}

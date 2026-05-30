@@ -10,6 +10,11 @@ TARGET_GROUPS = [
     {"name": "Excel Fitness", "url": "https://www.excelfitness.com/leadership"}, # Inferred
     {"name": "Grand Fitness Partners", "url": "https://grandfitnesspartners.com/team"}, # Inferred
     {"name": "United Fitness Partners", "url": "https://pffranchisee.org/united-fp-rings-in-the-new-year-with-big-leadership-changes/"},
+    {"name": "United Fitness Partners", "url": "https://www.unitedpf.com/leadership/"}, # Updated URL
+    {"name": "Flynn Group", "url": "https://flynn.com/flynn-fitness/"},
+    {"name": "CDM Fitness Holdings", "url": "https://www.fitearth.com/"},
+    {"name": "Ohana Growth Partners", "url": "https://www.ohanagp.com/team"},
+    {"name": "EPIC Fitness Group", "url": "https://www.epicfitnessgroup.com/"}
 ]
 
 OUTPUT_FILE = "franchise_leads.csv"
@@ -18,6 +23,20 @@ def scrape_leadership(group):
     """
     Scrapes a franchise group's leadership/team page.
     """
+def is_junk(text):
+    junk_keywords = [
+        "lorem", "ipsum", "dolor", "sit", "amet",
+        "locations totals", "loading details", "loading location",
+        "apply now", "join our team", "careers",
+        "premier zone", "judgement free", "all rights reserved"
+    ]
+    if not text: return True
+    text_lower = text.lower()
+    if any(junk in text_lower for junk in junk_keywords): return True
+    if len(text) < 3 or len(text) > 100: return True
+    return False
+
+def scrape_leadership_playwright(browser, group):
     name = group['name']
     url = group['url']
     print(f"--- Scraping {name} via Playwright at {url} ---")
@@ -70,6 +89,47 @@ def scrape_leadership(group):
 
     print(f"Found {len(leads)} potential leads for {name}.")
     return leads
+    # Improved Parsing Heuristics
+    # Look for common containers like 'team-member', 'person', 'staff'
+    potential_leads = []
+
+    # Try finding elements with 'CEO', 'President', 'Director', 'Manager'
+    keywords = ["CEO", "President", "Director", "Manager", "Founder", "VP", "Vice President"]
+
+    for tag in soup.find_all(['h2', 'h3', 'h4', 'h5', 'strong']):
+        text = tag.get_text(separator=' ').strip()
+        if is_junk(text): continue
+
+        # Check if this element or its siblings contain a leadership keyword
+        parent = tag.parent
+        combined_text = parent.get_text(separator=' ')
+
+        if any(kw in combined_text for kw in keywords):
+            # Attempt to extract Name and Title
+            # Usually the heading is the name
+            full_name = text
+            # Find the title (often in a p or span sibling or child)
+            title = "Leadership"
+            for sibling in tag.find_next_siblings(['p', 'span', 'div']):
+                sib_text = sibling.get_text().strip()
+                if any(kw in sib_text for kw in keywords):
+                    title = sib_text
+                    break
+
+            if len(full_name.split()) > 1 and len(full_name.split()) < 5:
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
+
+    # Deduplicate
+    unique_leads = []
+    seen = set()
+    for lead in leads:
+        key = (lead['Name'], lead['Franchise Group'])
+        if key not in seen:
+            unique_leads.append(lead)
+            seen.add(key)
+
+    print(f"Found {len(unique_leads)} potential leads for {name}.")
+    return unique_leads
 
 def save_to_csv(leads, filename):
     if not leads:

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}2FA Verification - StepManiaX B2B{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-12">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 p-8 text-center">
+            <div class="inline-block bg-yellow-400 text-black px-3 py-1 rounded-md font-black text-2xl mb-4">SMX</div>
+            <h2 class="text-white text-2xl font-bold">Two-Factor Authentication</h2>
+            <p class="text-slate-400 text-sm mt-2 font-medium">Please enter your verification code</p>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest block">Verification Code</label>
+                <input type="text" name="token" required autofocus autocomplete="one-time-code"
+                    class="block w-full px-3 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-center text-2xl font-bold tracking-[0.5em]"
+                    placeholder="000000">
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-yellow-400 hover:bg-yellow-500 text-black rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-sm">
+                Verify & Login
+            </button>
+
+            <div class="text-center">
+                <a href="{{ url_for('auth.login') }}" class="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
+                    ← Back to Login
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

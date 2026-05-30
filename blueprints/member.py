@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user
-from models import db, Member, EquipmentMetric, TelemetryHistory, Payment, Feedback
+from models import db, Member, EquipmentMetric, MemberSchedule, TelemetryHistory, Payment, Feedback
 from datetime import datetime
 
 member_bp = Blueprint('member', __name__)
@@ -9,7 +9,7 @@ member_bp = Blueprint('member', __name__)
 @login_required
 def member_dashboard():
     if current_user.role != 'Member':
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('dashboard'))
 
     member = Member.query.filter_by(user_id=current_user.id).first()
     if not member:
@@ -18,15 +18,11 @@ def member_dashboard():
 
     if request.method == 'POST':
         member.name = request.form.get('name')
-        # We don't allow email change for now as it's the username
         db.session.commit()
         flash("Profile updated successfully!")
 
-    # Get available equipment for the member's franchise
     equipment = EquipmentMetric.query.filter_by(franchise_id=member.franchise_id).all()
 
-    # Get member's upcoming sessions
-    from models import MemberSchedule
     upcoming_sessions = db.session.query(
         MemberSchedule.start_time,
         MemberSchedule.duration_minutes,
@@ -36,24 +32,34 @@ def member_dashboard():
      .filter(MemberSchedule.member_id == member.id)\
      .order_by(MemberSchedule.start_time.asc()).all()
 
-    # Get engagement chart data
-    history = TelemetryHistory.query.filter_by(member_id=member.id).order_by(TelemetryHistory.timestamp.asc()).all()
+    history_raw = db.session.query(TelemetryHistory, EquipmentMetric.equipment_name)\
+        .join(EquipmentMetric, TelemetryHistory.equipment_id == EquipmentMetric.id)\
+        .filter(TelemetryHistory.member_id == member.id)\
+        .order_by(TelemetryHistory.timestamp.desc()).all()
+
+    workout_history = []
     daily_stats = {}
-    for entry in history:
+    for entry, eq_name in history_raw:
+        workout_history.append({
+            "timestamp": entry.timestamp,
+            "equipment": eq_name,
+            "scans": entry.scans_count,
+            "duration": entry.duration_minutes
+        })
         date = entry.timestamp[:10]
         daily_stats[date] = daily_stats.get(date, 0) + entry.scans_count
 
     sorted_dates = sorted(daily_stats.keys())
-    chart_labels = sorted_dates[-7:] # Last 7 days
+    chart_labels = sorted_dates[-7:]
     chart_data = [daily_stats[d] for d in chart_labels]
 
-    # Payments (v3.9.2)
     payments = Payment.query.filter_by(member_id=member.id).order_by(Payment.timestamp.desc()).all()
 
     return render_template('member_dashboard.html',
                            member=member,
                            equipment=equipment,
                            upcoming_sessions=upcoming_sessions,
+                           workout_history=workout_history[:10],
                            chart_labels=chart_labels,
                            chart_data=chart_data,
                            payments=payments)
@@ -61,7 +67,6 @@ def member_dashboard():
 @member_bp.route('/submit-feedback', methods=['POST'])
 @login_required
 def member_submit_feedback():
-    """Handles pilot feedback submissions (v3.9.1)"""
     if current_user.role != 'Member':
         abort(403)
 
@@ -102,7 +107,6 @@ def member_book_session():
         flash("Please select a valid date and time.")
         return redirect(url_for('member.member_dashboard'))
 
-    # Format datetime for storage
     try:
         dt = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
         formatted_start = dt.strftime('%Y-%m-%d %H:%M')
@@ -110,13 +114,12 @@ def member_book_session():
         flash("Invalid date format.")
         return redirect(url_for('member.member_dashboard'))
 
-    from models import MemberSchedule
     new_booking = MemberSchedule(
         member_id=member.id,
         member_name=member.name,
         equipment_id=equipment_id,
         start_time=formatted_start,
-        duration_minutes=15, # Default pilot session
+        duration_minutes=15,
         status='Scheduled'
     )
     db.session.add(new_booking)

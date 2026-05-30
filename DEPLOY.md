@@ -67,3 +67,22 @@ server {
 - **Check Logs:** `journalctl -u smx-dashboard -f`
 - **Restart Services:** `sudo systemctl restart smx-dashboard smx-monitor`
 - **DB Maintenance:** Use `crm_tool.py` for user provisioning and lead management.
+- **Enterprise Data Exchange:** (v4.8.0)
+  - `GET /api/v1/enterprise/export`: Pull aggregated fleet telemetry, engagement, and sentiment.
+  - `GET /api/v1/enterprise/leads`: Synchronize lead portfolio with corporate CRM.
+- **Hardware Check-in Integration:** (v5.2.0)
+  - `POST /api/v1/telemetry/check-in`: Process secure NFC/Biometric check-ins.
+
+## 8. Multi-Factor Authentication & API Governance (v4.9.0)
+### API Key Governance
+API keys are now generated per-user. Users can rotate their keys in the **Settings > Enterprise Access** section. The global `SMX_API_KEY` in `config.py` is deprecated.
+
+### MFA Enrollment
+Management accounts should enable TOTP-based 2FA. Enrollment is available in **Settings > Enterprise Access**. Once enabled, a verification code is required during the login sequence.
+
+## 9. Integration Testing (v4.5.0)
+To verify UI integrity and core user flows, execute the Playwright integration suite:
+```bash
+pytest tests/integration/test_ui.py
+```
+Note: Ensure the development server is running on port 5000 before executing tests.

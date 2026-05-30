@@ -1,17 +1,29 @@
 import sqlite3
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta
 import analytics
 from notifications import send_notification
-from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
+from app import app, db
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
+
+# --- Log Rotation Setup ---
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+logger = logging.getLogger('health_monitor')
+handler = RotatingFileHandler('logs/health_monitor.log', maxBytes=10240, backupCount=10)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def monitor_health():
     """
     Scans equipment metrics and generates alerts for operational anomalies.
     """
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Health Monitor...")
+    logger.info("Starting Health Monitor...")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -25,11 +37,11 @@ def monitor_health():
         if unit['uptime_percent'] < 98.0 and unit['uptime_percent'] >= 95.0:
             generate_alert(cursor, "Warning", f"Degraded performance on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
 
-        # B. Uptime check (Critical for < 95%) - already handled in app.py but good to have here too
+        # B. Uptime check (Critical for < 95%)
         elif unit['uptime_percent'] < 95.0:
             generate_alert(cursor, "Critical", f"Low Uptime detected on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
 
-        # C. Session variance check (Warning if avg session is < 5 mins - potentially user frustration)
+        # C. Session variance check (Warning if avg session is < 5 mins)
         if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
              generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
 
@@ -64,13 +76,12 @@ def monitor_health():
 
     conn.commit()
     conn.close()
-    print("Health Monitor check complete.")
+    logger.info("Health Monitor check complete.")
 
 def generate_alert(cursor, severity, message, equipment_id):
     """
     Inserts an alert if it doesn't already exist and is unresolved.
     """
-    # Check for existing unresolved alert with same message
     cursor.execute("SELECT id FROM alert WHERE message = ? AND is_resolved = 0", (message,))
     if cursor.fetchone():
         return
@@ -78,7 +89,7 @@ def generate_alert(cursor, severity, message, equipment_id):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved, equipment_id) VALUES (?, ?, ?, 0, ?)",
                    (severity, message, timestamp, equipment_id))
-    print(f"Alert Generated: [{severity}] {message}")
+    logger.warning(f"Alert Generated: [{severity}] {message}")
 
     # Send Notification (Franchise filtering)
     cursor.execute("SELECT location FROM equipment_metric WHERE id = ?", (equipment_id,))
@@ -105,19 +116,16 @@ def process_cadence(cursor):
 
     for lead in due_leads:
         msg = f"🔔 FOLLOW-UP DUE: {lead['company']} is ready for Cadence Touch #{lead['follow_up_count'] + 1}."
-        print(msg)
+        logger.info(msg)
         with app.app_context():
             send_notification(msg)
 
 import time
 
 if __name__ == "__main__":
-    # In production, this script runs in a continuous loop via systemd
     while True:
         try:
             monitor_health()
         except Exception as e:
-            print(f"Health Monitor encountered an error: {e}")
-
-        # Check every 60 seconds
+            logger.error(f"Health Monitor encountered an error: {e}")
         time.sleep(60)

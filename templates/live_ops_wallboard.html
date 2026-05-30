@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Live Ops Wallboard - StepManiaX{% endblock %}
+
+{% block extra_head %}
+<style>
+    .intensity-low { background-color: rgba(34, 197, 94, 0.2); border-color: rgb(34, 197, 94); }
+    .intensity-med { background-color: rgba(234, 179, 8, 0.2); border-color: rgb(234, 179, 8); }
+    .intensity-high { background-color: rgba(239, 68, 68, 0.2); border-color: rgb(239, 68, 68); }
+    .wallboard-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-slate-950 min-h-screen -m-8 p-8 text-white">
+    <!-- Wallboard Header -->
+    <div class="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
+        <div>
+            <h1 class="text-5xl font-black italic tracking-tighter text-yellow-400 uppercase">Live Ops Wallboard</h1>
+            <p class="text-slate-400 font-bold tracking-widest mt-2">{{ franchise_name }} • REAL-TIME FACILITY INTELLIGENCE</p>
+            {% if all_regions %}
+            <div class="mt-4 flex gap-4">
+                <a href="{{ url_for('staff.live_ops_wallboard') }}"
+                   class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all border border-slate-700 {% if not current_region %}bg-yellow-400 text-black border-yellow-400{% else %}text-slate-500 hover:border-slate-500{% endif %}">
+                    Global
+                </a>
+                {% for region in all_regions %}
+                <a href="{{ url_for('staff.live_ops_wallboard', region=region) }}"
+                   class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all border border-slate-700 {% if current_region == region %}bg-yellow-400 text-black border-yellow-400{% else %}text-slate-500 hover:border-slate-500{% endif %}">
+                    {{ region }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="text-right">
+            <div class="text-4xl font-mono font-black" id="clock">00:00:00</div>
+            <div class="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mt-1">System Time</div>
+        </div>
+    </div>
+
+    <!-- Live KPI Strip -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+         hx-get="{{ url_for('api.api_live_occupancy', franchise_id=request.args.get('franchise_id'), region=current_region) }}"
+         hx-trigger="every 10s"
+         hx-swap="none"
+         hx-on::after-request="updateWallboard(event)">
+
+        <div class="bg-slate-900 border-l-8 border-blue-500 p-8 rounded-r-2xl shadow-2xl">
+            <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Live Intensity</p>
+            <p class="text-6xl font-black italic"><span id="total-scans">0</span> <span class="text-xl text-slate-600 not-italic">SCANS / 15M</span></p>
+        </div>
+
+        <div class="bg-slate-900 border-l-8 border-yellow-400 p-8 rounded-r-2xl shadow-2xl">
+            <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">On-Site Staff</p>
+            <p class="text-6xl font-black italic"><span id="active-staff">0</span> <span class="text-xl text-slate-600 not-italic">ACTIVE</span></p>
+        </div>
+
+        <div class="bg-slate-900 border-l-8 border-green-500 p-8 rounded-r-2xl shadow-2xl">
+            <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Fleet Status</p>
+            <p class="text-6xl font-black italic">100% <span class="text-xl text-slate-600 not-italic">ONLINE</span></p>
+        </div>
+    </div>
+
+    <!-- Unit Grid -->
+    <div class="grid wallboard-grid gap-8" id="unit-container">
+        {% for unit in units %}
+        <div class="unit-card p-8 rounded-3xl border-2 border-slate-800 transition-all duration-500 bg-slate-900/50" id="unit-{{ unit.id }}">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-2xl font-black uppercase tracking-tight">{{ unit.equipment_name }}</h3>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">{{ unit.location }}</p>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)]"></div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="h-4 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-yellow-400 transition-all duration-1000" id="bar-{{ unit.id }}" style="width: 0%;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span class="text-slate-500">Utilization</span>
+                    <span class="text-yellow-400" id="val-{{ unit.id }}">0%</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function updateWallboard(event) {
+        const data = JSON.parse(event.detail.xhr.responseText);
+        document.getElementById('total-scans').innerText = data.total_active_scans;
+        document.getElementById('active-staff').innerText = data.active_staff;
+
+        data.units.forEach(u => {
+            const card = document.getElementById(`unit-${u.unit_id}`);
+            const bar = document.getElementById(`bar-${u.unit_id}`);
+            const val = document.getElementById(`val-${u.unit_id}`);
+
+            if (card && bar && val) {
+                const percent = Math.round(u.intensity * 100);
+                bar.style.width = `${percent}%`;
+                val.innerText = `${percent}%`;
+
+                // Update intensity colors
+                card.classList.remove('intensity-low', 'intensity-med', 'intensity-high');
+                if (u.intensity > 0.7) card.classList.add('intensity-high');
+                else if (u.intensity > 0.3) card.classList.add('intensity-med');
+                else card.classList.add('intensity-low');
+            }
+        });
+    }
+</script>
+{% endblock %}
