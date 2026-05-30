@@ -19,7 +19,7 @@ TIMEOUT_SECONDS = 5
 
 # Security
 # In production, these should be set via environment variables
-API_KEY = os.environ.get('SMX_API_KEY', 'dev-api-key-999')
+API_KEY = os.environ.get('SMX_API_KEY', 'placeholder-key-for-development-only')
 
 # Cadence Settings
 FOLLOW_UP_INTERVAL_DAYS = 7

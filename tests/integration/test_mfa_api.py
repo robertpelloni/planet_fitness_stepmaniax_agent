@@ -38,8 +38,10 @@ def test_mfa_login_sequence(client):
 
 def test_per_user_api_key(client):
     """Test API key validation using per-user keys."""
+    import secrets
+    test_key = secrets.token_urlsafe(32)
     with app.app_context():
-        test_user = User(username='api_test', api_key='test-key-unique-mfa')
+        test_user = User(username='api_test', api_key=test_key)
         test_user.set_password('Admin123!')
         db.session.add(test_user)
         db.session.commit()
@@ -47,7 +49,7 @@ def test_per_user_api_key(client):
     response = client.get('/api/v1/enterprise/export')
     assert response.status_code == 401
 
-    headers = {'X-API-KEY': 'test-key-unique-mfa'}
+    headers = {'X-API-KEY': test_key}
     response = client.get('/api/v1/enterprise/export', headers=headers)
     assert response.status_code == 200
     assert response.get_json()['version'] == '4.8.0'

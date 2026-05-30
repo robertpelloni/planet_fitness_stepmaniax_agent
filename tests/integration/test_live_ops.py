@@ -29,12 +29,14 @@ def test_live_occupancy_api(client):
         db.session.add(scan)
         db.session.commit()
 
-        admin = User(username='admin_live', role='Admin', api_key='live-key-unique')
+        import secrets
+        test_key = secrets.token_urlsafe(32)
+        admin = User(username='admin_live', role='Admin', api_key=test_key)
         admin.set_password('Admin123!')
         db.session.add(admin)
         db.session.commit()
 
-    headers = {'X-API-KEY': 'live-key-unique'}
+    headers = {'X-API-KEY': test_key}
     response = client.get('/api/v1/analytics/live-occupancy', headers=headers)
     assert response.status_code == 200
     data = response.get_json()

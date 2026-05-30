@@ -12,18 +12,21 @@ def client():
             db.create_all()
         yield client
 
+import secrets
+
 def test_hardware_checkin_nfc(client):
     """Test successful hardware check-in via NFC."""
+    test_key = secrets.token_urlsafe(32)
     with app.app_context():
         member = Member(name="NFC Member", email="nfc@test.com", nfc_uid="nfc-123", registration_date="2026-05-01")
         unit = EquipmentMetric(equipment_name="SMX-1", location="Test Gym")
-        admin = User(username='admin_checkin', role='Admin', api_key='checkin-key-nfc')
+        admin = User(username='admin_checkin', role='Admin', api_key=test_key)
         admin.set_password('password123')
         db.session.add_all([member, unit, admin])
         db.session.commit()
         unit_id = unit.id
 
-    headers = {'X-API-KEY': 'checkin-key-nfc'}
+    headers = {'X-API-KEY': test_key}
     payload = {
         "nfc_uid": "nfc-123",
         "equipment_id": unit_id
@@ -36,16 +39,17 @@ def test_hardware_checkin_nfc(client):
 
 def test_hardware_checkin_biometric(client):
     """Test successful hardware check-in via Biometric token."""
+    test_key = secrets.token_urlsafe(32)
     with app.app_context():
         member = Member(name="Bio Member", email="bio@test.com", biometric_token="bio-token-456", registration_date="2026-05-01")
         unit = EquipmentMetric(equipment_name="SMX-2", location="Test Gym")
-        admin = User(username='admin_checkin_2', role='Admin', api_key='checkin-key-bio')
+        admin = User(username='admin_checkin_2', role='Admin', api_key=test_key)
         admin.set_password('password123')
         db.session.add_all([member, unit, admin])
         db.session.commit()
         unit_id = unit.id
 
-    headers = {'X-API-KEY': 'checkin-key-bio'}
+    headers = {'X-API-KEY': test_key}
     payload = {
         "biometric_token": "bio-token-456",
         "equipment_id": unit_id

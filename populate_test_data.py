@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import secrets
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
@@ -191,9 +192,9 @@ def populate():
     cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)
 
     users = [
-        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 1, 1, 1, 1, 1, 'admin-key'),
-        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 1, 0, 1, 1, 0, 'franchise-key'),
-        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 0, 0, 1, 0, 0, 'staff-key')
+        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
+        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 1, 0, 1, 1, 0, secrets.token_urlsafe(32)),
+        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 0, 0, 1, 0, 0, secrets.token_urlsafe(32))
     ]
     cursor.executemany("""
         INSERT INTO user (id, username, password_hash, role, franchise_id,
@@ -209,7 +210,7 @@ def populate():
     cursor.execute("""
         INSERT INTO user (id, username, password_hash, role, franchise_id, api_key)
         VALUES (?, ?, ?, ?, ?, ?)""",
-        (4, 'member@flynngroup.com', generate_password_hash('member123'), 'Member', 'FLY-002', 'member-key'))
+        (4, 'member@flynngroup.com', generate_password_hash('member123'), 'Member', 'FLY-002', secrets.token_urlsafe(32)))
 
     members = [
         (1, 4, 'Flynn Member', 'member@flynngroup.com', 'Registered', '2026-05-20', 'FLY-002', 250, 0.5)
