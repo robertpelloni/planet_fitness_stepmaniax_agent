@@ -128,6 +128,20 @@ def initialize_db():
         print("Adding nfc_uid to member table...")
         cursor.execute("ALTER TABLE member ADD COLUMN nfc_uid TEXT UNIQUE")
 
+    # Service Dispatch migrations (v5.6.0)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS service_dispatch (
+        id INTEGER PRIMARY KEY,
+        ticket_id TEXT UNIQUE NOT NULL,
+        equipment_id INTEGER NOT NULL,
+        status TEXT DEFAULT 'Pending',
+        provider TEXT DEFAULT 'Internal',
+        notes TEXT,
+        created_at TEXT,
+        updated_at TEXT,
+        FOREIGN KEY(equipment_id) REFERENCES equipment_metric(id)
+    )""")
+
     # 3. Migrate Data from JSON (Idempotent)
     if os.path.exists(JSON_FILE):
         with open(JSON_FILE, 'r') as f:

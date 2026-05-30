@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, send_from_directory
 from flask_login import login_required, current_user
-from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule
+from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule, ServiceDispatch
 from datetime import datetime
 import subprocess
 import analytics
@@ -237,6 +237,7 @@ def admin_command_center():
     region = request.args.get('region')
     all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
     automation_status = AutomationHeartbeat.query.all()
+    dispatches = ServiceDispatch.query.order_by(ServiceDispatch.created_at.desc()).limit(10).all()
 
     query_metrics = EquipmentMetric.query
     if region:
@@ -276,7 +277,8 @@ def admin_command_center():
                            automation_status=automation_status,
                            recent_security=recent_security,
                            all_regions=all_regions,
-                           current_region=region)
+                           current_region=region,
+                           dispatches=dispatches)
 
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, current_app
 from flask_login import current_user
-from models import db, Member, EquipmentMetric, TelemetryHistory, Alert, Payment, User, Feedback, MemberSchedule, Lead
+from models import db, Member, EquipmentMetric, TelemetryHistory, Alert, Payment, User, Feedback, MemberSchedule, Lead, ServiceDispatch
 from datetime import datetime
 import os
 import config
@@ -496,6 +496,53 @@ def api_enterprise_leads():
     return {
         "count": len(lead_data),
         "leads": lead_data
+    }, 200
+
+@api_bp.route('/v1/dispatches', methods=['GET', 'POST'])
+@require_api_or_role(['Admin', 'Staff'])
+def api_service_dispatches():
+    """Automated Service Dispatch API (v5.6.0)"""
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'equipment_id' not in data:
+            return {"error": "Equipment ID required"}, 400
+
+        unit = EquipmentMetric.query.get(data['equipment_id'])
+        if not unit:
+            return {"error": "Unit not found"}, 404
+
+        ticket_id = f"SMX-SRV-{secrets.token_hex(4).upper()}"
+        new_dispatch = ServiceDispatch(
+            ticket_id=ticket_id,
+            equipment_id=unit.id,
+            provider=data.get('provider', 'ServiceChannel-Mock'),
+            notes=data.get('notes', 'Automated trigger via Health Monitor')
+        )
+        db.session.add(new_dispatch)
+
+        # Simulate External Webhook / Dispatch Trigger
+        # In prod: requests.post(external_url, json={"ticket": ticket_id, ...})
+        unit.maintenance_status = 'Service Dispatched'
+        db.session.commit()
+
+        return {
+            "status": "dispatched",
+            "ticket_id": ticket_id,
+            "provider": new_dispatch.provider
+        }, 201
+
+    # GET dispatches
+    dispatches = ServiceDispatch.query.order_by(ServiceDispatch.created_at.desc()).limit(50).all()
+    return {
+        "dispatches": [
+            {
+                "ticket_id": d.ticket_id,
+                "equipment_id": d.equipment_id,
+                "status": d.status,
+                "provider": d.provider,
+                "created_at": d.created_at
+            } for d in dispatches
+        ]
     }, 200
 
 @api_bp.route('/v1/analytics/live-occupancy', methods=['GET'])

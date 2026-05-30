@@ -91,6 +91,19 @@ def generate_alert(cursor, severity, message, equipment_id):
                    (severity, message, timestamp, equipment_id))
     logger.warning(f"Alert Generated: [{severity}] {message}")
 
+    # Automated Service Dispatch (v5.6.0)
+    # Trigger dispatch for OFFLINE critical events
+    if severity == "Critical" and "OFFLINE" in message:
+        import secrets
+        ticket_id = f"AUTO-SRV-{secrets.token_hex(4).upper()}"
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+            INSERT INTO service_dispatch (ticket_id, equipment_id, provider, notes, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (ticket_id, equipment_id, 'AutoDispatch-v5.6', 'Heartbeat failure detected by monitor', 'Pending', created_at))
+        cursor.execute("UPDATE equipment_metric SET maintenance_status = 'Service Dispatched' WHERE id = ?", (equipment_id,))
+        logger.info(f"Automated Dispatch Triggered: {ticket_id} for Unit {equipment_id}")
+
     # Send Notification (Franchise filtering)
     cursor.execute("SELECT location FROM equipment_metric WHERE id = ?", (equipment_id,))
     loc = cursor.fetchone()[0]

@@ -165,3 +165,13 @@ class Payment(db.Model):
     status = db.Column(db.String(20), default='Pending') # 'Pending', 'Completed', 'Failed'
     transaction_id = db.Column(db.String(100), unique=True)
     timestamp = db.Column(db.String(50), nullable=False)
+
+class ServiceDispatch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.String(50), unique=True, nullable=False)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment_metric.id'), nullable=False)
+    status = db.Column(db.String(20), default='Pending') # 'Pending', 'Dispatched', 'Completed'
+    provider = db.Column(db.String(100), default='Internal')
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.String(50), default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    updated_at = db.Column(db.String(50))

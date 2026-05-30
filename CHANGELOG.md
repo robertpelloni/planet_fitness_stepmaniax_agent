@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.6.0]
+- **Automated Service Dispatch:** Integrated a work order management system that automatically triggers service dispatches for offline equipment.
+- **Maintenance UI:** Added an "Active Work Orders" module to the Global Command Center and "Dispatch" buttons to critical alert cards.
+- **Service API:** Launched `/api/v1/dispatches` endpoint for programmatic ticket management.
+- **Log Rotation:** Implemented `RotatingFileHandler` across all core background services and the main application server.
+
 ## [5.5.0]
 - **Multi-Region Cluster Support:** Implemented `region_cluster` filtering across Admin and Staff dashboards to support international expansion.
 - **Enhanced Background Logging:** Integrated `RotatingFileHandler` into `health_monitor.py` and `backup_job.py`.
