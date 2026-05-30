@@ -1,15 +1,25 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, send_from_directory, abort
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, send_from_directory
 from flask_login import login_required, current_user
-from models import db, EquipmentMetric, Alert, Member, Lead, TelemetryHistory, AutomationHeartbeat, User, Feedback, Payment
+from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule
+from datetime import datetime
+import subprocess
+import analytics
+import os
+import secrets
 from blueprints.decorators import role_required, permission_required
 from report_generator import generate_report
-import analytics
-import secrets
-import subprocess
-import os
-from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
+
+def log_security_event(user_id, action):
+    log = AuditLog(
+        user_id=user_id,
+        action=action,
+        ip_address=request.remote_addr,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    db.session.add(log)
+    db.session.commit()
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -19,55 +29,34 @@ def dashboard():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
 
-    # 1. CRM Summary
     if is_admin:
         crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).group_by(Lead.status).all()
+        metrics = EquipmentMetric.query.all()
+        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
+        leads_list = Lead.query.all()
     else:
         crm_stats = db.session.query(Lead.status, db.func.count(Lead.id).label('count')).filter_by(id=franchise_id).group_by(Lead.status).all()
-
-    # 2. Equipment Metrics
-    if is_admin:
-        metrics = EquipmentMetric.query.all()
-    else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).filter_by(franchise_id=franchise_id).group_by(Member.onboarding_status).all()
+        leads_list = Lead.query.filter_by(id=franchise_id).all()
 
     metric_ids = [m.id for m in metrics]
 
-    # 3. Alerts
     if is_admin:
         alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
-    else:
-        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
-
-    # 4. Schedules
-    from models import MemberSchedule
-    if is_admin:
         schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
     else:
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
-
-    # 6. Onboarding Stats
-    if is_admin:
-        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
-    else:
-        onboarding_stats = db.session.query(Member.onboarding_status, db.func.count(Member.id)).filter_by(franchise_id=franchise_id).group_by(Member.onboarding_status).all()
 
     onboarding_dict = {status: count for status, count in onboarding_stats}
 
-    # 5. Lead List with Propensity Scores
-    if is_admin:
-        leads_list = Lead.query.all()
-    else:
-        leads_list = Lead.query.filter_by(id=franchise_id).all()
-
-    # Dynamic scoring and token generation
     updated = False
     for lead in leads_list:
         if not lead.public_token:
             lead.public_token = secrets.token_urlsafe(16)
             updated = True
 
-        # Calculate real-time pilot engagement
         member_count = Member.query.filter_by(franchise_id=lead.id).count()
         total_points = db.session.query(db.func.sum(Member.points)).filter_by(franchise_id=lead.id).scalar() or 0
         avg_feedback = db.session.query(db.func.avg(Feedback.rating)).filter_by(franchise_id=lead.id).scalar() or 5.0
@@ -89,9 +78,12 @@ def dashboard():
     if updated:
         db.session.commit()
 
-    # Sort by propensity score descending for Admin
     if is_admin:
         leads_list.sort(key=lambda x: x.propensity_score, reverse=True)
+
+    franchise_name = "Global Admin"
+    if not is_admin and leads_list:
+        franchise_name = leads_list[0].company
 
     return render_template('dashboard.html',
                            crm_stats=crm_stats,
@@ -101,7 +93,7 @@ def dashboard():
                            leads_list=leads_list,
                            onboarding_stats=onboarding_dict,
                            is_admin=is_admin,
-                           franchise_name=leads_list[0].company if not is_admin and leads_list else "Global Admin")
+                           franchise_name=franchise_name)
 
 @admin_bp.route('/feedback')
 @login_required
@@ -125,14 +117,10 @@ def admin_feedback():
         })
 
     avg_rating = db.session.query(db.func.avg(Feedback.rating)).scalar() or 0
-
-    # Category distribution
-    cat_counts = db.session.query(Feedback.category, db.func.count(Feedback.id))\
-        .group_by(Feedback.category).all()
+    cat_counts = db.session.query(Feedback.category, db.func.count(Feedback.id)).group_by(Feedback.category).all()
     categories = [c[0] for c in cat_counts]
     category_counts = [c[1] for c in cat_counts]
 
-    # Simple rating trend (by day)
     trend_raw = db.session.query(db.func.substr(Feedback.timestamp, 1, 10), db.func.avg(Feedback.rating))\
         .group_by(db.func.substr(Feedback.timestamp, 1, 10))\
         .order_by(db.func.substr(Feedback.timestamp, 1, 10)).all()
@@ -151,17 +139,11 @@ def admin_feedback():
 @login_required
 @role_required(['Admin'])
 def admin_optimization():
-    # Optimization & Performance Metrics
     total_members = Member.query.count()
     onboarding_funnel = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
     onboarding_dict = {status: count for status, count in onboarding_funnel}
-
-    # Avg Engagement Score across fleet
     avg_engagement = db.session.query(db.func.avg(Member.engagement_score)).scalar() or 0
-
-    # Optimization recommendations
     units = EquipmentMetric.query.all()
-    # Convert SQLAlchemy objects to dicts for the analytics function
     metrics_list = [
         {
             "equipment_name": u.equipment_name,
@@ -184,17 +166,23 @@ def admin_optimization():
 @login_required
 @role_required(['Admin'])
 def admin_api_logs():
-    """Serves the latest system logs for real-time streaming (v3.9.0)"""
-    log_files = ['campaign_launch.log', 'server.log']
+    """Serves the latest system logs for real-time streaming (v4.5.0)"""
+    log_files = ['campaign_launch.log', 'server.log', 'health_monitor.log']
     logs = []
     for log_file in log_files:
-        if os.path.exists(log_file):
-            with open(log_file, 'r') as f:
-                # Get last 5 lines from each
-                lines = f.readlines()[-5:]
-                logs.extend([f"[{log_file}] {line.strip()}" for line in lines])
+        path = os.path.join('logs', log_file)
+        if os.path.exists(path):
+            try:
+                with open(path, 'r') as f:
+                    lines = f.readlines()[-8:]
+                    logs.append(f"<div class='mb-2'><span class='text-blue-200 font-bold'>[{log_file}]</span>")
+                    for line in lines:
+                        logs.append(f"<div class='pl-2 opacity-80'>{line.strip()}</div>")
+                    logs.append("</div>")
+            except Exception as e:
+                logs.append(f"Error reading {log_file}: {str(e)}")
 
-    return "<br>".join(logs) if logs else "Waiting for system logs..."
+    return "".join(logs) if logs else "Waiting for system logs..."
 
 @admin_bp.route('/launch-campaign', methods=['POST'])
 @login_required
@@ -202,15 +190,12 @@ def admin_api_logs():
 def admin_launch_campaign():
     """Triggers the autonomous sales pipeline (v3.9.0)"""
     try:
-        # Run launch_campaign.sh in the background
+        log_path = os.path.join('logs', 'campaign_launch.log')
         subprocess.Popen(["bash", "launch_campaign.sh"],
-                         stdout=open("campaign_launch.log", "a"),
+                         stdout=open(log_path, "a"),
                          stderr=subprocess.STDOUT)
 
-        # Log the event
-        from blueprints.auth import log_security_event
-        log_security_event(current_user.id, "Campaign Launch Triggered: Autonomous sales pipeline (launch_campaign.sh) initiated via Command Center.")
-
+        log_security_event(current_user.id, "Campaign Launch Triggered: Autonomous sales pipeline (launch_campaign.sh) initiated.")
         flash("Autonomous Campaign Launch Sequence Initiated! Monitor logs for progress.", "success")
     except Exception as e:
         flash(f"Error launching campaign: {str(e)}", "danger")
@@ -221,24 +206,35 @@ def admin_launch_campaign():
 @login_required
 @role_required(['Admin'])
 def admin_command_center():
-    # Automation Status (v3.9.0)
+    region = request.args.get('region')
     automation_status = AutomationHeartbeat.query.all()
 
-    # Global Fleet Stats
-    total_units = EquipmentMetric.query.count()
-    active_alerts = Alert.query.filter_by(is_resolved=False).count()
-    total_scans = db.session.query(db.func.sum(EquipmentMetric.total_scans)).scalar() or 0
-    avg_uptime = db.session.query(db.func.avg(EquipmentMetric.uptime_percent)).scalar() or 0
+    query_metrics = EquipmentMetric.query
+    if region:
+        query_metrics = query_metrics.filter_by(region_cluster=region)
 
-    # Active Sessions (Mocking for now as we don't have a 'session' table yet,
-    # but we can count unique member_ids in TelemetryHistory from last hour)
-    one_hour_ago = datetime.now().timestamp() - 3600
-    # Actually our timestamp is a string, so we'd need to convert.
-    # For now let's just count distinct member_ids from the last 10 telemetry entries as 'live'
-    live_sessions = db.session.query(TelemetryHistory.member_id).distinct().limit(10).count()
+    metrics = query_metrics.all()
+    total_units = len(metrics)
 
-    metrics = EquipmentMetric.query.all()
+    active_alerts_query = Alert.query.filter_by(is_resolved=False)
+    if region:
+        metric_ids = [m.id for m in metrics]
+        active_alerts_query = active_alerts_query.filter(Alert.equipment_id.in_(metric_ids))
+    active_alerts = active_alerts_query.count()
+
+    total_scans = sum(m.total_scans for m in metrics)
+    avg_uptime = sum(m.uptime_percent for m in metrics) / total_units if total_units > 0 else 0
+
+    live_sessions_query = db.session.query(TelemetryHistory.member_id).distinct()
+    if region:
+        metric_ids = [m.id for m in metrics]
+        live_sessions_query = live_sessions_query.filter(TelemetryHistory.equipment_id.in_(metric_ids))
+    live_sessions = live_sessions_query.limit(10).count()
     alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
+
+    recent_security = db.session.query(AuditLog, User.username)\
+        .outerjoin(User, AuditLog.user_id == User.id)\
+        .order_by(AuditLog.timestamp.desc()).limit(10).all()
 
     return render_template('admin_command_center.html',
                            total_units=total_units,
@@ -248,7 +244,8 @@ def admin_command_center():
                            live_sessions=live_sessions,
                            metrics=metrics,
                            alerts=alerts,
-                           automation_status=automation_status)
+                           automation_status=automation_status,
+                           recent_security=recent_security)
 
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required
@@ -275,7 +272,6 @@ def admin_unlock_user(user_id):
     user.is_locked = False
     user.failed_login_attempts = 0
     db.session.commit()
-    from blueprints.auth import log_security_event
     log_security_event(current_user.id, f"Unlocked user account: {user.username}")
     flash(f"Account for {user.username} has been unlocked.")
     return redirect(url_for('auth.settings'))
@@ -290,46 +286,15 @@ def admin_delete_user(user_id):
 
     user = User.query.get_or_404(user_id)
     username = user.username
-
-    # Also find associated member record if any
     member = Member.query.filter_by(user_id=user.id).first()
     if member:
         db.session.delete(member)
 
     db.session.delete(user)
     db.session.commit()
-    from blueprints.auth import log_security_event
     log_security_event(current_user.id, f"Deleted user account: {username}")
     flash(f"Account for {username} and associated member data deleted.")
     return redirect(url_for('auth.settings'))
-
-@admin_bp.route('/system-health')
-@login_required
-@role_required(['Admin'])
-def admin_system_health():
-    """System Health Monitoring Dashboard (v4.4.0)"""
-    automation_status = AutomationHeartbeat.query.all()
-    # Check for heartbeat gaps
-    health_reports = []
-    for task in automation_status:
-        last_run = datetime.strptime(task.last_run, "%Y-%m-%d %H:%M:%S")
-        gap_seconds = (datetime.now() - last_run).total_seconds()
-        status = "Healthy" if gap_seconds < 120 else "Delayed" if gap_seconds < 300 else "Critical Gap"
-        health_reports.append({
-            "task_name": task.task_name,
-            "last_run": task.last_run,
-            "status": status,
-            "gap_mins": round(gap_seconds / 60, 1)
-        })
-
-    # Check for recent backups
-    backups = []
-    if os.path.exists('backups'):
-        backups = sorted(os.listdir('backups'), reverse=True)[:5]
-
-    return render_template('admin_system_health.html',
-                           health_reports=health_reports,
-                           backups=backups)
 
 @admin_bp.route('/generate_report/<int:unit_id>')
 @login_required
@@ -341,3 +306,58 @@ def generate_unit_report(unit_id):
     else:
         flash("Failed to generate performance report.")
     return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/prospect/<token>')
+def prospect_portal(token):
+    lead = Lead.query.filter_by(public_token=token).first_or_404()
+    if lead.portal_views is None: lead.portal_views = 0
+    lead.portal_views += 1
+    db.session.commit()
+    log_security_event(None, f"Prospect Portal Viewed: {lead.company} (Token: {token})")
+    metrics = analytics.calculate_detailed_metrics(
+        num_clubs=lead.num_clubs,
+        retention_lift_percent=lead.retention_lift,
+        avg_monthly_fee=lead.avg_monthly_fee
+    )
+    return render_template('prospect_portal.html', lead=lead, metrics=metrics)
+
+@admin_bp.route('/resources/<path:filename>')
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def serve_resources(filename):
+    return send_from_directory('technical_docs', filename)
+
+@admin_bp.route('/system-health')
+@login_required
+@role_required(['Admin'])
+def admin_system_health():
+    """System Health & Integrity Dashboard (v4.4.0)"""
+    automation_status = AutomationHeartbeat.query.all()
+    health_data = []
+    now = datetime.now()
+    for task in automation_status:
+        last_run = datetime.strptime(task.last_run, "%Y-%m-%d %H:%M:%S")
+        diff = (now - last_run).total_seconds()
+        status_override = task.status
+        if diff > 300: status_override = 'Delayed'
+        if diff > 3600: status_override = 'Critical Gap'
+        health_data.append({
+            'task_name': task.task_name,
+            'last_run': task.last_run,
+            'status': status_override,
+            'latency_sec': int(diff)
+        })
+
+    backup_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'backups')
+    backups = []
+    if os.path.exists(backup_dir):
+        for f in os.listdir(backup_dir):
+            if f.endswith('.db'):
+                path = os.path.join(backup_dir, f)
+                backups.append({
+                    'filename': f,
+                    'size_kb': round(os.path.getsize(path) / 1024, 1),
+                    'created_at': datetime.fromtimestamp(os.path.getctime(path)).strftime("%Y-%m-%d %H:%M:%S")
+                })
+    backups.sort(key=lambda x: x['filename'], reverse=True)
+    return render_template('admin_system_health.html', health_data=health_data, backups=backups)

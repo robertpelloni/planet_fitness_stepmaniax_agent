@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 import analytics
 from notifications import send_notification
-from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
+from app import app, db
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
 
@@ -25,11 +25,11 @@ def monitor_health():
         if unit['uptime_percent'] < 98.0 and unit['uptime_percent'] >= 95.0:
             generate_alert(cursor, "Warning", f"Degraded performance on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
 
-        # B. Uptime check (Critical for < 95%) - already handled in app.py but good to have here too
+        # B. Uptime check (Critical for < 95%)
         elif unit['uptime_percent'] < 95.0:
             generate_alert(cursor, "Critical", f"Low Uptime detected on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
 
-        # C. Session variance check (Warning if avg session is < 5 mins - potentially user frustration)
+        # C. Session variance check (Warning if avg session is < 5 mins)
         if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
              generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
 
@@ -70,7 +70,6 @@ def generate_alert(cursor, severity, message, equipment_id):
     """
     Inserts an alert if it doesn't already exist and is unresolved.
     """
-    # Check for existing unresolved alert with same message
     cursor.execute("SELECT id FROM alert WHERE message = ? AND is_resolved = 0", (message,))
     if cursor.fetchone():
         return
@@ -112,12 +111,9 @@ def process_cadence(cursor):
 import time
 
 if __name__ == "__main__":
-    # In production, this script runs in a continuous loop via systemd
     while True:
         try:
             monitor_health()
         except Exception as e:
             print(f"Health Monitor encountered an error: {e}")
-
-        # Check every 60 seconds
         time.sleep(60)

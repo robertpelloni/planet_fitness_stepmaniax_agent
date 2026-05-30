@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.1]
+- **Repository Consolidation:** Successfully merged `feat/lead-research-v0.4.0` containing advanced hardware integration, MFA, and enterprise API features.
+- **Security Hardening:** Integrated TOTP-based Multi-Factor Authentication and secure session cookie policies.
+- **Hardware Integration:** Added support for Biometric and NFC-based member check-ins via telemetry endpoints.
+- **Enterprise Capabilities:** Launched secure REST endpoints for BI export and lead synchronization.
+- **Maintenance Automation:** Implemented log rotation and enhanced backup verification suites.
+
 ## [0.7.0]
 - **Discovery Infrastructure:** Developed `discovery-call-script.md` and `pilot-faq.md` for structured decision-maker engagement.
 - **Commercial Framework:** Created `commercial-proposal-template.md` and `pilot-performance-report.md` to bridge pilot success with regional procurement contracts.

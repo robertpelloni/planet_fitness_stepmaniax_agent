@@ -12,3 +12,18 @@ env/
 
 # Secrets
 .env
+
+# CRM Database
+crm.db
+
+# Logs
+*.log
+
+# Jules AI session logs (auto-generated)
+.jules/sessions/
+
+# Generated Outreach Assets
+outreach/generated/
+outreach/generated_messages/
+technical_docs/reports/
+verification/

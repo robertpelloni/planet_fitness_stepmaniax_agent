@@ -2,6 +2,7 @@
 **Pilot Program Maintenance & Reliability Standards**
 
 This document details the technical reliability standards and service commitments provided by the StepManiaX B2B Initiative during the 90-day pilot program.
+This document details the technical reliability standards and service commitments provided by the StepManiaX B2B Initiative, aligned with official **Step Revolution LLC** commercial warranty terms.
 
 ## 1. 48-Hour Service Guarantee
 We understand that equipment uptime is critical for member satisfaction. During the pilot period, we commit to the following:

@@ -3,8 +3,8 @@
 ## Phase 12: Scalability & Enterprise Hardening (v4.5.0 - v5.0.0)
 - **Multi-Region Cluster Support:** Implement shard-based data isolation for international franchise expansion (UK, Canada, Mexico).
 - **ML-Based Outreach Optimization:** Train a local LLM fine-tuned on Planet Fitness franchise group communication patterns to increase Discovery Call conversion rates by > 15%.
-- **Biometric Telemetry Ingestion:** Support secure NFC/Biometric member check-ins on SMX units to eliminate manual scan entry.
-- **Enterprise Reporting API:** Launch a GraphQL endpoint for large franchise groups to pull raw engagement data into their corporate BI tools.
+- [x] **Biometric Telemetry Ingestion:** Support secure NFC/Biometric member check-ins on SMX units to eliminate manual scan entry. (Completed in v5.2.0)
+- [x] **Enterprise Reporting API:** Launch secure REST endpoints for large franchise groups to pull raw engagement data. (Completed in v4.8.0)
 - **Automated Service Dispatch:** Integrate with gym maintenance platforms (e.g., ServiceChannel) to automatically trigger work orders for SMX hardware repairs.
 
 ## Phase 1: Asset Preparation & Collateral Assembly

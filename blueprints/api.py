@@ -1,12 +1,13 @@
-from flask import Blueprint, request, abort
-from flask_login import login_required, current_user
-from models import db, User, Member, EquipmentMetric, TelemetryHistory, Payment, Alert
-from blueprints.decorators import require_api_or_role, require_api_key, role_required
+from flask import Blueprint, request, abort, current_app
+from flask_login import current_user
+from models import db, Member, EquipmentMetric, TelemetryHistory, Alert, Payment, User, Feedback, MemberSchedule, Lead
 from datetime import datetime
 import os
 import config
-from gateways import get_payment_gateway
+import secrets
 from notifications import send_notification
+from gateways import get_payment_gateway
+from blueprints.decorators import require_api_key, require_api_or_role
 
 api_bp = Blueprint('api', __name__)
 
@@ -22,7 +23,6 @@ def api_process_payment():
     if not member:
         return {"error": "Member not found"}, 404
 
-    # Utilize Gateway Adapter
     gateway = get_payment_gateway(provider_type=os.environ.get('PAYMENT_PROVIDER', 'mock'))
     result = gateway.process_charge(
         amount=float(data['amount']),
@@ -42,8 +42,6 @@ def api_process_payment():
         db.session.add(payment)
         db.session.commit()
 
-        from blueprints.auth import log_security_event
-        log_security_event(None, f"Payment Processed: {result['transaction_id']} for Member {member.id}")
         return {"status": "success", "transaction_id": result['transaction_id']}, 201
     else:
         return {"error": "Payment failed", "details": result.get('error')}, 400
@@ -63,7 +61,6 @@ def telemetry():
     if not unit:
         return {"error": "Unit not found"}, 404
 
-    # Update heartbeat
     unit.last_heartbeat = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     member_id = data.get('member_id')
@@ -71,36 +68,31 @@ def telemetry():
     if member_id:
         member = Member.query.get(member_id)
 
-    # Update Metrics
     if 'uptime_percent' in data:
         unit.uptime_percent = data['uptime_percent']
 
     if 'scans_increment' in data:
         unit.total_scans += data['scans_increment']
-        # Log to history
         history = TelemetryHistory(
             equipment_id=unit.id,
             member_id=member_id,
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            scans_count=data['scans_increment']
+            scans_count=data['scans_increment'],
+            duration_minutes=data.get('session_duration', 0.0)
         )
         db.session.add(history)
 
-        # Update member points and engagement
         if member:
             member.points += data['scans_increment']
-            # Simple engagement score: points / days since registration
             reg_date = datetime.strptime(member.registration_date, "%Y-%m-%d")
             days_active = (datetime.now() - reg_date).days + 1
-            member.engagement_score = min(1.0, member.points / (days_active * 100)) # Target 100 scans/day
+            member.engagement_score = min(1.0, member.points / (days_active * 100))
 
     if 'session_duration' in data:
-        # Proper moving average: (old_avg * count + new_val) / (count + 1)
         new_duration = data['session_duration']
         unit.avg_session_duration = ((unit.avg_session_duration * unit.total_sessions) + new_duration) / (unit.total_sessions + 1)
         unit.total_sessions += 1
 
-    # Auto-generate Alert if uptime drops below threshold
     if unit.uptime_percent < config.UPTIME_THRESHOLD:
         alert_msg = f"Low Uptime detected on {unit.equipment_name} at {unit.location}: {unit.uptime_percent}%"
         existing_alert = Alert.query.filter_by(message=alert_msg, is_resolved=False).first()
@@ -113,7 +105,6 @@ def telemetry():
                 equipment_id=unit.id
             )
             db.session.add(new_alert)
-            # Update maintenance status
             unit.maintenance_status = 'Needs Maintenance'
             send_notification(f"⚠️ [CRITICAL] {alert_msg}", franchise_id=unit.franchise_id)
 
@@ -123,9 +114,7 @@ def telemetry():
 @api_bp.route('/v1/analytics/hourly', methods=['GET'])
 @require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_hourly_analytics():
-    """
-    Returns scan distribution by hour of day (0-23).
-    """
+    """Returns scan distribution by hour of day (0-23)."""
     if current_user.is_authenticated:
         franchise_id = current_user.franchise_id
         is_admin = (current_user.role == 'Admin')
@@ -143,7 +132,6 @@ def api_hourly_analytics():
 
     hourly_distribution = {i: 0 for i in range(24)}
     for entry in history:
-        # Expected format: "YYYY-MM-DD HH:MM:S"
         try:
             hour = int(entry.timestamp[11:13])
             hourly_distribution[hour] += entry.scans_count
@@ -156,38 +144,33 @@ def api_hourly_analytics():
     }, 200
 
 @api_bp.route('/v1/alerts/<int:alert_id>/acknowledge', methods=['POST'])
-@login_required
-@role_required(['Admin', 'Staff'])
+@require_api_or_role(['Admin', 'Staff'])
 def api_acknowledge_alert(alert_id):
     alert = Alert.query.get_or_404(alert_id)
-    alert.acknowledged_by = current_user.username
+    alert.acknowledged_by = current_user.username if current_user.is_authenticated else "API-USER"
     db.session.commit()
-    return {"status": "acknowledged", "user": current_user.username}, 200
+    return {"status": "acknowledged", "user": alert.acknowledged_by}, 200
 
 @api_bp.route('/v1/alerts/<int:alert_id>/resolve', methods=['POST'])
-@login_required
-@role_required(['Admin', 'Staff'])
+@require_api_or_role(['Admin', 'Staff'])
 def api_resolve_alert(alert_id):
     alert = Alert.query.get_or_404(alert_id)
     alert.is_resolved = True
     alert.resolved_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    alert.resolved_by = current_user.username
+    alert.resolved_by = current_user.username if current_user.is_authenticated else "API-USER"
 
-    # Also update equipment status if all alerts for it are resolved
     unit = EquipmentMetric.query.get(alert.equipment_id)
     if unit:
         remaining = Alert.query.filter_by(equipment_id=unit.id, is_resolved=False).count()
-        if remaining <= 1: # This one is about to be resolved
+        if remaining <= 1:
             unit.maintenance_status = 'Operational'
 
     db.session.commit()
-    return {"status": "resolved", "user": current_user.username}, 200
+    return {"status": "resolved", "user": alert.resolved_by}, 200
 
 @api_bp.route('/v1/analytics/usage', methods=['GET'])
 @require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_usage_analytics():
-    # If authenticated via session (e.g. from dashboard), use session context
-    # Otherwise, require franchise_id as a parameter if not global
     if current_user.is_authenticated:
         franchise_id = current_user.franchise_id
         is_admin = (current_user.role == 'Admin')
@@ -201,8 +184,6 @@ def api_usage_analytics():
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
 
     metric_ids = [m.id for m in metrics]
-
-    # Simple aggregation by date from TelemetryHistory
     history = TelemetryHistory.query.filter(TelemetryHistory.equipment_id.in_(metric_ids)).all()
 
     daily_stats = {}
@@ -210,7 +191,6 @@ def api_usage_analytics():
         date = entry.timestamp[:10]
         daily_stats[date] = daily_stats.get(date, 0) + entry.scans_count
 
-    # Sort by date
     sorted_dates = sorted(daily_stats.keys())
 
     return {
@@ -221,8 +201,6 @@ def api_usage_analytics():
 @api_bp.route('/v1/members', methods=['GET'])
 @require_api_or_role(['Admin', 'Staff', 'Franchisee'])
 def api_list_members():
-    # If authenticated via API Key, we assume Global Admin scope for now as the key is in config.py
-    # If authenticated via Session, we check roles.
     is_admin = not current_user.is_authenticated or current_user.role == 'Admin'
 
     if is_admin:
@@ -232,7 +210,6 @@ def api_list_members():
         else:
             members = Member.query.filter_by(franchise_id=franchise_id).all()
     else:
-        # Force filter by current user's franchise if not admin
         members = Member.query.filter_by(franchise_id=current_user.franchise_id).all()
 
     return {
@@ -255,11 +232,9 @@ def api_create_member():
     if not data or 'email' not in data or 'name' not in data or 'password' not in data:
         return {"error": "Missing required fields"}, 400
 
-    # Check if exists
     if User.query.filter_by(username=data['email']).first():
         return {"error": "User already exists"}, 409
 
-    # Logic similar to /onboard but for API
     new_user = User(
         username=data['email'],
         role='Member',
@@ -287,11 +262,8 @@ def api_create_member():
 def api_member_detail(member_id):
     member = Member.query.get_or_404(member_id)
 
-    # Multi-tenant isolation for session-based users
     if current_user.is_authenticated:
         if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
-            from blueprints.auth import log_security_event
-            log_security_event(current_user.id, f"Unauthorized member access attempt: Member {member_id}")
             abort(403)
 
     if request.method == 'GET':
@@ -314,10 +286,262 @@ def api_member_detail(member_id):
         return {"status": "updated"}
 
     if request.method == 'DELETE':
-        # Remove User account too
         user = User.query.get(member.user_id)
         if user:
             db.session.delete(user)
         db.session.delete(member)
         db.session.commit()
         return {"status": "deleted"}
+
+@api_bp.route('/v1/feedback', methods=['POST'])
+@require_api_or_role(['Admin', 'Member'])
+def api_submit_feedback():
+    data = request.get_json()
+    if not data or 'rating' not in data:
+        return {"error": "Rating is required"}, 400
+
+    member_id = data.get('member_id')
+    if not member_id and current_user.is_authenticated and current_user.role == 'Member':
+        member = Member.query.filter_by(user_id=current_user.id).first()
+        member_id = member.id if member else None
+
+    feedback = Feedback(
+        member_id=member_id,
+        franchise_id=data.get('franchise_id'),
+        rating=int(data['rating']),
+        category=data.get('category', 'General'),
+        comment=data.get('comment'),
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    db.session.add(feedback)
+    db.session.commit()
+    return {"status": "success", "feedback_id": feedback.id}, 201
+
+@api_bp.route('/v1/members/sync', methods=['POST'])
+@require_api_key
+def api_sync_members():
+    """Secure bulk sync for member statuses."""
+    data = request.get_json()
+    if not data or not isinstance(data, list):
+        return {"error": "Invalid data format, expected list"}, 400
+
+    results = {"updated": 0, "errors": []}
+    for item in data:
+        email = item.get('email')
+        status = item.get('status')
+        if not email or not status:
+            results['errors'].append({"email": email, "error": "Missing email or status"})
+            continue
+
+        member = Member.query.filter_by(email=email).first()
+        if member:
+            member.onboarding_status = status
+            results['updated'] += 1
+        else:
+            results['errors'].append({"email": email, "error": "Member not found"})
+
+    db.session.commit()
+    return results, 200
+
+@api_bp.route('/v1/telemetry/check-in', methods=['POST'])
+@require_api_key
+def api_hardware_checkin():
+    """Hardware Check-in Integration (v5.2.0)"""
+    data = request.get_json()
+    if not data:
+        return {"error": "Invalid check-in packet"}, 400
+
+    nfc_uid = data.get('nfc_uid')
+    biometric_token = data.get('biometric_token')
+    equipment_id = data.get('equipment_id')
+
+    if not equipment_id:
+        return {"error": "Equipment ID required"}, 400
+
+    member = None
+    if nfc_uid:
+        member = Member.query.filter_by(nfc_uid=nfc_uid).first()
+    elif biometric_token:
+        member = Member.query.filter_by(biometric_token=biometric_token).first()
+
+    if not member:
+        return {"error": "Member not identified"}, 404
+
+    history = TelemetryHistory(
+        equipment_id=equipment_id,
+        member_id=member.id,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        scans_count=1
+    )
+    db.session.add(history)
+    member.points += 1
+    db.session.commit()
+
+    return {
+        "status": "success",
+        "member_name": member.name,
+        "points_total": member.points
+    }, 200
+
+@api_bp.route('/v1/auth/member-login', methods=['POST'])
+@require_api_key
+def api_member_login():
+    """Secure Member Auth (v5.3.0)"""
+    data = request.get_json()
+    if not data or 'email' not in data or 'password' not in data:
+        return {"error": "Email and password required"}, 400
+
+    user = User.query.filter_by(username=data['email'], role='Member').first()
+    if user and user.check_password(data['password']):
+        if user.is_locked:
+            return {"error": "Account is locked"}, 403
+
+        member = Member.query.filter_by(user_id=user.id).first()
+        return {
+            "status": "authenticated",
+            "member_id": member.id if member else None,
+            "name": member.name if member else user.username,
+            "session_token": secrets.token_urlsafe(32)
+        }, 200
+
+    return {"error": "Invalid credentials"}, 401
+
+@api_bp.route('/v1/schedules/book', methods=['POST'])
+@require_api_key
+def api_book_session():
+    """Stateless Scheduling (v5.3.0)"""
+    data = request.get_json()
+    if not data or not all(k in data for k in ['member_id', 'equipment_id', 'start_time']):
+        return {"error": "Missing booking details"}, 400
+
+    existing = MemberSchedule.query.filter_by(
+        equipment_id=data['equipment_id'],
+        start_time=data['start_time'].replace('T', ' ')
+    ).first()
+
+    if existing:
+        return {"error": "Slot already occupied"}, 409
+
+    new_booking = MemberSchedule(
+        member_id=data['member_id'],
+        member_name=data.get('member_name', 'External Booking'),
+        equipment_id=data['equipment_id'],
+        start_time=data['start_time'].replace('T', ' '),
+        duration_minutes=int(data.get('duration_minutes', 15)),
+        status='Scheduled'
+    )
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return {
+        "status": "confirmed",
+        "booking_id": new_booking.id
+    }, 201
+
+@api_bp.route('/v1/enterprise/export', methods=['GET'])
+@require_api_or_role(['Admin'])
+def api_enterprise_export():
+    """Enterprise Data Exchange (v4.8.0)"""
+    units = EquipmentMetric.query.all()
+    telemetry_data = [{
+        "unit_id": u.id,
+        "name": u.equipment_name,
+        "location": u.location,
+        "uptime": u.uptime_percent,
+        "scans": u.total_scans,
+        "health_score": u.predictive_health_score,
+        "status": u.maintenance_status
+    } for u in units]
+
+    members = Member.query.all()
+    engagement_data = [{
+        "member_id": m.id,
+        "status": m.onboarding_status,
+        "points": m.points,
+        "engagement_score": m.engagement_score,
+        "franchise_id": m.franchise_id
+    } for m in members]
+
+    feedback = Feedback.query.all()
+    sentiment_data = [{
+        "rating": f.rating,
+        "category": f.category,
+        "timestamp": f.timestamp,
+        "franchise_id": f.franchise_id
+    } for f in feedback]
+
+    return {
+        "version": "4.8.0",
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "telemetry": telemetry_data,
+        "engagement": engagement_data,
+        "sentiment": sentiment_data
+    }, 200
+
+@api_bp.route('/v1/enterprise/leads', methods=['GET'])
+@require_api_or_role(['Admin'])
+def api_enterprise_leads():
+    """Enterprise Lead Sync (v4.8.0)"""
+    leads = Lead.query.all()
+    lead_data = [{
+        "id": l.id,
+        "company": l.company,
+        "region": l.region,
+        "status": l.status,
+        "priority": l.priority,
+        "propensity_score": l.propensity_score if hasattr(l, 'propensity_score') else 0,
+        "portal_views": l.portal_views
+    } for l in leads]
+
+    return {
+        "count": len(lead_data),
+        "leads": lead_data
+    }, 200
+
+@api_bp.route('/v1/analytics/live-occupancy', methods=['GET'])
+@require_api_or_role(['Admin', 'Staff', 'Franchisee'])
+def api_live_occupancy():
+    """Live Occupancy Analytics (v5.0.0)"""
+    if current_user.is_authenticated:
+        franchise_id = current_user.franchise_id
+        is_admin = (current_user.role == 'Admin')
+    else:
+        franchise_id = request.args.get('franchise_id')
+        is_admin = not franchise_id
+
+    if is_admin:
+        units = EquipmentMetric.query.all()
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+
+    unit_intensity = []
+    total_active_scans = 0
+
+    for u in units:
+        from datetime import timedelta
+        cutoff = (datetime.now() - timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+        recent_scans = db.session.query(db.func.sum(TelemetryHistory.scans_count)).filter(
+            TelemetryHistory.equipment_id == u.id,
+            TelemetryHistory.timestamp >= cutoff
+        ).scalar() or 0
+
+        intensity = min(1.0, recent_scans / 10.0)
+        unit_intensity.append({
+            "unit_id": u.id,
+            "name": u.equipment_name,
+            "intensity": intensity,
+            "scans": recent_scans
+        })
+        total_active_scans += recent_scans
+
+    active_shifts = MemberSchedule.query.filter(
+        MemberSchedule.status == 'Scheduled',
+        MemberSchedule.start_time.contains(datetime.now().strftime("%Y-%m-%d"))
+    ).count()
+
+    return {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "total_active_scans": total_active_scans,
+        "active_staff": active_shifts,
+        "units": unit_intensity
+    }, 200

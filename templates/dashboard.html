@@ -98,6 +98,7 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-2">
                                         <a href="{{ url_for('prospect_portal', token=lead.public_token) }}" class="text-slate-400 hover:text-blue-500 transition-colors" title="View Portal">
+                                        <a href="{{ url_for('admin.prospect_portal', token=lead.public_token) }}" class="text-slate-400 hover:text-blue-500 transition-colors" title="View Portal">
                                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                                         </a>
                                         <button class="text-slate-400 hover:text-slate-600 transition-colors" title="Edit Lead">

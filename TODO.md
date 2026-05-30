@@ -1,6 +1,6 @@
 # TODO - Immediate Actions
 
-## Infrastructure & Maintenance (v4.4.x)
+## Infrastructure & Maintenance (v5.4.x)
 - [ ] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
 - [ ] Add unit tests for `backup_job.py` to verify snapshot integrity.
 - [ ] Implement automated restoration test in a staging environment.

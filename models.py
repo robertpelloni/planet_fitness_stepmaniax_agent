@@ -1,8 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
-db = SQLAlchemy()
+from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,6 +12,13 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.String(50))
     failed_login_attempts = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
+
+    # Security Enhancements (v4.9.0)
+    mfa_secret = db.Column(db.String(32))
+    mfa_enabled = db.Column(db.Boolean, default=False)
+    api_key = db.Column(db.String(64), unique=True)
+    reset_token = db.Column(db.String(100), unique=True)
+    reset_token_expiry = db.Column(db.String(50))
 
     # Granular Permissions (v4.0.0)
     perm_crm_view = db.Column(db.Boolean, default=True)
@@ -40,6 +46,7 @@ class EquipmentMetric(db.Model):
     maintenance_status = db.Column(db.String(50), default='Operational') # 'Operational', 'Needs Maintenance'
     last_heartbeat = db.Column(db.String(50))
     predictive_health_score = db.Column(db.Float, default=100.0)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +78,19 @@ class Member(db.Model):
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
     points = db.Column(db.Integer, default=0)
     engagement_score = db.Column(db.Float, default=0.0)
+    biometric_token = db.Column(db.String(100), unique=True)
+    nfc_uid = db.Column(db.String(50), unique=True)
+
+    # Relationship to WorkoutPlan
+    workout_plan = db.relationship('WorkoutPlan', backref='member', uselist=False)
+
+class WorkoutPlan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False)
+    target_scans = db.Column(db.Integer, default=1000)
+    target_duration = db.Column(db.Integer, default=300) # In minutes
+    created_at = db.Column(db.String(50), default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 class Lead(db.Model):
     __tablename__ = 'leads'
@@ -91,6 +111,7 @@ class Lead(db.Model):
     last_contact_date = db.Column(db.String(50))
     public_token = db.Column(db.String(100), unique=True)
     portal_views = db.Column(db.Integer, default=0)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'
@@ -112,6 +133,7 @@ class TelemetryHistory(db.Model):
     member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=True)
     timestamp = db.Column(db.String(50), nullable=False)
     scans_count = db.Column(db.Integer, default=0)
+    duration_minutes = db.Column(db.Float, default=0.0)
 
 class AuditLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
