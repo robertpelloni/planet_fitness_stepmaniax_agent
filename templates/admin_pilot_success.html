@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Pilot Success Dashboard - StepManiaX{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Pilot Success Dashboard</h1>
+            <p class="text-slate-500 font-medium">ROI Targets vs. Actual Performance</p>
+        </div>
+        {% include 'partials/region_selector.html' %}
+    </div>
+
+    <!-- Pilot Performance Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">Active Pilot Tracking</h3>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ pilot_stats|length }} PILOTS IN PROGRESS</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                        <th class="px-6 py-4">Franchise Group</th>
+                        <th class="px-6 py-4">Region</th>
+                        <th class="px-6 py-4 text-right">Weekly Target</th>
+                        <th class="px-6 py-4 text-right">Actual (LTD)</th>
+                        <th class="px-6 py-4">Success Score</th>
+                        <th class="px-6 py-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for pilot in pilot_stats %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <p class="font-bold text-slate-800 text-sm">{{ pilot.company }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-tighter">{{ pilot.region }}</td>
+                        <td class="px-6 py-4 text-right font-mono text-xs">${{ "{:,.2f}".format(pilot.target) }}</td>
+                        <td class="px-6 py-4 text-right font-mono text-xs text-green-600">${{ "{:,.2f}".format(pilot.actual) }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden w-24">
+                                    <div class="h-full bg-blue-500" style="width: {{ pilot.score }}%;"></div>
+                                </div>
+                                <span class="text-[10px] font-black text-slate-600">{{ pilot.score }}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-100 text-blue-700">{{ pilot.status }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 italic text-sm">No active pilots identified for this scope.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

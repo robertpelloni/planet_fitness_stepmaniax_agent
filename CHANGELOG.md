@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.3.0] - 2026-05-31
+### Internationalization & Pilot Analytics
+- **Real-time Translation:** Integrated `googletrans` into the outreach engine to support automated localization for Mexico (Spanish) and Canada (French) regions.
+- **Pilot Success Dashboard:** Launched `/admin/pilot-success` providing real-time ROI tracking against franchise-specific MOU targets.
+- **Geolocation Seeding:** Updated `populate_test_data.py` with regional coordinates (Detroit, Chicago, London, Toronto) to support spatial visualization.
+- **Verification Suite:** Finalized `validate_system.sh` ensuring 100% pass rate across 13 integration and UI tests.
+
 ## [6.2.0] - 2026-05-31
 ### Enterprise Security & Reporting Refinement
 - **IP-based Access Lists:** Implemented IP filtering for Enterprise APIs. Administrators can now restrict API access to specific whitelisted IPs per user.

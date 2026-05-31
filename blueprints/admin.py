@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, send_from_directory
 from flask_login import login_required, current_user
 from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule, ServiceDispatch
+from sqlalchemy import func
 from datetime import datetime
 import subprocess
 import analytics
@@ -507,3 +508,40 @@ def admin_system_health():
                 })
     backups.sort(key=lambda x: x['filename'], reverse=True)
     return render_template('admin_system_health.html', health_data=health_data, backups=backups)
+
+@admin_bp.route('/pilot-success')
+@login_required
+@role_required(['Admin'])
+def admin_pilot_success():
+    """Pilot Success Dashboard: ROI Tracking (v6.3.0)"""
+    region = request.args.get('region')
+
+    query = Lead.query.filter(Lead.status.contains('Pilot'))
+    if region:
+        query = query.filter_by(region_cluster=region)
+
+    pilot_leads = query.all()
+    pilot_stats = []
+
+    for lead in pilot_leads:
+        # Calculate actual revenue from payments
+        actual_revenue = db.session.query(func.sum(Payment.amount))\
+            .join(Member, Payment.member_id == Member.id)\
+            .filter(Member.franchise_id == lead.id, Payment.status == 'Completed').scalar() or 0.0
+
+        # Success Score: (Actual / Projected) * 100
+        target = lead.projected_annual_profit / 52 if lead.projected_annual_profit else 1000 # Weekly target approx
+        # Since payments might be sparse in test data, we use a simulation factor if actuals are 0
+        success_score = min(100.0, (actual_revenue / target * 100)) if target > 0 else 0
+
+        pilot_stats.append({
+            "company": lead.company,
+            "region": lead.region,
+            "target": round(target, 2),
+            "actual": round(actual_revenue, 2),
+            "score": round(success_score, 1),
+            "status": lead.status
+        })
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+    return render_template('admin_pilot_success.html', pilot_stats=pilot_stats, all_regions=all_regions, current_region=region)

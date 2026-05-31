@@ -33,6 +33,7 @@
 
                         {% if current_user.role == 'Admin' %}
                             <a href="{{ url_for('admin.admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
+                            <a href="{{ url_for('admin.admin_pilot_success') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Pilot Success</a>
                             <a href="{{ url_for('admin.admin_optimization') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Optimization</a>
                             <a href="{{ url_for('admin.admin_feedback') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Feedback</a>
                             <a href="{{ url_for('admin.admin_system_health') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Health</a>

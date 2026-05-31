@@ -4,6 +4,7 @@ from datetime import datetime
 from app import app, db
 from models import Lead, AuditLog, OutreachLog, Feedback
 import analytics
+from googletrans import Translator
 
 DB_PATH = 'crm.db'
 
@@ -11,8 +12,10 @@ def launch_outreach():
     """
     Identifies leads ready for outreach and generates simulation messages.
     (v5.9.0): Enhanced with ML-based optimization simulation and sentiment awareness.
+    (v6.3.0): Integrated real-time translation for Mexico/Canada regions.
     """
-    print("--- Starting Automated Outreach Dispatcher (Optimized v5.9.0) ---")
+    print("--- Starting Automated Outreach Dispatcher (Optimized v6.3.0) ---")
+    translator = Translator()
 
     with app.app_context():
         # Optimization: Prioritize high-propensity leads
@@ -73,6 +76,22 @@ Do you have 5 minutes for a brief introductory call later this week?
 Best regards,
 B2B Sales Agent (Autonomous Dispatch)
             """
+
+            # Region-based Translation (v6.3.0) - MUST HAPPEN BEFORE LOGGING/SAVING
+            target_lang = None
+            if lead.region == 'Mexico':
+                target_lang = 'es'
+            elif lead.region in ['Quebec', 'Canada']:
+                # For simulation, we'll use French for Quebec/general Canada targets
+                target_lang = 'fr'
+
+            if target_lang:
+                try:
+                    print(f"Translating message to {target_lang} for {lead.region}...")
+                    translated = translator.translate(message, dest=target_lang)
+                    message = translated.text
+                except Exception as e:
+                    print(f"Translation failed for {lead.company}: {e}")
 
             # Save generated message for record
             outreach_dir = 'outreach/generated_messages'
