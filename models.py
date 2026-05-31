@@ -114,6 +114,7 @@ class Lead(db.Model):
     projected_annual_profit = db.Column(db.Float)
     follow_up_count = db.Column(db.Integer, default=0)
     last_contact_date = db.Column(db.String(50))
+    cadence_paused = db.Column(db.Boolean, default=False)
     public_token = db.Column(db.String(100), unique=True)
     portal_views = db.Column(db.Integer, default=0)
     region_cluster = db.Column(db.String(50), default='US-EAST-1')

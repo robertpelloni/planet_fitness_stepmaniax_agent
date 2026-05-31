@@ -382,6 +382,27 @@ def admin_lead_edit(lead_id):
         return redirect(url_for('admin.admin_leads'))
     return render_template('admin_lead_form.html', action="Edit", lead=lead)
 
+@admin_bp.route('/leads/toggle-cadence/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_toggle_cadence(lead_id):
+    lead = Lead.query.get_or_404(lead_id)
+    lead.cadence_paused = not lead.cadence_paused
+    db.session.commit()
+    return render_template('partials/lead_row.html', lead=lead)
+
+@admin_bp.route('/leads/reset-cadence/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_reset_cadence(lead_id):
+    lead = Lead.query.get_or_404(lead_id)
+    lead.follow_up_count = 0
+    lead.status = 'Ready for Outreach'
+    lead.last_contact_date = None
+    lead.cadence_paused = False
+    db.session.commit()
+    return render_template('partials/lead_row.html', lead=lead)
+
 @admin_bp.route('/leads/delete/<lead_id>', methods=['POST'])
 @login_required
 @role_required(['Admin'])

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.4.0] - 2026-05-31
+### Automated Outreach Cadence
+- **Multi-tier Follow-up Engine:** Implemented automated Day 3, 7, and 14 follow-up tiers in `launch_outreach.py` with timing and tier-selection logic.
+- **Cadence Dashboard:** Enhanced the Admin Leads interface with real-time cadence tracking and HTMX controls for pausing, resuming, and resetting outreach states.
+- **Model Enhancement:** Added `cadence_paused` field to the `Lead` model to allow granular control over automated sequences.
+- **Integration Testing:** Launched `tests/integration/test_cadence.py` verifying automated tier progression and timing logic.
+
 ## [6.3.0] - 2026-05-31
 ### Internationalization & Pilot Analytics
 - **Real-time Translation:** Integrated `googletrans` into the outreach engine to support automated localization for Mexico (Spanish) and Canada (French) regions.

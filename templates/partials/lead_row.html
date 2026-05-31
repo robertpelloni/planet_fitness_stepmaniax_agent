@@ -1,0 +1,45 @@
+<tr id="lead-row-{{ lead.id }}">
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{{ lead.company }}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ lead.contact_name or 'N/A' }}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+            {% if lead.status == 'Ready for Outreach' %}bg-green-100 text-green-800
+            {% elif lead.status == 'Identified' %}bg-blue-100 text-blue-800
+            {% elif lead.status == 'Outreach Active' %}bg-yellow-100 text-yellow-800
+            {% else %}bg-gray-100 text-gray-800{% endif %}">
+            {{ lead.status }}
+        </span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ lead.priority }}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+        {% if lead.status in ['Outreach Active', 'Outreach Exhausted'] %}
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold {% if lead.cadence_paused %}text-red-400{% else %}text-green-400{% endif %}">
+                    Tier {{ lead.follow_up_count }} {% if lead.cadence_paused %}(Paused){% endif %}
+                </span>
+                <button hx-post="{{ url_for('admin.admin_toggle_cadence', lead_id=lead.id) }}"
+                        hx-target="#lead-row-{{ lead.id }}" hx-swap="outerHTML"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                        class="text-[10px] bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">
+                    {% if lead.cadence_paused %}Resume{% else %}Pause{% endif %}
+                </button>
+                <button hx-post="{{ url_for('admin.admin_reset_cadence', lead_id=lead.id) }}"
+                        hx-target="#lead-row-{{ lead.id }}" hx-swap="outerHTML"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                        hx-confirm="Reset outreach cadence to Day 0?"
+                        class="text-[10px] bg-red-900 hover:bg-red-800 px-2 py-1 rounded">
+                    Reset
+                </button>
+            </div>
+        {% else %}
+            <span class="text-gray-600 italic">Not Started</span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2">
+        <a href="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) }}" class="text-indigo-400 hover:text-indigo-600">Edit</a>
+        <form action="{{ url_for('admin.admin_lead_delete', lead_id=lead.id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-red-400 hover:text-red-600">Delete</button>
+        </form>
+    </td>
+</tr>

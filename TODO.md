@@ -6,6 +6,8 @@
 - [x] Hardened security: Implement IP-based access lists for the Enterprise Export API. (Completed in v6.2.0)
 - [x] Integrate real-time translation for outreach messages to support Mexico/Canada expansion. (Completed in v6.3.0)
 - [x] Launch Pilot Success Dashboard tracking ROI targets vs. actual performance. (Completed in v6.3.0)
+- [x] Implement automated follow-up engine (Day 3, 7, 14) with translation support. (Completed in v6.4.0)
+- [x] Add Admin UI for pausing/resetting outreach cadence. (Completed in v6.4.0)
 
 ## Infrastructure & Maintenance (v5.4.1)
 - [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
