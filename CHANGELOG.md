@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.0.0] - 2026-05-31
+### Advanced Analytics & Global Expansion
+- **Regional Heatmap:** Integrated Leaflet.js into the Admin Command Center for global fleet and lead visualization.
+- **Geolocation API:** Launched `/api/v1/analytics/geo` to serve spatial data for units and prospects.
+- **Spatial Schema:** Added `latitude` and `longitude` support to Lead and Equipment models.
+- **UI Hardening:** Resolved structural template errors and implemented output escaping for system logs.
+
 ## [5.9.1] - 2026-05-31
 ### Multi-Region Scalability & Outreach Optimization
 - **Multi-Region Support:** Implemented granular data filtering by `region_cluster` across all Admin and Staff dashboards.

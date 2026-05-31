@@ -48,6 +48,8 @@ class EquipmentMetric(db.Model):
     last_heartbeat = db.Column(db.String(50))
     predictive_health_score = db.Column(db.Float, default=100.0)
     region_cluster = db.Column(db.String(50), default='US-EAST-1')
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -114,6 +116,8 @@ class Lead(db.Model):
     public_token = db.Column(db.String(100), unique=True)
     portal_views = db.Column(db.Integer, default=0)
     region_cluster = db.Column(db.String(50), default='US-EAST-1')
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
 class OutreachLog(db.Model):
     __tablename__ = 'outreach_logs'

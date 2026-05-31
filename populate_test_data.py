@@ -40,7 +40,9 @@ def populate():
         last_contact_date TEXT,
         public_token TEXT UNIQUE,
         portal_views INTEGER DEFAULT 0,
-        region_cluster TEXT DEFAULT 'US-EAST-1'
+        region_cluster TEXT DEFAULT 'US-EAST-1',
+        latitude REAL,
+        longitude REAL
     )""")
 
     cursor.execute("""
@@ -82,6 +84,8 @@ def populate():
         last_heartbeat TEXT,
         predictive_health_score REAL DEFAULT 100.0,
         region_cluster TEXT DEFAULT 'US-EAST-1',
+        latitude REAL,
+        longitude REAL,
         FOREIGN KEY(franchise_id) REFERENCES leads(id)
     )""")
 
@@ -222,12 +226,12 @@ def populate():
     cursor.execute("PRAGMA foreign_keys = ON")
 
     leads = [
-        ('EPIC-001', 'EPIC Fitness Group', 'John Doe', 'VP Operations', 'john@epicfitness.com', 'Midwest', 'Pilot MOU Signed', 'High', 15, 0.04, 20.0, 150000, 'token-epic', 'US-EAST-1'),
-        ('FLY-002', 'Flynn Group', 'Jane Smith', 'Chief Operating Officer', 'jane@flynngroup.com', 'National', 'Identified', 'High', 120, 0.03, 15.0, 850000, 'token-flynn', 'US-EAST-1'),
-        ('UK-003', 'UK Fitness Corp', 'Nigel Farad', 'Director', 'nigel@ukfitness.co.uk', 'London', 'Ready for Outreach', 'Medium', 10, 0.03, 20.0, 100000, 'token-uk', 'UK-NORTH'),
-        ('CAN-004', 'Canada Gyms', 'Justin T', 'CEO', 'justin@canadagyms.ca', 'Toronto', 'Identified', 'Low', 5, 0.02, 18.0, 50000, 'token-canada', 'CAN-WEST')
+        ('EPIC-001', 'EPIC Fitness Group', 'John Doe', 'VP Operations', 'john@epicfitness.com', 'Midwest', 'Pilot MOU Signed', 'High', 15, 0.04, 20.0, 150000, 'token-epic', 'US-EAST-1', 42.3314, -83.0458),
+        ('FLY-002', 'Flynn Group', 'Jane Smith', 'Chief Operating Officer', 'jane@flynngroup.com', 'National', 'Identified', 'High', 120, 0.03, 15.0, 850000, 'token-flynn', 'US-EAST-1', 41.8781, -87.6298),
+        ('UK-003', 'UK Fitness Corp', 'Nigel Farad', 'Director', 'nigel@ukfitness.co.uk', 'London', 'Ready for Outreach', 'Medium', 10, 0.03, 20.0, 100000, 'token-uk', 'UK-NORTH', 51.5074, -0.1278),
+        ('CAN-004', 'Canada Gyms', 'Justin T', 'CEO', 'justin@canadagyms.ca', 'Toronto', 'Identified', 'Low', 5, 0.02, 18.0, 50000, 'token-canada', 'CAN-WEST', 43.6532, -79.3832)
     ]
-    cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token, region_cluster) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)
+    cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token, region_cluster, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)
 
     users = [
         (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 'US-EAST-1', 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
@@ -240,11 +244,11 @@ def populate():
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", users)
 
     metrics = [
-        (1, 'StepManiaX Unit A', 'EPIC Fitness - Detroit', 'EPIC-001', 98.5, 1250, '2026-05-01', 12.5, 100, 'Operational', 'US-EAST-1'),
-        (2, 'StepManiaX Unit B', 'Flynn Group - Chicago', 'FLY-002', 92.0, 850, '2026-04-20', 10.2, 80, 'Needs Maintenance', 'US-EAST-1'),
-        (3, 'StepManiaX Unit C', 'London Central', 'UK-003', 99.0, 500, '2026-05-10', 15.0, 50, 'Operational', 'UK-NORTH')
+        (1, 'StepManiaX Unit A', 'EPIC Fitness - Detroit', 'EPIC-001', 98.5, 1250, '2026-05-01', 12.5, 100, 'Operational', 'US-EAST-1', 42.3314, -83.0458),
+        (2, 'StepManiaX Unit B', 'Flynn Group - Chicago', 'FLY-002', 92.0, 850, '2026-04-20', 10.2, 80, 'Needs Maintenance', 'US-EAST-1', 41.8781, -87.6298),
+        (3, 'StepManiaX Unit C', 'London Central', 'UK-003', 99.0, 500, '2026-05-10', 15.0, 50, 'Operational', 'UK-NORTH', 51.5074, -0.1278)
     ]
-    cursor.executemany("INSERT INTO equipment_metric (id, equipment_name, location, franchise_id, uptime_percent, total_scans, last_service_date, avg_session_duration, total_sessions, maintenance_status, region_cluster) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", metrics)
+    cursor.executemany("INSERT INTO equipment_metric (id, equipment_name, location, franchise_id, uptime_percent, total_scans, last_service_date, avg_session_duration, total_sessions, maintenance_status, region_cluster, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", metrics)
 
     cursor.execute("""
         INSERT INTO user (id, username, password_hash, role, franchise_id, region_cluster, api_key)

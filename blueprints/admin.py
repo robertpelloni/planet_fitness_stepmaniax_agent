@@ -236,9 +236,10 @@ def admin_api_logs():
             try:
                 with open(path, 'r') as f:
                     lines = f.readlines()[-8:]
+                    from markupsafe import escape
                     logs.append(f"<div class='mb-2'><span class='text-blue-200 font-bold'>[{log_file}]</span>")
                     for line in lines:
-                        logs.append(f"<div class='pl-2 opacity-80'>{line.strip()}</div>")
+                        logs.append(f"<div class='pl-2 opacity-80'>{escape(line.strip())}</div>")
                     logs.append("</div>")
             except Exception as e:
                 logs.append(f"Error reading {log_file}: {str(e)}")

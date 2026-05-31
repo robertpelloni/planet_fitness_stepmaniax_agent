@@ -2,6 +2,16 @@
 
 {% block title %}Global Command Center - StepManiaX{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #map { height: 400px; border-radius: 1.5rem; }
+    .unit-marker { background: #3b82f6; border: 2px solid white; border-radius: 50%; width: 12px; height: 12px; }
+    .lead-marker { background: #f59e0b; border: 2px solid white; border-radius: 2px; width: 10px; height: 10px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-8">
     <div class="flex justify-between items-center">
@@ -92,8 +102,6 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- System Logs (v3.9.0) -->
-        <div class="bg-slate-900 rounded-2xl border border-slate-700 shadow-xl overflow-hidden">
         <!-- Security & Logs Stack -->
         <div class="space-y-8">
             <!-- Recent Security Audit (v4.7.0) -->
@@ -143,51 +151,35 @@
 
             <!-- System Logs (v3.9.0) -->
             <div class="bg-slate-900 rounded-2xl border border-slate-700 shadow-xl overflow-hidden">
-            <div class="p-6 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <i class="fa-solid fa-terminal text-blue-400"></i> System Log Stream
-                </h3>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">Live</span>
-            </div>
-            <div class="p-6 font-mono text-[10px] text-blue-400 leading-relaxed overflow-y-auto max-h-[300px]"
-                 hx-get="{{ url_for('admin.admin_api_logs') }}"
-                 hx-trigger="every 5s">
-                Initializing stream...
-            </div>
+                <div class="p-6 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-terminal text-blue-400"></i> System Log Stream
+                    </h3>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">Live</span>
+                </div>
+                <div class="p-6 font-mono text-[10px] text-blue-400 leading-relaxed overflow-y-auto max-h-[300px]"
+                     hx-get="{{ url_for('admin.admin_api_logs') }}"
+                     hx-trigger="every 5s">
+                    Initializing stream...
+                </div>
             </div>
         </div>
 
-        <!-- Fleet Map (Simulated) -->
-        <div class="lg:col-span-2 bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden min-h-[400px]">
-            <h3 class="font-black text-xs text-slate-500 uppercase tracking-[0.2em] mb-6">Global Deployment Map</h3>
-            <div class="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
-                <i class="fa-solid fa-earth-americas text-[300px]"></i>
-            </div>
-
-            <div class="relative z-10 space-y-4">
-                {% for unit in metrics %}
-                <div class="flex items-center gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs {{ 'bg-green-500/20 text-green-500' if unit.uptime_percent > 95 else 'bg-red-500/20 text-red-500' }}">
-                        {{ unit.id }}
+        <!-- Fleet Map (v6.0.0) -->
+        <div class="lg:col-span-2 bg-slate-900 rounded-3xl p-1 text-white relative overflow-hidden min-h-[400px]">
+            <div id="map"></div>
+            <div class="absolute top-6 left-6 z-[1000] pointer-events-none">
+                <h3 class="font-black text-xs text-white/50 uppercase tracking-[0.2em] mb-2">Global Deployment Map</h3>
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span class="text-[10px] font-black uppercase text-white/70">StepManiaX Units</span>
                     </div>
-                    <div class="flex-1">
-                        <p class="font-bold text-sm">{{ unit.equipment_name }}</p>
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">{{ unit.location }}</p>
-                    </div>
-                    <div class="flex items-center gap-6 text-right">
-                        <div>
-                            <p class="text-xs font-black {{ 'text-blue-500' if unit.predictive_health_score > 90 else 'text-yellow-500' if unit.predictive_health_score > 75 else 'text-red-500' }}">
-                                {{ unit.predictive_health_score|round(1) }}
-                            </p>
-                            <p class="text-[10px] text-slate-500 font-medium">Stability</p>
-                        </div>
-                        <div>
-                            <p class="text-xs font-black {{ 'text-green-500' if unit.uptime_percent > 95 else 'text-red-500' }}">{{ unit.uptime_percent }}%</p>
-                            <p class="text-[10px] text-slate-500 font-medium">Uptime</p>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-yellow-500"></div>
+                        <span class="text-[10px] font-black uppercase text-white/70">Potential Leads</span>
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
 
@@ -236,4 +228,51 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const map = L.map('map', {
+            center: [30, -20],
+            zoom: 2,
+            zoomControl: false,
+            attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        fetch('/api/v1/analytics/geo{% if current_region %}?region={{ current_region }}{% endif %}', {
+            headers: { 'X-API-KEY': '{{ current_user.api_key }}' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Render Units
+            data.units.forEach(u => {
+                const marker = L.divIcon({ className: 'unit-marker' });
+                L.marker([u.lat, u.lng], { icon: marker })
+                    .bindPopup(`<b>${u.name}</b><br>${u.location}<br>Stability: ${u.health_score}%`)
+                    .addTo(map);
+            });
+
+            // Render Leads
+            data.leads.forEach(l => {
+                const marker = L.divIcon({ className: 'lead-marker' });
+                L.marker([l.lat, l.lng], { icon: marker })
+                    .bindPopup(`<b>${l.company}</b><br>Status: ${l.status}<br>Propensity: ${l.propensity}`)
+                    .addTo(map);
+            });
+
+            if (data.units.length > 0 || data.leads.length > 0) {
+                const group = new L.featureGroup([
+                    ...data.units.map(u => L.marker([u.lat, u.lng])),
+                    ...data.leads.map(l => L.marker([l.lat, l.lng]))
+                ]);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        });
+    });
+</script>
 {% endblock %}

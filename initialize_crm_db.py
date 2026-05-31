@@ -35,7 +35,9 @@ def initialize_db():
         last_contact_date TEXT,
         public_token TEXT UNIQUE,
         portal_views INTEGER DEFAULT 0,
-        region_cluster TEXT DEFAULT 'US-EAST-1'
+        region_cluster TEXT DEFAULT 'US-EAST-1',
+        latitude REAL,
+        longitude REAL
     )
     """)
 
@@ -59,7 +61,9 @@ def initialize_db():
         "last_contact_date": "TEXT",
         "public_token": "TEXT UNIQUE",
         "portal_views": "INTEGER DEFAULT 0",
-        "region_cluster": "TEXT DEFAULT 'US-EAST-1'"
+        "region_cluster": "TEXT DEFAULT 'US-EAST-1'",
+        "latitude": "REAL",
+        "longitude": "REAL"
     }
     for col, definition in migrations.items():
         if col not in columns:
@@ -111,6 +115,12 @@ def initialize_db():
     if "region_cluster" not in eq_columns:
         print("Adding region_cluster to equipment_metric...")
         cursor.execute("ALTER TABLE equipment_metric ADD COLUMN region_cluster TEXT DEFAULT 'US-EAST-1'")
+    if "latitude" not in eq_columns:
+        print("Adding latitude to equipment_metric...")
+        cursor.execute("ALTER TABLE equipment_metric ADD COLUMN latitude REAL")
+    if "longitude" not in eq_columns:
+        print("Adding longitude to equipment_metric...")
+        cursor.execute("ALTER TABLE equipment_metric ADD COLUMN longitude REAL")
 
     # Hardware Check-in migrations (v5.2.0)
     cursor.execute("""
@@ -160,21 +170,22 @@ def initialize_db():
                 UPDATE leads SET
                     company=?, contact_name=?, title=?, email=?, region=?, status=?, priority=?, notes=?,
                     num_clubs=?, retention_lift=?, avg_monthly_fee=?, projected_annual_profit=?,
-                    public_token=?
+                    public_token=?, latitude=?, longitude=?
                 WHERE id=?
                 """, (
                     lead['company'], lead['contact_name'], lead['title'], lead['email'], lead['region'],
                     lead['status'], lead['priority'], lead['notes'],
                     roi.get('num_clubs'), roi.get('retention_lift'), roi.get('avg_monthly_fee'),
-                    roi.get('projected_annual_profit'), token, lead['id']
+                    roi.get('projected_annual_profit'), token, lead.get('latitude'), lead.get('longitude'), lead['id']
                 ))
             else:
                 token = secrets.token_urlsafe(16)
                 cursor.execute("""
                 INSERT INTO leads (
                     id, company, contact_name, title, email, region, status, priority, notes,
-                    num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token,
+                    latitude, longitude
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     lead['id'],
                     lead['company'],
@@ -189,7 +200,9 @@ def initialize_db():
                     roi.get('retention_lift'),
                     roi.get('avg_monthly_fee'),
                     roi.get('projected_annual_profit'),
-                    token
+                    token,
+                    lead.get('latitude'),
+                    lead.get('longitude')
                 ))
 
         print(f"Successfully synchronized leads from {JSON_FILE} to {DB_NAME}.")

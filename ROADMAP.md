@@ -3,6 +3,7 @@
 ## Phase 12: Scalability & Enterprise Hardening (v5.5.0)
 - [x] **Multi-Region Cluster Support:** Implement shard-based data isolation for international franchise expansion (UK, Canada, Mexico). (Completed in v5.9.0)
 - [x] **ML-Based Outreach Optimization:** Implement sentiment-aware prioritized outreach to increase Discovery Call conversion rates. (Completed in v5.9.0)
+- [x] **Spatial Intelligence:** Integrated Leaflet.js heatmaps and Geolocation APIs for global fleet visualization. (Completed in v6.0.0)
 - [x] **Biometric Telemetry Ingestion:** Support secure NFC/Biometric member check-ins on SMX units to eliminate manual scan entry. (Completed in v5.2.0)
 - [x] **Enterprise Reporting API:** Launch secure REST endpoints for large franchise groups to pull raw engagement data. (Completed in v4.8.0)
 - [x] **Automated Service Dispatch:** Integrate with maintenance workflows to automatically trigger work orders for hardware repairs. (Completed in v5.6.0)

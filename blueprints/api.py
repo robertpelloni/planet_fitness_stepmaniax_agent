@@ -597,3 +597,43 @@ def api_live_occupancy():
         "active_staff": active_shifts,
         "units": unit_intensity
     }, 200
+
+@api_bp.route('/v1/analytics/geo', methods=['GET'])
+@require_api_or_role(['Admin'])
+def api_geo_analytics():
+    """
+    Returns geolocation data for units and leads for map visualization (v6.0.0).
+    """
+    region = request.args.get('region')
+
+    query_units = EquipmentMetric.query
+    query_leads = Lead.query
+
+    if region:
+        query_units = query_units.filter_by(region_cluster=region)
+        query_leads = query_leads.filter_by(region_cluster=region)
+
+    units = query_units.all()
+    leads = query_leads.all()
+
+    geo_data = {
+        "units": [{
+            "id": u.id,
+            "name": u.equipment_name,
+            "location": u.location,
+            "lat": u.latitude,
+            "lng": u.longitude,
+            "health_score": u.predictive_health_score,
+            "status": u.maintenance_status
+        } for u in units if u.latitude and u.longitude],
+        "leads": [{
+            "id": l.id,
+            "company": l.company,
+            "lat": l.latitude,
+            "lng": l.longitude,
+            "status": l.status,
+            "propensity": l.propensity_score if hasattr(l, 'propensity_score') else 0
+        } for l in leads if l.latitude and l.longitude]
+    }
+
+    return geo_data, 200
