@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default='Franchisee') # 'Admin', 'Franchisee', 'Member', 'Staff'
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
     last_login = db.Column(db.String(50))
     failed_login_attempts = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
@@ -76,6 +77,7 @@ class Member(db.Model):
     onboarding_status = db.Column(db.String(50), default='Registered') # 'Registered', 'In Progress', 'Completed'
     registration_date = db.Column(db.String(50), nullable=False)
     franchise_id = db.Column(db.String(50), db.ForeignKey('leads.id'), nullable=True)
+    region_cluster = db.Column(db.String(50), default='US-EAST-1')
     points = db.Column(db.Integer, default=0)
     engagement_score = db.Column(db.Float, default=0.0)
     biometric_token = db.Column(db.String(100), unique=True)

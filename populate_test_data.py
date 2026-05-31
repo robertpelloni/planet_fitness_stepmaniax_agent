@@ -50,6 +50,7 @@ def populate():
         password_hash TEXT NOT NULL,
         role TEXT DEFAULT 'Franchisee',
         franchise_id TEXT,
+        region_cluster TEXT DEFAULT 'US-EAST-1',
         last_login TEXT,
         failed_login_attempts INTEGER DEFAULT 0,
         is_locked BOOLEAN DEFAULT 0,
@@ -93,6 +94,7 @@ def populate():
         onboarding_status TEXT DEFAULT 'Registered',
         registration_date TEXT NOT NULL,
         franchise_id TEXT,
+        region_cluster TEXT DEFAULT 'US-EAST-1',
         points INTEGER DEFAULT 0,
         engagement_score REAL DEFAULT 0.0,
         biometric_token TEXT UNIQUE,
@@ -226,14 +228,14 @@ def populate():
     cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)
 
     users = [
-        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
-        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 1, 0, 1, 1, 0, secrets.token_urlsafe(32)),
-        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 0, 0, 1, 0, 0, secrets.token_urlsafe(32))
+        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 'US-EAST-1', 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
+        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 'US-EAST-1', 1, 0, 1, 1, 0, secrets.token_urlsafe(32)),
+        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 'US-EAST-1', 0, 0, 1, 0, 0, secrets.token_urlsafe(32))
     ]
     cursor.executemany("""
-        INSERT INTO user (id, username, password_hash, role, franchise_id,
+        INSERT INTO user (id, username, password_hash, role, franchise_id, region_cluster,
                          perm_crm_view, perm_crm_edit, perm_ops_view, perm_revenue_view, perm_admin_access, api_key)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", users)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", users)
 
     metrics = [
         (1, 'StepManiaX Unit A', 'EPIC Fitness - Detroit', 'EPIC-001', 98.5, 1250, '2026-05-01', 12.5, 100, 'Operational'),
@@ -242,14 +244,14 @@ def populate():
     cursor.executemany("INSERT INTO equipment_metric (id, equipment_name, location, franchise_id, uptime_percent, total_scans, last_service_date, avg_session_duration, total_sessions, maintenance_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", metrics)
 
     cursor.execute("""
-        INSERT INTO user (id, username, password_hash, role, franchise_id, api_key)
-        VALUES (?, ?, ?, ?, ?, ?)""",
-        (4, 'member@flynngroup.com', generate_password_hash('member123'), 'Member', 'FLY-002', secrets.token_urlsafe(32)))
+        INSERT INTO user (id, username, password_hash, role, franchise_id, region_cluster, api_key)
+        VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (4, 'member@flynngroup.com', generate_password_hash('member123'), 'Member', 'FLY-002', 'US-EAST-1', secrets.token_urlsafe(32)))
 
     members = [
-        (1, 4, 'Flynn Member', 'member@flynngroup.com', 'Registered', '2026-05-20', 'FLY-002', 250, 0.5)
+        (1, 4, 'Flynn Member', 'member@flynngroup.com', 'Registered', '2026-05-20', 'FLY-002', 'US-EAST-1', 250, 0.5)
     ]
-    cursor.executemany("INSERT INTO member (id, user_id, name, email, onboarding_status, registration_date, franchise_id, points, engagement_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", members)
+    cursor.executemany("INSERT INTO member (id, user_id, name, email, onboarding_status, registration_date, franchise_id, region_cluster, points, engagement_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", members)
 
     cursor.execute("INSERT INTO workout_plan (member_id, name, target_scans, target_duration, created_at) VALUES (?, ?, ?, ?, ?)",
                    (1, "Summer Challenge", 1000, 300, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
