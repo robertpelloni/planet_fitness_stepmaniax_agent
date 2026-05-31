@@ -280,6 +280,75 @@ def admin_command_center():
                            current_region=region,
                            dispatches=dispatches)
 
+@admin_bp.route('/leads')
+@login_required
+@role_required(['Admin'])
+def admin_leads():
+    leads = Lead.query.all()
+    return render_template('admin_leads.html', leads=leads)
+
+@admin_bp.route('/leads/create', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin'])
+def admin_lead_create():
+    if request.method == 'POST':
+        company = request.form.get('company')
+        lead_id = company[:3].upper() + "-" + secrets.token_hex(2).upper()
+
+        new_lead = Lead(
+            id=lead_id,
+            company=company,
+            contact_name=request.form.get('contact_name'),
+            title=request.form.get('title'),
+            email=request.form.get('email'),
+            region=request.form.get('region'),
+            status=request.form.get('status', 'New'),
+            priority=request.form.get('priority', 'Medium'),
+            num_clubs=int(request.form.get('num_clubs', 0)),
+            notes=request.form.get('notes'),
+            public_token=secrets.token_urlsafe(16)
+        )
+        db.session.add(new_lead)
+        db.session.commit()
+        log_security_event(current_user.id, f"Created new lead: {company}")
+        flash(f"Lead {company} created successfully.")
+        return redirect(url_for('admin.admin_leads'))
+    return render_template('admin_lead_form.html', action="Create")
+
+@admin_bp.route('/leads/edit/<lead_id>', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin'])
+def admin_lead_edit(lead_id):
+    lead = Lead.query.get_or_404(lead_id)
+    if request.method == 'POST':
+        lead.company = request.form.get('company')
+        lead.contact_name = request.form.get('contact_name')
+        lead.title = request.form.get('title')
+        lead.email = request.form.get('email')
+        lead.region = request.form.get('region')
+        lead.status = request.form.get('status')
+        lead.priority = request.form.get('priority')
+        lead.num_clubs = int(request.form.get('num_clubs', 0))
+        lead.notes = request.form.get('notes')
+
+        db.session.commit()
+        log_security_event(current_user.id, f"Edited lead: {lead.company}")
+        flash(f"Lead {lead.company} updated.")
+        return redirect(url_for('admin.admin_leads'))
+    return render_template('admin_lead_form.html', action="Edit", lead=lead)
+
+@admin_bp.route('/leads/delete/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_lead_delete(lead_id):
+    lead = Lead.query.get_or_404(lead_id)
+    company = lead.company
+    db.session.delete(lead)
+    db.session.commit()
+    log_security_event(current_user.id, f"Deleted lead: {company}")
+    flash(f"Lead {company} deleted.")
+    return redirect(url_for('admin.admin_leads'))
+
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required
 @permission_required('perm_crm_edit')
@@ -291,7 +360,7 @@ def update_lead_status():
     if lead:
         lead.status = new_status
         db.session.commit()
-        flash(f"Status updated for lead {lead_id} to {new_status}")
+        flash(f"Status updated for lead {lead.company} to {new_status}")
     else:
         flash(f"Error: Lead {lead_id} not found.")
 

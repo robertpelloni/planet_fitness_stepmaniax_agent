@@ -59,33 +59,47 @@ def scrape_leadership_playwright(browser, group):
 
     # NFP Specific Parsing
     if "nfpfit.com" in url:
-        # Based on search snippet: Meet the NFP Leadership Team
-        # Common pattern: h3 or h4 for names, p or span for titles
+        # Common pattern: h3/h4 for names, p/span for titles
         for person in soup.find_all(['h3', 'h4']):
             full_name = person.text.strip()
-            title = person.find_next(['p', 'span']).text.strip() if person.find_next(['p', 'span']) else "Unknown"
-            if len(full_name.split()) > 1: # Basic filter for noise
+            title_tag = person.find_next(['p', 'span'])
+            title = title_tag.text.strip() if title_tag else "Leadership"
+            if len(full_name.split()) > 1 and not is_junk(full_name):
                 leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
+    # Ohana Growth Partners Parsing
+    elif "ohanagp.com" in url:
+        # Often uses cards with names and titles
+        for person in soup.find_all(['h5', 'h4']):
+            full_name = person.text.strip()
+            title_tag = person.find_next(['p', 'span', 'div'])
+            title = title_tag.text.strip() if title_tag else "Leadership"
+            if len(full_name.split()) > 1 and not is_junk(full_name):
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
+
+    # Flynn Group Parsing
+    elif "flynn.com" in url:
+        for person in soup.find_all(['h3', 'strong']):
+            full_name = person.text.strip()
+            if len(full_name.split()) > 1 and not is_junk(full_name):
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': "Leadership"})
+
     # United FP / PFIFC Specific Parsing
-    elif "pffranchisee.org" in url:
-        # Looking for names mentioned in the article
-        content = soup.find('div', class_='entry-content') or soup.body
+    elif "pffranchisee.org" in url or "unitedpf.com" in url:
+        content = soup.find('div', class_='entry-content') or soup.find('main') or soup.body
         if content:
-            # Simple heuristic: capitalized names near titles like CEO, CFO, VP
-            text = content.get_text()
-            keywords = ["CEO", "CFO", "President", "VP", "Director"]
-            # This is a bit complex for a simple scraper, so we might just log that we found content
-            print(f"Found article content for {name}, manually extracting top names for LEADS.md")
+            for item in content.find_all(['h2', 'h3', 'h4', 'strong']):
+                text = item.text.strip()
+                if len(text.split()) > 1 and not is_junk(text):
+                    leads.append({'Franchise Group': name, 'Name': text, 'Title': "Executive"})
 
     # Generic Fallback
     else:
         print(f"No specific parser for {url}, using generic heuristic.")
-        for item in soup.find_all(['h2', 'h3']):
+        for item in soup.find_all(['h2', 'h3', 'h4']):
             text = item.text.strip()
-            if any(key in text for key in ["Team", "Leadership", "Executive"]):
-                continue
-            leads.append({'Franchise Group': name, 'Name': text, 'Title': "Consult LEADS.md"})
+            if not is_junk(text) and len(text.split()) > 1:
+                leads.append({'Franchise Group': name, 'Name': text, 'Title': "Leadership"})
 
     print(f"Found {len(leads)} potential leads for {name}.")
     return leads

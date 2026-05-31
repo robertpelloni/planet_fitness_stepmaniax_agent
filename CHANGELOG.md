@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.7.0]
+- **Lead Management Refactor:** Migrated legacy flat-file lead data into SQLite and launched a full CRUD Admin interface.
+- **Enhanced Scraper:** Updated `scrape_leads.py` with targeted heuristics for major franchise groups and Playwright support.
+- **Automated Outreach Engine:** Launched `launch_outreach.py` for automated personalized message generation and stage tracking.
+
 ## [5.6.0]
 - **Automated Service Dispatch:** Integrated a work order management system that automatically triggers service dispatches for offline equipment.
 - **Maintenance UI:** Added an "Active Work Orders" module to the Global Command Center and "Dispatch" buttons to critical alert cards.
