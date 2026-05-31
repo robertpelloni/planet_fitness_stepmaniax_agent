@@ -62,6 +62,17 @@ def monitor_health():
     # 2. Lead Cadence Processing (v3.9.0)
     process_cadence(cursor)
 
+    # Weekly Pilot Summary Generation (v6.1.0)
+    # Checks if today is Sunday night (23:00 - 23:59)
+    now = datetime.now()
+    if now.weekday() == 6 and now.hour == 23 and now.minute < 5:
+        logger.info("Executing Weekly Pilot Summary generation...")
+        cursor.execute("SELECT id FROM leads WHERE status LIKE '%Pilot%'")
+        active_pilots = cursor.fetchall()
+        from report_generator import generate_weekly_summary
+        for pilot in active_pilots:
+            generate_weekly_summary(pilot['id'])
+
     # 3. Database Backup (v4.4.0)
     from backup_job import run_backup
     run_backup()

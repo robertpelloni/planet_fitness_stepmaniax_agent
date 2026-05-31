@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.1.0] - 2026-05-31
+### Automated Performance Reporting
+- **Weekly Pilot Summaries:** Launched background engine in `health_monitor.py` to aggregate and generate weekly ROI reports for all active pilot franchises.
+- **Enhanced Reporting Engine:** Added `generate_weekly_summary` to `report_generator.py` with cross-table metric aggregation.
+- **Reporting Infrastructure:** Created `weekly-pilot-summary-template.md` and dedicated report output directories.
+
 ## [6.0.0] - 2026-05-31
 ### Advanced Analytics & Global Expansion
 - **Regional Heatmap:** Integrated Leaflet.js into the Admin Command Center for global fleet and lead visualization.
