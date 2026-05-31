@@ -56,6 +56,7 @@ def populate():
         last_login TEXT,
         failed_login_attempts INTEGER DEFAULT 0,
         is_locked BOOLEAN DEFAULT 0,
+        allowed_ips TEXT,
         mfa_secret TEXT,
         mfa_enabled BOOLEAN DEFAULT 0,
         api_key TEXT UNIQUE,
@@ -234,14 +235,14 @@ def populate():
     cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token, region_cluster, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)
 
     users = [
-        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 'US-EAST-1', 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
-        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 'US-EAST-1', 1, 0, 1, 1, 0, secrets.token_urlsafe(32)),
-        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 'US-EAST-1', 0, 0, 1, 0, 0, secrets.token_urlsafe(32))
+        (1, 'admin', generate_password_hash('admin123'), 'Admin', None, 'US-EAST-1', '127.0.0.1,10.0.0.1', 1, 1, 1, 1, 1, secrets.token_urlsafe(32)),
+        (2, 'franchisee', generate_password_hash('planet123'), 'Franchisee', 'EPIC-001', 'US-EAST-1', None, 1, 0, 1, 1, 0, secrets.token_urlsafe(32)),
+        (3, 'staff', generate_password_hash('staff123'), 'Staff', 'EPIC-001', 'US-EAST-1', None, 0, 0, 1, 0, 0, secrets.token_urlsafe(32))
     ]
     cursor.executemany("""
-        INSERT INTO user (id, username, password_hash, role, franchise_id, region_cluster,
+        INSERT INTO user (id, username, password_hash, role, franchise_id, region_cluster, allowed_ips,
                          perm_crm_view, perm_crm_edit, perm_ops_view, perm_revenue_view, perm_admin_access, api_key)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", users)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", users)
 
     metrics = [
         (1, 'StepManiaX Unit A', 'EPIC Fitness - Detroit', 'EPIC-001', 98.5, 1250, '2026-05-01', 12.5, 100, 'Operational', 'US-EAST-1', 42.3314, -83.0458),

@@ -52,6 +52,11 @@ def require_api_or_role(roles):
                 # Check per-user keys
                 user = User.query.filter_by(api_key=api_key).first()
                 if user:
+                    # IP-based Access List check (v6.2.0)
+                    if user.allowed_ips:
+                        allowed_list = [ip.strip() for ip in user.allowed_ips.split(',')]
+                        if request.remote_addr not in allowed_list:
+                            return {"error": "Unauthorized IP address"}, 403
                     return f(*args, **kwargs)
 
             # 2. Check for Authenticated Session
@@ -77,6 +82,11 @@ def require_api_key(f):
                 return f(*args, **kwargs)
             user = User.query.filter_by(api_key=api_key).first()
             if user:
+                # IP-based Access List check (v6.2.0)
+                if user.allowed_ips:
+                    allowed_list = [ip.strip() for ip in user.allowed_ips.split(',')]
+                    if request.remote_addr not in allowed_list:
+                        return {"error": "Unauthorized IP address"}, 403
                 return f(*args, **kwargs)
 
         if current_user and current_user.is_authenticated:

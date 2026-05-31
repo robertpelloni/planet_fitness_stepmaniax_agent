@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.String(50))
     failed_login_attempts = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
+    allowed_ips = db.Column(db.Text) # Comma-separated list of allowed IPs
 
     # Security Enhancements (v4.9.0)
     mfa_secret = db.Column(db.String(32))

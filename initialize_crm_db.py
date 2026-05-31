@@ -92,6 +92,7 @@ def initialize_db():
         "api_key": "TEXT UNIQUE",
         "reset_token": "TEXT UNIQUE",
         "reset_token_expiry": "TEXT",
+        "allowed_ips": "TEXT",
         "perm_crm_view": "BOOLEAN DEFAULT 1",
         "perm_crm_edit": "BOOLEAN DEFAULT 0",
         "perm_ops_view": "BOOLEAN DEFAULT 1",

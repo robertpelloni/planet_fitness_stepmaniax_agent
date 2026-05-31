@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.2.0] - 2026-05-31
+### Enterprise Security & Reporting Refinement
+- **IP-based Access Lists:** Implemented IP filtering for Enterprise APIs. Administrators can now restrict API access to specific whitelisted IPs per user.
+- **Reporting Persistence:** Refined the weekly summary trigger in `health_monitor.py` to prevent duplicate report generation using `AutomationHeartbeat` tracking.
+- **Security Hardening:** Updated `require_api_or_role` and `require_api_key` decorators to enforce IP validation.
+
 ## [6.1.0] - 2026-05-31
 ### Automated Performance Reporting
 - **Weekly Pilot Summaries:** Launched background engine in `health_monitor.py` to aggregate and generate weekly ROI reports for all active pilot franchises.

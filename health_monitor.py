@@ -62,16 +62,31 @@ def monitor_health():
     # 2. Lead Cadence Processing (v3.9.0)
     process_cadence(cursor)
 
-    # Weekly Pilot Summary Generation (v6.1.0)
-    # Checks if today is Sunday night (23:00 - 23:59)
+    # Weekly Pilot Summary Generation (v6.2.0)
+    # Checks if today is Sunday night (23:00 - 23:59) and if we've already run it this week.
     now = datetime.now()
-    if now.weekday() == 6 and now.hour == 23 and now.minute < 5:
-        logger.info("Executing Weekly Pilot Summary generation...")
-        cursor.execute("SELECT id FROM leads WHERE status LIKE '%Pilot%'")
-        active_pilots = cursor.fetchall()
-        from report_generator import generate_weekly_summary
-        for pilot in active_pilots:
-            generate_weekly_summary(pilot['id'])
+    if now.weekday() == 6 and now.hour == 23:
+        # Get the start of the current week (Monday)
+        week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
+
+        cursor.execute("SELECT last_run FROM automation_heartbeat WHERE task_name = 'Weekly Summary Trigger'")
+        last_trigger = cursor.fetchone()
+
+        # Only run if not already triggered this week
+        if not last_trigger or last_trigger[0][:10] < week_start:
+            logger.info(f"Executing Weekly Pilot Summary generation for week starting {week_start}...")
+            cursor.execute("SELECT id FROM leads WHERE status LIKE '%Pilot%'")
+            active_pilots = cursor.fetchall()
+            from report_generator import generate_weekly_summary
+            for pilot in active_pilots:
+                generate_weekly_summary(pilot['id'])
+
+            # Update trigger heartbeat
+            cursor.execute("""
+                INSERT INTO automation_heartbeat (task_name, last_run, status)
+                VALUES ('Weekly Summary Trigger', ?, 'Healthy')
+                ON CONFLICT(task_name) DO UPDATE SET last_run=excluded.last_run, status='Healthy'
+            """, (now.strftime("%Y-%m-%d %H:%M:%S"),))
 
     # 3. Database Backup (v4.4.0)
     from backup_job import run_backup
