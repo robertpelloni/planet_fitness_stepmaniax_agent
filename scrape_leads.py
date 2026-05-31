@@ -19,10 +19,6 @@ TARGET_GROUPS = [
 
 OUTPUT_FILE = "franchise_leads.csv"
 
-def scrape_leadership(group):
-    """
-    Scrapes a franchise group's leadership/team page.
-    """
 def is_junk(text):
     junk_keywords = [
         "lorem", "ipsum", "dolor", "sit", "amet",
@@ -59,7 +55,6 @@ def scrape_leadership_playwright(browser, group):
 
     # NFP Specific Parsing
     if "nfpfit.com" in url:
-        # Common pattern: h3/h4 for names, p/span for titles
         for person in soup.find_all(['h3', 'h4']):
             full_name = person.text.strip()
             title_tag = person.find_next(['p', 'span'])
@@ -69,7 +64,6 @@ def scrape_leadership_playwright(browser, group):
 
     # Ohana Growth Partners Parsing
     elif "ohanagp.com" in url:
-        # Often uses cards with names and titles
         for person in soup.find_all(['h5', 'h4']):
             full_name = person.text.strip()
             title_tag = person.find_next(['p', 'span', 'div'])
@@ -86,52 +80,37 @@ def scrape_leadership_playwright(browser, group):
 
     # United FP / PFIFC Specific Parsing
     elif "pffranchisee.org" in url or "unitedpf.com" in url:
-        content = soup.find('div', class_='entry-content') or soup.find('main') or soup.body
-        if content:
-            for item in content.find_all(['h2', 'h3', 'h4', 'strong']):
+        content_div = soup.find('div', class_='entry-content') or soup.find('main') or soup.body
+        if content_div:
+            for item in content_div.find_all(['h2', 'h3', 'h4', 'strong']):
                 text = item.text.strip()
                 if len(text.split()) > 1 and not is_junk(text):
                     leads.append({'Franchise Group': name, 'Name': text, 'Title': "Executive"})
 
-    # Generic Fallback
+    # Generic Fallback & Improved Parsing Heuristics
     else:
         print(f"No specific parser for {url}, using generic heuristic.")
-        for item in soup.find_all(['h2', 'h3', 'h4']):
-            text = item.text.strip()
-            if not is_junk(text) and len(text.split()) > 1:
-                leads.append({'Franchise Group': name, 'Name': text, 'Title': "Leadership"})
+        keywords = ["CEO", "President", "Director", "Manager", "Founder", "VP", "Vice President"]
 
-    print(f"Found {len(leads)} potential leads for {name}.")
-    return leads
-    # Improved Parsing Heuristics
-    # Look for common containers like 'team-member', 'person', 'staff'
-    potential_leads = []
+        for tag in soup.find_all(['h2', 'h3', 'h4', 'h5', 'strong']):
+            text = tag.get_text(separator=' ').strip()
+            if is_junk(text): continue
 
-    # Try finding elements with 'CEO', 'President', 'Director', 'Manager'
-    keywords = ["CEO", "President", "Director", "Manager", "Founder", "VP", "Vice President"]
+            # Check if this element or its parent contain a leadership keyword
+            parent = tag.parent
+            combined_text = parent.get_text(separator=' ')
 
-    for tag in soup.find_all(['h2', 'h3', 'h4', 'h5', 'strong']):
-        text = tag.get_text(separator=' ').strip()
-        if is_junk(text): continue
+            if any(kw in combined_text for kw in keywords):
+                full_name = text
+                title = "Leadership"
+                for sibling in tag.find_next_siblings(['p', 'span', 'div']):
+                    sib_text = sibling.get_text().strip()
+                    if any(kw in sib_text for kw in keywords):
+                        title = sib_text
+                        break
 
-        # Check if this element or its siblings contain a leadership keyword
-        parent = tag.parent
-        combined_text = parent.get_text(separator=' ')
-
-        if any(kw in combined_text for kw in keywords):
-            # Attempt to extract Name and Title
-            # Usually the heading is the name
-            full_name = text
-            # Find the title (often in a p or span sibling or child)
-            title = "Leadership"
-            for sibling in tag.find_next_siblings(['p', 'span', 'div']):
-                sib_text = sibling.get_text().strip()
-                if any(kw in sib_text for kw in keywords):
-                    title = sib_text
-                    break
-
-            if len(full_name.split()) > 1 and len(full_name.split()) < 5:
-                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
+                if 1 < len(full_name.split()) < 5:
+                    leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
     # Deduplicate
     unique_leads = []

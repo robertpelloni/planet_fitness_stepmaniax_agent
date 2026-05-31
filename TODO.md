@@ -1,5 +1,11 @@
 # TODO - Immediate Actions
 
+## Next Phase: Advanced Analytics & Global Expansion (v6.0.0)
+- [ ] Implement Regional Heatmap visualization in the Admin Command Center using Leaflet.js.
+- [ ] Develop automated "Pilot Summary" email generation for regional managers at the end of every week.
+- [ ] Integrate real-time translation for outreach messages to support Mexico/Canada expansion.
+- [ ] Hardened security: Implement IP-based access lists for the Enterprise Export API.
+
 ## Infrastructure & Maintenance (v5.4.1)
 - [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
 - [x] Add unit tests for `backup_job.py` to verify snapshot integrity.

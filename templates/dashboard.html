@@ -10,22 +10,8 @@
             <h1 class="text-3xl font-black text-slate-800 tracking-tight italic">COMMAND CENTER</h1>
             <p class="text-slate-500 font-medium">Global Network Overview • {{ franchise_name }}</p>
         </div>
-        {% if is_admin and all_regions %}
-        <div class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Region</span>
-            <div class="flex gap-2">
-                <a href="{{ url_for('admin.dashboard') }}"
-                   class="px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all {% if not current_region %}bg-slate-900 text-white{% else %}text-slate-500 hover:bg-slate-100{% endif %}">
-                    Global
-                </a>
-                {% for region in all_regions %}
-                <a href="{{ url_for('admin.dashboard', region=region) }}"
-                   class="px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all {% if current_region == region %}bg-slate-900 text-white{% else %}text-slate-500 hover:bg-slate-100{% endif %}">
-                    {{ region }}
-                </a>
-                {% endfor %}
-            </div>
-        </div>
+        {% if is_admin %}
+            {% include 'partials/region_selector.html' %}
         {% endif %}
         <div class="flex gap-3">
             {% if is_admin %}

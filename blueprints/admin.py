@@ -8,18 +8,9 @@ import os
 import secrets
 from blueprints.decorators import role_required, permission_required
 from report_generator import generate_report
+from extensions import log_security_event
 
 admin_bp = Blueprint('admin', __name__)
-
-def log_security_event(user_id, action):
-    log = AuditLog(
-        user_id=user_id,
-        action=action,
-        ip_address=request.remote_addr,
-        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
-    db.session.add(log)
-    db.session.commit()
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -65,8 +56,13 @@ def dashboard():
     metric_ids = [m.id for m in metrics]
 
     if is_admin:
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
-        schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
+        if region:
+            metric_ids = [m.id for m in metrics]
+            alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+        else:
+            alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
+            schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
     else:
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
@@ -128,10 +124,16 @@ def dashboard():
 @role_required(['Admin'])
 def admin_feedback():
     """Feedback Analytics Dashboard (v3.9.1)"""
-    feedback_raw = db.session.query(Feedback, Member.name, Lead.company)\
+    region = request.args.get('region')
+
+    query = db.session.query(Feedback, Member.name, Lead.company)\
         .outerjoin(Member, Feedback.member_id == Member.id)\
-        .outerjoin(Lead, Feedback.franchise_id == Lead.id)\
-        .order_by(Feedback.timestamp.desc()).all()
+        .outerjoin(Lead, Feedback.franchise_id == Lead.id)
+
+    if region:
+        query = query.filter(Lead.region_cluster == region)
+
+    feedback_raw = query.order_by(Feedback.timestamp.desc()).all()
 
     feedback_list = []
     for f, m_name, company in feedback_raw:
@@ -144,13 +146,21 @@ def admin_feedback():
             "comment": f.comment
         })
 
-    avg_rating = db.session.query(db.func.avg(Feedback.rating)).scalar() or 0
-    cat_counts = db.session.query(Feedback.category, db.func.count(Feedback.id)).group_by(Feedback.category).all()
+    avg_query = db.session.query(db.func.avg(Feedback.rating))
+    cat_query = db.session.query(Feedback.category, db.func.count(Feedback.id))
+    trend_query = db.session.query(db.func.substr(Feedback.timestamp, 1, 10), db.func.avg(Feedback.rating))
+
+    if region:
+        avg_query = avg_query.join(Lead, Feedback.franchise_id == Lead.id).filter(Lead.region_cluster == region)
+        cat_query = cat_query.join(Lead, Feedback.franchise_id == Lead.id).filter(Lead.region_cluster == region)
+        trend_query = trend_query.join(Lead, Feedback.franchise_id == Lead.id).filter(Lead.region_cluster == region)
+
+    avg_rating = avg_query.scalar() or 0
+    cat_counts = cat_query.group_by(Feedback.category).all()
     categories = [c[0] for c in cat_counts]
     category_counts = [c[1] for c in cat_counts]
 
-    trend_raw = db.session.query(db.func.substr(Feedback.timestamp, 1, 10), db.func.avg(Feedback.rating))\
-        .group_by(db.func.substr(Feedback.timestamp, 1, 10))\
+    trend_raw = trend_query.group_by(db.func.substr(Feedback.timestamp, 1, 10))\
         .order_by(db.func.substr(Feedback.timestamp, 1, 10)).all()
     trend_labels = [t[0] for t in trend_raw]
     trend_data = [round(t[1], 1) for t in trend_raw]
@@ -167,11 +177,30 @@ def admin_feedback():
 @login_required
 @role_required(['Admin'])
 def admin_optimization():
-    total_members = Member.query.count()
-    onboarding_funnel = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
+    region = request.args.get('region')
+
+    member_query = Member.query
+    onboarding_query = db.session.query(Member.onboarding_status, db.func.count(Member.id))
+    engagement_query = db.session.query(db.func.avg(Member.engagement_score))
+    units_query = EquipmentMetric.query
+
+    if region:
+        member_query = member_query.filter(Member.franchise_id.in_(
+            db.session.query(Lead.id).filter_by(region_cluster=region)
+        ))
+        onboarding_query = onboarding_query.filter(Member.franchise_id.in_(
+            db.session.query(Lead.id).filter_by(region_cluster=region)
+        ))
+        engagement_query = engagement_query.filter(Member.franchise_id.in_(
+            db.session.query(Lead.id).filter_by(region_cluster=region)
+        ))
+        units_query = units_query.filter_by(region_cluster=region)
+
+    total_members = member_query.count()
+    onboarding_funnel = onboarding_query.group_by(Member.onboarding_status).all()
     onboarding_dict = {status: count for status, count in onboarding_funnel}
-    avg_engagement = db.session.query(db.func.avg(Member.engagement_score)).scalar() or 0
-    units = EquipmentMetric.query.all()
+    avg_engagement = engagement_query.scalar() or 0
+    units = units_query.all()
     metrics_list = [
         {
             "equipment_name": u.equipment_name,
@@ -183,12 +212,16 @@ def admin_optimization():
     ]
     recommendations = analytics.generate_optimization_recommendations(metrics_list)
 
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+
     return render_template('admin_optimization.html',
                            total_members=total_members,
                            onboarding_stats=onboarding_dict,
                            avg_engagement=round(avg_engagement * 100, 1),
                            recommendations=recommendations,
-                           units=units)
+                           units=units,
+                           all_regions=all_regions,
+                           current_region=region)
 
 @admin_bp.route('/api/logs')
 @login_required
@@ -260,7 +293,12 @@ def admin_command_center():
         metric_ids = [m.id for m in metrics]
         live_sessions_query = live_sessions_query.filter(TelemetryHistory.equipment_id.in_(metric_ids))
     live_sessions = live_sessions_query.limit(10).count()
-    alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
+
+    if region:
+        metric_ids = [m.id for m in metrics]
+        alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
+    else:
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).all()
 
     recent_security = db.session.query(AuditLog, User.username)\
         .outerjoin(User, AuditLog.user_id == User.id)\
@@ -284,8 +322,13 @@ def admin_command_center():
 @login_required
 @role_required(['Admin'])
 def admin_leads():
-    leads = Lead.query.all()
-    return render_template('admin_leads.html', leads=leads)
+    region = request.args.get('region')
+    query = Lead.query
+    if region:
+        query = query.filter_by(region_cluster=region)
+    leads = query.all()
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+    return render_template('admin_leads.html', leads=leads, all_regions=all_regions, current_region=region)
 
 @admin_bp.route('/leads/create', methods=['GET', 'POST'])
 @login_required

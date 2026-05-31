@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [5.8.1]
+## [5.9.1] - 2026-05-31
+### Multi-Region Scalability & Outreach Optimization
+- **Multi-Region Support:** Implemented granular data filtering by `region_cluster` across all Admin and Staff dashboards.
+- **UI Consolidation:** Launched a reusable `region_selector.html` partial for consistent fleet management.
+- **Optimized Outreach:** Enhanced `launch_outreach.py` with ML-simulation for lead prioritization and sentiment-aware regional messaging.
+- **Architectural Cleanup:** Centralized `log_security_event` in `extensions.py` and stabilized development session keys in `app.py`.
+- **Scraper Hardening:** Fully restored Playwright-based lead scraping heuristics in `scrape_leads.py`.
+- **Governance Compliance:** Fixed `.gitignore` and documentation standards to align with the Principal Directive.
+
+## [5.8.1] - 2026-05-31
 - **UI Test Infrastructure:** Integrated `pytest-playwright` and added a visual verification suite (`tests/integration/test_ui.py`) for Admin and Staff portals.
 - **Database Alignment:** Fixed `populate_test_data.py` to include mandatory tables (`audit_log`, `outreach_logs`, `service_dispatch`) required for production-ready state.
 - **Routing Namespacing:** Synchronized UI tests with the namespaced blueprint routing architecture.

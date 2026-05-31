@@ -33,7 +33,9 @@ campaign_logger.addHandler(campaign_handler)
 campaign_logger.setLevel(logging.INFO)
 
 # --- Configuration ---
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(24))
+# (v5.9.1): Fallback to a stable dummy key in development to preserve sessions across restarts.
+# In production, SECRET_KEY MUST be set via environment variable.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-stable-key-1234567890')
 
 # Security Hardening (v4.5.0)
 is_prod = os.environ.get('FLASK_DEBUG', 'false').lower() == 'false'

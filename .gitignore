@@ -20,8 +20,6 @@ backups/
 # Logs
 *.log
 
-# Jules AI session logs (auto-generated)
-.jules/sessions/
 
 # Generated Outreach Assets
 outreach/generated/

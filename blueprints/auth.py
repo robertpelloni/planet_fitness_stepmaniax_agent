@@ -8,20 +8,9 @@ import pyotp
 import qrcode
 import io
 import re
-from extensions import limiter
+from extensions import limiter, log_security_event
 
 auth_bp = Blueprint('auth', __name__)
-
-def log_security_event(user_id, action):
-    from flask import request
-    log = AuditLog(
-        user_id=user_id,
-        action=action,
-        ip_address=request.remote_addr,
-        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
-    db.session.add(log)
-    db.session.commit()
 
 def is_password_complex(password):
     """

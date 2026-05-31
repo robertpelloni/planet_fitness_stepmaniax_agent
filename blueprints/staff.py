@@ -13,11 +13,21 @@ staff_bp = Blueprint('staff', __name__)
 def staff_dashboard():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        metrics = EquipmentMetric.query.all()
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
-        schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
+        query_metrics = EquipmentMetric.query
+        if region:
+            query_metrics = query_metrics.filter_by(region_cluster=region)
+        metrics = query_metrics.all()
+        metric_ids = [m.id for m in metrics]
+
+        if region:
+            alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+        else:
+            alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
+            schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
@@ -27,11 +37,15 @@ def staff_dashboard():
     for m in metrics:
         m.utilization_score = analytics.calculate_capacity_utilization(m.total_sessions, m.uptime_percent) if hasattr(analytics, 'calculate_capacity_utilization') else 0
 
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
+
     return render_template('staff_dashboard.html',
                            metrics=metrics,
                            alerts=alerts,
                            schedules=schedules,
-                           franchise_name=current_user.franchise_id or "Global Admin")
+                           franchise_name=current_user.franchise_id or "Global Admin",
+                           all_regions=all_regions,
+                           current_region=region)
 
 @staff_bp.route('/operations')
 @login_required
@@ -39,12 +53,22 @@ def staff_dashboard():
 def facility_operations():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        metrics = EquipmentMetric.query.all()
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+        query_metrics = EquipmentMetric.query
+        if region:
+            query_metrics = query_metrics.filter_by(region_cluster=region)
+        metrics = query_metrics.all()
+        metric_ids = [m.id for m in metrics]
+
         today = datetime.now().strftime("%Y-%m-%d")
-        schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+        if region:
+            alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(20).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids), MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+        else:
+            alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
@@ -60,11 +84,15 @@ def facility_operations():
         else:
             m.is_online = False
 
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
+
     return render_template('facility_ops.html',
                            metrics=metrics,
                            alerts=alerts,
                            schedules=schedules,
-                           franchise_name=current_user.franchise_id or "Global Admin")
+                           franchise_name=current_user.franchise_id or "Global Admin",
+                           all_regions=all_regions,
+                           current_region=region)
 
 @staff_bp.route('/members')
 @login_required
@@ -72,13 +100,21 @@ def facility_operations():
 def staff_members():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        members = Member.query.all()
+        query = Member.query
+        if region:
+            query = query.filter(Member.franchise_id.in_(
+                db.session.query(Lead.id).filter_by(region_cluster=region)
+            ))
+        members = query.all()
     else:
         members = Member.query.filter_by(franchise_id=franchise_id).all()
 
-    return render_template('staff_members.html', members=members)
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
+
+    return render_template('staff_members.html', members=members, all_regions=all_regions, current_region=region)
 
 @staff_bp.route('/members/update/<int:member_id>', methods=['POST'])
 @login_required

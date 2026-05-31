@@ -9,9 +9,12 @@
             <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Optimization Intelligence</h1>
             <p class="text-slate-500 font-medium">Performance Metrics & Lifecycle Optimization</p>
         </div>
-        <a href="{{ url_for('admin.admin_command_center') }}" class="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center gap-2">
-            <i class="fa-solid fa-arrow-left"></i> Back to Command Center
-        </a>
+        <div class="flex items-center gap-4">
+            {% include 'partials/region_selector.html' %}
+            <a href="{{ url_for('admin.admin_command_center') }}" class="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Back to Command Center
+            </a>
+        </div>
     </div>
 
     <!-- KPI Grid -->

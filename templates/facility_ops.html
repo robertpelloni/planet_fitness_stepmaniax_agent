@@ -21,12 +21,17 @@
         <h1 class="text-2xl font-black text-slate-800 tracking-tight">FACILITY OPERATIONS CENTER</h1>
         <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">{{ franchise_name }}</span>
     </div>
-    <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Auto-refreshing</span>
-        <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-        </span>
+    <div class="flex items-center gap-4">
+        {% if current_user.role == 'Admin' %}
+            {% include 'partials/region_selector.html' %}
+        {% endif %}
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Auto-refreshing</span>
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+        </div>
     </div>
 </div>
 
