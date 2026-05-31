@@ -267,3 +267,50 @@ def live_ops_wallboard():
                            franchise_name=franchise_name,
                            all_regions=all_regions,
                            current_region=region)
+
+@staff_bp.route('/schedule/create', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def create_schedule():
+    if request.method == 'POST':
+        member_id = request.form.get('member_id')
+        member_name = request.form.get('member_name')
+        start_time = request.form.get('start_time')
+        duration = int(request.form.get('duration', 10))
+        unit_id = request.form.get('equipment_id')
+
+        new_booking = MemberSchedule(
+            member_id=member_id if member_id else None,
+            member_name=member_name,
+            start_time=start_time,
+            duration_minutes=duration,
+            equipment_id=unit_id,
+            status='Scheduled'
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        flash("New session scheduled successfully.")
+        return redirect(url_for('staff.staff_dashboard'))
+
+    members = Member.query.all() if current_user.role == 'Admin' else Member.query.filter_by(franchise_id=current_user.franchise_id).all()
+    units = EquipmentMetric.query.all() if current_user.role == 'Admin' else EquipmentMetric.query.filter_by(franchise_id=current_user.franchise_id).all()
+    return render_template('staff_edit_schedule.html', action="Create", members=members, units=units)
+
+@staff_bp.route('/schedule/edit/<int:schedule_id>', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def edit_schedule(schedule_id):
+    booking = MemberSchedule.query.get_or_404(schedule_id)
+    if request.method == 'POST':
+        booking.member_name = request.form.get('member_name')
+        booking.start_time = request.form.get('start_time')
+        booking.duration_minutes = int(request.form.get('duration', 10))
+        booking.equipment_id = request.form.get('equipment_id')
+        booking.status = request.form.get('status')
+        db.session.commit()
+        flash("Schedule updated.")
+        return redirect(url_for('staff.staff_dashboard'))
+
+    members = Member.query.all() if current_user.role == 'Admin' else Member.query.filter_by(franchise_id=current_user.franchise_id).all()
+    units = EquipmentMetric.query.all() if current_user.role == 'Admin' else EquipmentMetric.query.filter_by(franchise_id=current_user.franchise_id).all()
+    return render_template('staff_edit_schedule.html', action="Edit", booking=booking, members=members, units=units)
