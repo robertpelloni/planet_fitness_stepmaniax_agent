@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.8.1]
+- **UI Test Infrastructure:** Integrated `pytest-playwright` and added a visual verification suite (`tests/integration/test_ui.py`) for Admin and Staff portals.
+- **Database Alignment:** Fixed `populate_test_data.py` to include mandatory tables (`audit_log`, `outreach_logs`, `service_dispatch`) required for production-ready state.
+- **Routing Namespacing:** Synchronized UI tests with the namespaced blueprint routing architecture.
+- **Verification Completion:** Achieved 100% pass rate across backend (11) and frontend (2) integration test suites.
+
 ## [5.8.0]
 - **Governance Protocol Initialization:** Formally documented the Autonomous Development & Governance Protocol in `GOVERNANCE.md`.
 - **System Consolidation:** Successfully merged all v5.7.0 features into the `main` branch.

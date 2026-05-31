@@ -8,7 +8,8 @@ def test_admin_login_and_command_center(page: Page):
     page.fill('input[name="password"]', 'admin123')
     page.click('button[type="submit"]')
 
-    expect(page).to_have_url("http://localhost:5000/dashboard")
+    # Admins are redirected to /admin/dashboard
+    expect(page).to_have_url("http://localhost:5000/admin/dashboard")
 
     # 2. Navigate to Command Center
     page.goto("http://localhost:5000/admin/command-center")

@@ -15,7 +15,8 @@ def populate():
     tables = [
         'user', 'leads', 'equipment_metric', 'alert', 'member',
         'member_schedule', 'telemetry_history', 'automation_heartbeat',
-        'feedback', 'payment', 'workout_plan', 'webhook'
+        'feedback', 'payment', 'workout_plan', 'webhook', 'audit_log',
+        'outreach_logs', 'service_dispatch'
     ]
     for table in tables:
         cursor.execute(f"DROP TABLE IF EXISTS {table}")
@@ -181,6 +182,39 @@ def populate():
         transaction_id TEXT UNIQUE,
         timestamp TEXT NOT NULL,
         FOREIGN KEY(member_id) REFERENCES member(id)
+    )""")
+
+    cursor.execute("""
+    CREATE TABLE audit_log (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        action TEXT NOT NULL,
+        ip_address TEXT,
+        timestamp TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES user(id)
+    )""")
+
+    cursor.execute("""
+    CREATE TABLE outreach_logs (
+        id INTEGER PRIMARY KEY,
+        lead_id TEXT NOT NULL,
+        date_sent TEXT NOT NULL,
+        channel TEXT,
+        notes TEXT,
+        FOREIGN KEY(lead_id) REFERENCES leads(id)
+    )""")
+
+    cursor.execute("""
+    CREATE TABLE service_dispatch (
+        id INTEGER PRIMARY KEY,
+        ticket_id TEXT UNIQUE NOT NULL,
+        equipment_id INTEGER NOT NULL,
+        status TEXT DEFAULT 'Pending',
+        provider TEXT DEFAULT 'Internal',
+        notes TEXT,
+        created_at TEXT,
+        updated_at TEXT,
+        FOREIGN KEY(equipment_id) REFERENCES equipment_metric(id)
     )""")
 
     cursor.execute("PRAGMA foreign_keys = ON")
