@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.8.0]
+- **Governance Protocol Initialization:** Formally documented the Autonomous Development & Governance Protocol in `GOVERNANCE.md`.
+- **System Consolidation:** Successfully merged all v5.7.0 features into the `main` branch.
+
 ## [5.7.0]
 - **Lead Management Refactor:** Migrated legacy flat-file lead data into SQLite and launched a full CRUD Admin interface.
 - **Enhanced Scraper:** Updated `scrape_leads.py` with targeted heuristics for major franchise groups and Playwright support.
