@@ -9,7 +9,7 @@ import os
 import secrets
 from blueprints.decorators import role_required, permission_required
 from report_generator import generate_report
-from extensions import log_security_event
+from extensions import log_security_event, csrf
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -90,7 +90,8 @@ def dashboard():
                 'total_points': total_points
             },
             'portal_views': lead.portal_views,
-            'avg_feedback_rating': avg_feedback
+            'avg_feedback_rating': avg_feedback,
+            'notes': lead.notes
         }
         lead.propensity_score = analytics.calculate_propensity_score(lead_dict)
 
@@ -529,6 +530,24 @@ def admin_system_health():
                 })
     backups.sort(key=lambda x: x['filename'], reverse=True)
     return render_template('admin_system_health.html', health_data=health_data, backups=backups)
+
+@admin_bp.route('/prospect/track-interaction/<token>', methods=['POST'])
+@csrf.exempt
+def track_prospect_interaction(token):
+    """Logs high-intent interaction from the ROI simulator (v6.5.0)"""
+    lead = Lead.query.filter_by(public_token=token).first_or_404()
+
+    # Increment engagement signal
+    if lead.notes is None: lead.notes = ""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lead.notes = f"[{timestamp}] HIGH INTENT: Prospect interacted with ROI Simulator.\n" + lead.notes
+
+    # Also increment portal views as a proxy for engagement
+    lead.portal_views += 1
+
+    db.session.commit()
+    log_security_event(None, f"High-Intent Signal: {lead.company} interacted with ROI Simulator.")
+    return "", 204
 
 @admin_bp.route('/pilot-success')
 @login_required

@@ -34,6 +34,49 @@
                     </p>
                 </div>
 
+                <!-- Interactive ROI Simulator (v6.5.0) -->
+                <div class="mt-12 bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-black italic mb-6 uppercase tracking-tight flex items-center gap-3">
+                            <i class="fa-solid fa-calculator text-blue-500"></i> Interactive ROI Simulator
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div class="space-y-8">
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Portfolio Size (Clubs)</label>
+                                    <input type="range" id="clubs-slider" min="1" max="200" value="{{ lead.num_clubs or 1 }}" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-3">
+                                        <span>1 Club</span>
+                                        <span id="clubs-value" class="text-blue-500 text-lg">{{ lead.num_clubs or 1 }}</span>
+                                        <span>200 Clubs</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Target Retention Lift</label>
+                                    <input type="range" id="lift-slider" min="1" max="10" value="{{ (lead.retention_lift or 0.03) * 100 }}" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500">
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-3">
+                                        <span>1%</span>
+                                        <span id="lift-value" class="text-green-500 text-lg">{{ (lead.retention_lift or 0.03) * 100 }}%</span>
+                                        <span>10%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-center space-y-6">
+                                <p class="text-sm text-slate-400 leading-relaxed">
+                                    Adjust the sliders to simulate the impact of <span class="text-white font-bold">StepManiaX</span> across your specific portfolio footprint.
+                                </p>
+                                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Projected Annual Profit Lift</p>
+                                    <p id="calc-profit" class="text-4xl font-black text-blue-500">$0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -top-10 -right-10 opacity-5 text-9xl">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
                     <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center">
                         <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Annual Profit Lift</p>
@@ -127,5 +170,69 @@
     <footer class="py-12 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">
         StepRevolution B2B Autonomous Engine • Strictly Confidential Proposal for {{ lead.company }}
     </footer>
+
+    <script>
+        const clubsSlider = document.getElementById('clubs-slider');
+        const liftSlider = document.getElementById('lift-slider');
+        const clubsValue = document.getElementById('clubs-value');
+        const liftValue = document.getElementById('lift-value');
+        const calcProfit = document.getElementById('calc-profit');
+
+        // UI Metric Display Selectors
+        const displayProfit = document.querySelector('.text-blue-600');
+        const displayLift = document.querySelector('.text-green-600');
+        const displayROI = document.querySelector('.text-yellow-500');
+
+        function updateMetrics() {
+            const numClubs = parseInt(clubsSlider.value);
+            const liftPct = parseInt(liftSlider.value) / 100;
+
+            clubsValue.innerText = numClubs;
+            liftValue.innerText = (liftPct * 100).toFixed(0) + '%';
+
+            // Constants from analytics.py logic
+            const membersPerClub = 6000;
+            const avgMonthlyFee = {{ lead.avg_monthly_fee or 15.0 }};
+            const avgLifetimeMonths = 18;
+            const smxMonthlyCost = 600.0;
+
+            const totalMembers = numClubs * membersPerClub;
+            const baseLTV = avgMonthlyFee * avgLifetimeMonths;
+            const liftedLTV = avgMonthlyFee * (avgLifetimeMonths * (1 + liftPct));
+
+            const totalGain = (liftedLTV - baseLTV) * totalMembers;
+            // annual gain calculation simplified for UI
+            const annualGain = totalGain / ( (avgLifetimeMonths * (1 + liftPct)) / 12 );
+            const annualCost = numClubs * smxMonthlyCost * 12;
+            const annualProfit = annualGain - annualCost;
+            const roiMultiple = (annualGain / annualCost).toFixed(1);
+
+            const formattedProfit = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+            }).format(annualProfit);
+
+            calcProfit.innerText = formattedProfit;
+            if (displayProfit) displayProfit.innerText = formattedProfit;
+            if (displayLift) displayLift.innerText = '+' + (liftPct * 100).toFixed(0) + '%';
+            if (displayROI) displayROI.innerText = roiMultiple + 'x';
+        }
+
+        let interactionTracked = false;
+        function trackInteraction() {
+            if (interactionTracked) return;
+            interactionTracked = true;
+            fetch('/admin/prospect/track-interaction/{{ lead.public_token }}', { method: 'POST' })
+                .then(r => console.log('Interaction logged'))
+                .catch(e => console.error('Tracking failed', e));
+        }
+
+        clubsSlider.oninput = () => { updateMetrics(); trackInteraction(); };
+        liftSlider.oninput = () => { updateMetrics(); trackInteraction(); };
+
+        // Initial execution
+        updateMetrics();
+    </script>
 </body>
 </html>

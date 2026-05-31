@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.5.0] - 2026-05-31
+### High-Intent Lead Intelligence
+- **Interactive ROI Simulator:** Launched a real-time portfolio lift calculator on the Prospect Portal with club-count and retention sliders.
+- **Intent Tracking:** Integrated a secure tracking endpoint to log simulator interactions as "High Intent" signals.
+- **Dynamic Propensity Scoring:** Updated `analytics.py` to award a +30 point boost to leads interacting with the simulator, prioritizing them for immediate follow-up.
+- **Architectural Cleanup:** Refactored CSRF protection into `extensions.py` to support cross-blueprint namespaced exemptions.
+
 ## [6.4.0] - 2026-05-31
 ### Automated Outreach Cadence
 - **Multi-tier Follow-up Engine:** Implemented automated Day 3, 7, and 14 follow-up tiers in `launch_outreach.py` with timing and tier-selection logic.

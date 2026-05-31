@@ -117,6 +117,11 @@ def calculate_propensity_score(lead_data):
     if avg_rating >= 4.5: score += 10
     elif avg_rating < 3.0: score -= 15
 
+    # 8. High-Intent Interaction (v6.5.0)
+    # If notes contain the ROI Simulator signature, boost score
+    if "HIGH INTENT: Prospect interacted with ROI Simulator." in (lead_data.get('notes') or ""):
+        score += 30
+
     # Cap at 100
     return min(100, score)
 

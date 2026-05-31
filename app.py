@@ -5,8 +5,7 @@ from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, flash, request, send_from_directory, abort
 from flask_login import LoginManager, login_required, current_user
-from flask_wtf.csrf import CSRFProtect
-from extensions import db, limiter
+from extensions import db, limiter, csrf
 
 from models import User, Lead, Member, EquipmentMetric, Alert, MemberSchedule, Feedback
 import analytics
@@ -52,7 +51,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- Extensions Initialization ---
 db.init_app(app)
-csrf = CSRFProtect(app)
+csrf.init_app(app)
 limiter.init_app(app)
 
 login_manager = LoginManager()
