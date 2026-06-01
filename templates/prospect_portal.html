@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StepManiaX Pilot Proposal - {{ lead.company }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
@@ -156,12 +157,40 @@
                     </div>
                 </div>
 
-                <div class="mt-16 text-center">
-                    <p class="text-slate-500 font-medium mb-6 uppercase tracking-widest text-[10px] font-black">Authorized Discovery Phase</p>
-                    <a href="mailto:sales@smx-agent.fit?subject=Pilot%20Inquiry%3A%20{{ lead.company }}"
-                        class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black px-12 py-5 rounded-2xl font-black italic text-lg shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-tighter">
-                        Schedule Discovery Call
-                    </a>
+                <div id="demo-form-section" class="mt-20 border-t border-slate-100 pt-16">
+                    <div class="max-w-xl mx-auto">
+                        <div class="text-center mb-10">
+                            <h3 class="text-2xl font-black text-slate-800 italic uppercase tracking-tight">Schedule Priority Discovery</h3>
+                            <p class="text-slate-500 text-sm mt-2 font-medium">Secure your priority slot for a 90-day regional placement.</p>
+                        </div>
+
+                        <form hx-post="/admin/prospect/request-demo/{{ lead.public_token }}"
+                              hx-target="#demo-form-section"
+                              hx-swap="innerHTML"
+                              class="space-y-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                                    <input type="text" name="name" placeholder="John Doe" required
+                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
+                                    <input type="email" name="email" placeholder="john@example.com" required
+                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Demo Time</label>
+                                <input type="text" name="preferred_time" placeholder="e.g. Next Tuesday at 2:00 PM" required
+                                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black italic py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 uppercase tracking-tighter text-lg">
+                                Submit Priority Request
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

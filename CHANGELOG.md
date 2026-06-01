@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.8.0] - 2026-06-01
+### Engagement Intelligence & Portal Lead Capture
+- **Lead Capture Form:** Implemented a 'Request Pilot Demo' form on the Prospect Portal with HTMX-powered submission.
+- **Discovery Status Integration:** Submission of the demo form automatically transitions lead status to 'Discovery Call Scheduled' and logs contact details to Lead Notes.
+- **Engagement Visualization:** Added an "Engagement" column to the Lead Management UI displaying Portal Views and Propensity Scores.
+- **Real-time Indicators:** Implemented CSS pulsing animations for high-engagement leads (>80 propensity or active views).
+- **Campaign Pulse Widget:** Launched an outreach volume visualization widget in the Global Command Center.
+- **System Hygiene:** Cleaned up internal log rotation files and generated markdown assets from Git tracking.
+
+## [6.7.0] - 2026-06-01
+### Sales Pipeline & Conversion Flow
+- **Pipeline Kanban:** Implemented a visual, stage-based Sales Pipeline at `/admin/pipeline`.
+- **Proposal Generator:** Added automated commercial proposal generation based on pilot performance data.
+- **Lead Conversion:** Launched the Lead-to-Franchisee conversion flow, auto-provisioning secure user accounts for successful leads.
+- **UI Expansion:** Integrated Proposal and Convert actions into the primary Lead Management dashboard.
+
 ## [6.6.1] - 2026-06-01
 ### Repository Consolidation & Synchronization
 - **Intelligent Merge:** Successfully consolidated legacy feature branches (`feat/enterprise-sync`, `feat/lead-research`) into the `main` branch.

@@ -2,6 +2,7 @@ import json
 import sqlite3
 import os
 import re
+import secrets
 
 DB_PATH = 'crm.db'
 CRM_JSON_PATH = 'crm.json'

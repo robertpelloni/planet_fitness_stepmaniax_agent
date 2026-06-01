@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, send_from_directory
 from flask_login import login_required, current_user
-from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule, ServiceDispatch
+from models import db, User, EquipmentMetric, Alert, Lead, AuditLog, OutreachLog, AutomationHeartbeat, Feedback, Member, Payment, TelemetryHistory, MemberSchedule, ServiceDispatch
 from sqlalchemy import func
 from datetime import datetime
 import subprocess
@@ -275,6 +275,25 @@ def admin_command_center():
     automation_status = AutomationHeartbeat.query.all()
     dispatches = ServiceDispatch.query.order_by(ServiceDispatch.created_at.desc()).limit(10).all()
 
+    # Outreach Metrics (v6.8.0)
+    outreach_query = OutreachLog.query
+    if region:
+        outreach_query = outreach_query.filter(OutreachLog.lead_id.in_(
+            db.session.query(Lead.id).filter_by(region_cluster=region)
+        ))
+
+    total_outreach = outreach_query.count()
+    outreach_by_tier = db.session.query(OutreachLog.notes, func.count(OutreachLog.id))\
+        .group_by(OutreachLog.notes).all()
+
+    # Simplify notes to tiers
+    tier_counts = {"Initial": 0, "Day 3": 0, "Day 7": 0, "Day 14": 0}
+    for note, count in outreach_by_tier:
+        if "Tier 0" in note: tier_counts["Initial"] += count
+        elif "Tier 1" in note: tier_counts["Day 3"] += count
+        elif "Tier 2" in note: tier_counts["Day 7"] += count
+        elif "Tier 3" in note: tier_counts["Day 14"] += count
+
     query_metrics = EquipmentMetric.query
     if region:
         query_metrics = query_metrics.filter_by(region_cluster=region)
@@ -319,7 +338,9 @@ def admin_command_center():
                            recent_security=recent_security,
                            all_regions=all_regions,
                            current_region=region,
-                           dispatches=dispatches)
+                           dispatches=dispatches,
+                           total_outreach=total_outreach,
+                           tier_counts=tier_counts)
 
 @admin_bp.route('/pipeline')
 @login_required
@@ -659,6 +680,33 @@ def track_prospect_interaction(token):
     db.session.commit()
     log_security_event(None, f"High-Intent Signal: {lead.company} interacted with ROI Simulator.")
     return "", 204
+
+@admin_bp.route('/prospect/request-demo/<token>', methods=['POST'])
+@csrf.exempt
+def request_prospect_demo(token):
+    """Handles demo requests from the prospect portal (v6.8.0)"""
+    lead = Lead.query.filter_by(public_token=token).first_or_404()
+
+    name = request.form.get('name')
+    email = request.form.get('email')
+    preferred_time = request.form.get('preferred_time')
+
+    # Update Lead
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lead.status = 'Discovery Call Scheduled'
+    if lead.notes is None: lead.notes = ""
+    lead.notes = f"[{timestamp}] DEMO REQUESTED: {name} ({email}) requested a demo for {preferred_time}.\n" + lead.notes
+
+    db.session.commit()
+    log_security_event(None, f"DEMO REQUEST: {lead.company} requested a priority discovery call.")
+
+    return f"""
+        <div class="bg-green-900/20 border border-green-500/50 rounded-2xl p-8 text-center animate-pulse">
+            <i class="fa-solid fa-circle-check text-4xl text-green-500 mb-4"></i>
+            <h3 class="text-xl font-black text-white italic uppercase tracking-tight">Request Received</h3>
+            <p class="text-green-400 text-sm mt-2 font-medium">Thank you, {name}. Our regional director will contact you shortly to confirm your slot.</p>
+        </div>
+    """
 
 @admin_bp.route('/pilot-success')
 @login_required

@@ -25,6 +25,24 @@
             </select>
         </div>
     </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">
+        <div class="flex items-center space-x-3">
+            <div class="flex flex-col">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Views</span>
+                <span class="text-xs font-bold text-white">{{ lead.portal_views or 0 }}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Score</span>
+                <span class="text-xs font-bold text-blue-400">{{ lead.propensity_score or 0 }}%</span>
+            </div>
+            {% if (lead.portal_views or 0) > 0 or (lead.propensity_score or 0) > 80 %}
+                <div class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </div>
+            {% endif %}
+        </div>
+    </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ lead.priority }}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
         {% if lead.status in ['Outreach Active', 'Outreach Exhausted'] %}
