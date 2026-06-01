@@ -44,5 +44,8 @@
 - [x] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro. (Documented in `outreach/manufacturer_contacts.md`)
 - [x] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture). (Documented in `technical_docs/autoarrow_ml_specs.md`)
 - [x] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training. (Documented in `technical_docs/marathon_content_inventory.md`)
+- [x] Research and document 'Flow-State Analytics' for marathon rhythmic cardio. (Documented in `technical_docs/flow_state_analytics.md`)
+- [x] Draft a script and storyboard for the 'Proof of Concept' demonstration video. (Documented in `outreach/poc_video_script.md`)
+- [x] Implement 'AutoArrow ML Prototype' scaffolding (onset analysis). (See `autoarrow_proto.py`)
 - [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
 - [ ] Implement Phase 1 ML Prototype: 15-minute chart generation for a single track.
