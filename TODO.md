@@ -12,6 +12,12 @@
 - [x] Wire high-intent interaction signals to lead propensity scoring. (Completed in v6.5.0)
 - [x] Orchestrate automated outreach via health monitor background task. (Completed in v6.6.0)
 - [x] Add manual dispatch and quick-status transition controls to Admin Leads UI. (Completed in v6.6.0)
+- [x] Launch Sales Pipeline Kanban at `/admin/pipeline`. (Completed in v6.7.0)
+- [x] Implement automated commercial proposal generation. (Completed in v6.7.0)
+- [x] Launch Lead-to-Franchisee conversion flow. (Completed in v6.7.0)
+- [x] Implement lead capture form on Prospect Portal. (Completed in v6.8.0)
+- [x] Add 'Campaign Pulse' widget to Command Center. (Completed in v6.8.0)
+- [x] Perform Dual-Direction Intelligent Merge (Executive Protocol). (Completed in v6.9.0)
 
 ## Infrastructure & Maintenance (v5.4.1)
 - [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.

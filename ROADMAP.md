@@ -13,6 +13,10 @@
 - [x] **Automated Outreach Cadence:** Launched multi-tier follow-up engine with granular admin controls. (Completed in v6.4.0)
 - [x] **High-Intent Lead Intelligence:** Integrated interactive ROI simulator and intent-based propensity scoring. (Completed in v6.5.0)
 - [x] **Outreach Orchestration:** Automated background cadence processing and launched manual dispatch controls. (Completed in v6.6.0)
+- [x] **Sales Pipeline Kanban:** Integrated a visual, stage-based Sales Pipeline at `/admin/pipeline`. (Completed in v6.7.0)
+- [x] **Proposal Automation:** Developed a dynamic commercial proposal generator based on pilot data. (Completed in v6.7.0)
+- [x] **Engagement Intelligence:** Launched lead capture on the portal and pulsing intent indicators. (Completed in v6.8.0)
+- [x] **Dual-Direction Sync:** Completed the Executive Protocol for full repository synchronization. (Completed in v6.9.0)
 
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
