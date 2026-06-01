@@ -39,3 +39,9 @@
 13. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
 14. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
 15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+
+## Strategic Initiative: Marathon Content (v7.0.0)
+- [ ] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro.
+- [ ] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture).
+- [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
+- [ ] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training.

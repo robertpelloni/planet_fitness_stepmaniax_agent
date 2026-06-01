@@ -1,6 +1,7 @@
 # Ideas
 
 ## Refactoring & Architecture
+- **AutoArrow ML Engine:** Develop a deep-learning model (LSTM or Transformer-based) trained on expert-choreographed stepfiles to generate high-quality patterns for 1+ hour psytrance sets. Focus on "Metabolic Pacing"—periodically adjusting pattern density to match target heart rate zones for cardio.
 - **Headless Browser Integration:** Replace the basic `requests`-based scraper with Playwright or Selenium to handle JavaScript-heavy franchise portals and executive directories.
 - **WebSocket Integration:** Transition from HTMX polling to WebSockets for sub-second telemetry updates in the Staff Portal.
 - **Microservices Migration:** Decouple the telemetry ingestion API into a standalone Go or Rust service to handle ultra-high frequency metric streams.
@@ -14,6 +15,7 @@
 - **Autonomous Outreach Scaling:** Expand the `launch_campaign.sh` pipeline to target multi-region clusters simultaneously using distributed scrapers.
 - **Dynamic Pitch Generator:** Create a script that populates the `pitch-deck.md` with location-specific data (e.g., "Grand Fitness Partners' California locations").
 - **Video Demo:** Include a script or instructions for generating a high-quality "commercial" video of StepManiaX in a gym setting (non-arcade).
+- **Marathon Mode Dashboard:** A specialized UI mode for the SMX dashboard that tracks "Metabolic Progress" (calories, heart rate, hydration alerts) specifically for 60-120 minute sessions.
 
 ## Strategic Pivots
 - **Secondary Brands target:** Adapt the collateral for other "HVLP" (High Value Low Price) gym chains like Crunch Fitness or YouFit, using the same "Rogue Franchise" methodology.
