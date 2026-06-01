@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.6.0] - 2026-06-01
+### Outreach Orchestration & Manual Controls
+- **Background Orchestration:** Integrated `launch_outreach()` into `health_monitor.py` for fully autonomous cadence processing every minute.
+- **Manual Dispatch UI:** Added "Dispatch" buttons to the Leads dashboard to trigger initial or follow-up outreach tiers immediately.
+- **Quick-Status Transitions:** Implemented a status dropdown in the Leads table with HTMX-powered updates and audit logging.
+- **Circular Import Resolution:** Optimized blueprint and background task imports to maintain architectural stability during expansion.
+- **Database Safety:** Refined background task execution order to mitigate SQLite 'database is locked' errors during concurrent SQLAlchemy and raw SQL access.
+
 ## [6.5.0] - 2026-05-31
 ### High-Intent Lead Intelligence
 - **Interactive ROI Simulator:** Launched a real-time portfolio lift calculator on the Prospect Portal with club-count and retention sliders.

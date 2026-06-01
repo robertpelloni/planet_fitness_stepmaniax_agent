@@ -404,6 +404,34 @@ def admin_reset_cadence(lead_id):
     db.session.commit()
     return render_template('partials/lead_row.html', lead=lead)
 
+@admin_bp.route('/leads/update-status/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_update_lead_status(lead_id):
+    """Updates lead status and logs the transition (v6.6.0)"""
+    new_status = request.form.get('status')
+    lead = Lead.query.get_or_404(lead_id)
+    old_status = lead.status
+    lead.status = new_status
+    db.session.commit()
+    log_security_event(current_user.id, f"Lead {lead_id} Status Transition: {old_status} -> {new_status}")
+    return render_template('partials/lead_row.html', lead=lead)
+
+@admin_bp.route('/leads/dispatch-outreach/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def admin_dispatch_outreach(lead_id):
+    """Manually triggers the next outreach tier for a specific lead (v6.6.0)"""
+    from launch_outreach import launch_outreach
+    try:
+        launch_outreach(force_lead_id=lead_id)
+        log_security_event(current_user.id, f"Manual Outreach Dispatched: Lead {lead_id}")
+    except Exception as e:
+        print(f"Error in manual dispatch: {e}")
+
+    lead = Lead.query.get_or_404(lead_id)
+    return render_template('partials/lead_row.html', lead=lead)
+
 @admin_bp.route('/leads/delete/<lead_id>', methods=['POST'])
 @login_required
 @role_required(['Admin'])

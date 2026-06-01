@@ -24,6 +24,17 @@ def monitor_health():
     Scans equipment metrics and generates alerts for operational anomalies.
     """
     logger.info("Starting Health Monitor...")
+
+    # Lead Cadence Processing (v6.6.0 Orchestration)
+    # Automatically process multi-tier follow-up cadence
+    # Move this BEFORE opening the SQLite connection to avoid 'database is locked'
+    # when launch_outreach() uses SQLAlchemy's session.
+    from launch_outreach import launch_outreach
+    try:
+        launch_outreach()
+    except Exception as e:
+        logger.error(f"Error in launch_outreach() during health monitor cycle: {e}")
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -58,9 +69,6 @@ def monitor_health():
         unit_data = dict(unit)
         score = analytics.calculate_predictive_health_score(unit_data)
         cursor.execute("UPDATE equipment_metric SET predictive_health_score = ? WHERE id = ?", (score, unit['id']))
-
-    # 2. Lead Cadence Processing (v3.9.0)
-    process_cadence(cursor)
 
     # Weekly Pilot Summary Generation (v6.2.0)
     # Checks if today is Sunday night (23:00 - 23:59) and if we've already run it this week.
@@ -140,24 +148,6 @@ def generate_alert(cursor, severity, message, equipment_id):
     emoji = "⚠️" if severity == "Warning" else "🚨"
     with app.app_context():
         send_notification(f"{emoji} [{severity}] {message}", franchise_id=fid)
-
-def process_cadence(cursor):
-    """
-    Identifies leads due for follow-up and notifies the admin.
-    """
-    threshold_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-    query = """
-    SELECT id, company, follow_up_count FROM leads
-    WHERE status = 'Outreach Active' AND last_contact_date < ?
-    """
-    cursor.execute(query, (threshold_date,))
-    due_leads = cursor.fetchall()
-
-    for lead in due_leads:
-        msg = f"🔔 FOLLOW-UP DUE: {lead['company']} is ready for Cadence Touch #{lead['follow_up_count'] + 1}."
-        logger.info(msg)
-        with app.app_context():
-            send_notification(msg)
 
 import time
 

@@ -2,13 +2,28 @@
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{{ lead.company }}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ lead.contact_name or 'N/A' }}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-            {% if lead.status == 'Ready for Outreach' %}bg-green-100 text-green-800
-            {% elif lead.status == 'Identified' %}bg-blue-100 text-blue-800
-            {% elif lead.status == 'Outreach Active' %}bg-yellow-100 text-yellow-800
-            {% else %}bg-gray-100 text-gray-800{% endif %}">
-            {{ lead.status }}
-        </span>
+        <div class="flex flex-col space-y-1">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit
+                {% if lead.status == 'Ready for Outreach' %}bg-green-100 text-green-800
+                {% elif lead.status == 'Identified' %}bg-blue-100 text-blue-800
+                {% elif lead.status == 'Outreach Active' %}bg-yellow-100 text-yellow-800
+                {% elif 'Scheduled' in lead.status %}bg-purple-100 text-purple-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ lead.status }}
+            </span>
+            <select name="status" hx-post="{{ url_for('admin.admin_update_lead_status', lead_id=lead.id) }}"
+                    hx-target="#lead-row-{{ lead.id }}" hx-swap="outerHTML"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                    class="text-[10px] bg-gray-700 text-gray-300 rounded border-none focus:ring-0 py-0.5">
+                <option value="">Update Status...</option>
+                <option value="Researching">Researching</option>
+                <option value="Ready for Outreach">Ready for Outreach</option>
+                <option value="Discovery Call Scheduled">Discovery Scheduled</option>
+                <option value="Pilot MOU Signed">MOU Signed</option>
+                <option value="Pilot Operational">Pilot Operational</option>
+                <option value="Contract Finalized">Contract Finalized</option>
+            </select>
+        </div>
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ lead.priority }}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
@@ -29,8 +44,23 @@
                         hx-confirm="Reset outreach cadence to Day 0?"
                         class="text-[10px] bg-red-900 hover:bg-red-800 px-2 py-1 rounded">
                     Reset
+                                    </button>
+                                    <button hx-post="{{ url_for('admin.admin_dispatch_outreach', lead_id=lead.id) }}"
+                                            hx-target="#lead-row-{{ lead.id }}" hx-swap="outerHTML"
+                                            hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                                            hx-confirm="Force dispatch the next outreach tier immediately?"
+                                            class="text-[10px] bg-blue-900 hover:bg-blue-800 px-2 py-1 rounded"
+                                            {% if lead.status == 'Outreach Exhausted' %}disabled{% endif %}>
+                                        Dispatch
                 </button>
             </div>
+                            {% elif lead.status == 'Ready for Outreach' %}
+                                <button hx-post="{{ url_for('admin.admin_dispatch_outreach', lead_id=lead.id) }}"
+                                        hx-target="#lead-row-{{ lead.id }}" hx-swap="outerHTML"
+                                        hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                                        class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-bold shadow-sm">
+                                    Dispatch Initial
+                                </button>
         {% else %}
             <span class="text-gray-600 italic">Not Started</span>
         {% endif %}

@@ -68,32 +68,43 @@ B2B Sales Agent (Autonomous Dispatch)
 """
     return None
 
-def launch_outreach():
+def launch_outreach(force_lead_id=None):
     """
     Identifies leads ready for outreach and follow-up, generating simulation messages.
-    (v6.4.0): Implemented automated multi-tier follow-up cadence.
+    (v6.6.0): Added support for forced dispatch of a specific lead.
     """
-    print("--- Starting Automated Outreach Dispatcher (Cadence v6.4.0) ---")
+    print(f"--- Starting Automated Outreach Dispatcher (Cadence v6.6.0) {'[FORCE:' + force_lead_id + ']' if force_lead_id else ''} ---")
     translator = Translator()
     now = datetime.now()
 
     with app.app_context():
-        # 1. Process Initial Outreach (Ready for Outreach)
-        initial_leads = Lead.query.filter_by(status='Ready for Outreach').all()
+        if force_lead_id:
+            lead = db.session.get(Lead, force_lead_id)
+            if not lead: return
+            if lead.status == 'Ready for Outreach':
+                leads_to_process = [(lead, 0)]
+            elif lead.status == 'Outreach Active':
+                leads_to_process = [(lead, lead.follow_up_count)]
+            else:
+                print(f"Lead {force_lead_id} is not in a dispatchable state ({lead.status})")
+                return
+        else:
+            # 1. Process Initial Outreach (Ready for Outreach)
+            initial_leads = Lead.query.filter_by(status='Ready for Outreach').all()
 
-        # 2. Process Follow-ups (Outreach Active & Not Paused)
-        active_leads = Lead.query.filter_by(status='Outreach Active', cadence_paused=False).all()
+            # 2. Process Follow-ups (Outreach Active & Not Paused)
+            active_leads = Lead.query.filter_by(status='Outreach Active', cadence_paused=False).all()
 
-        followup_leads = []
-        for lead in active_leads:
-            if lead.follow_up_count in CADENCE_SCHEDULE:
-                days_required, tier_name = CADENCE_SCHEDULE[lead.follow_up_count]
-                if lead.last_contact_date:
-                    last_contact = datetime.strptime(lead.last_contact_date, "%Y-%m-%d %H:%M:%S")
-                    if now >= last_contact + timedelta(days=days_required):
-                        followup_leads.append((lead, lead.follow_up_count))
+            followup_leads = []
+            for lead in active_leads:
+                if lead.follow_up_count in CADENCE_SCHEDULE:
+                    days_required, tier_name = CADENCE_SCHEDULE[lead.follow_up_count]
+                    if lead.last_contact_date:
+                        last_contact = datetime.strptime(lead.last_contact_date, "%Y-%m-%d %H:%M:%S")
+                        if now >= last_contact + timedelta(days=days_required):
+                            followup_leads.append((lead, lead.follow_up_count))
 
-        leads_to_process = [(l, 0) for l in initial_leads] + followup_leads
+            leads_to_process = [(l, 0) for l in initial_leads] + followup_leads
 
         if not leads_to_process:
             print("No leads currently due for initial outreach or follow-up.")

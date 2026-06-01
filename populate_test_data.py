@@ -38,6 +38,7 @@ def populate():
         projected_annual_profit REAL,
         follow_up_count INTEGER DEFAULT 0,
         last_contact_date TEXT,
+        cadence_paused BOOLEAN DEFAULT 0,
         public_token TEXT UNIQUE,
         portal_views INTEGER DEFAULT 0,
         region_cluster TEXT DEFAULT 'US-EAST-1',

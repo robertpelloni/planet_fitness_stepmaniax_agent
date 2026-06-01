@@ -1,4 +1,4 @@
-2026-05-31 23:26:24,056 ERROR: Exception on /admin/dashboard [GET] [in /home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/flask/app.py:875]
+2026-05-31 20:00:01,485 ERROR: Exception on /api/v1/analytics/geo [GET] [in /home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/flask/app.py:875]
 Traceback (most recent call last):
   File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1970, in _exec_single_context
     self.dialect.do_execute(
@@ -21,15 +21,12 @@ Traceback (most recent call last):
   File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/blueprints/decorators.py", line 17, in decorated_function
+  File "/app/blueprints/decorators.py", line 60, in decorated_function
     return f(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^
-  File "/app/blueprints/admin.py", line 50, in dashboard
-    leads_list = query_leads.all()
-                 ^^^^^^^^^^^^^^^^^
+  File "/app/blueprints/api.py", line 617, in api_geo_analytics
+    leads = query_leads.all()
+            ^^^^^^^^^^^^^^^^^
   File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2673, in all
     return self._iter().all()  # type: ignore
            ^^^^^^^^^^^^

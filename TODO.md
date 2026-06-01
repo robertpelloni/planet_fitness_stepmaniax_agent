@@ -10,6 +10,8 @@
 - [x] Add Admin UI for pausing/resetting outreach cadence. (Completed in v6.4.0)
 - [x] Implement interactive ROI simulator on the prospect portal. (Completed in v6.5.0)
 - [x] Wire high-intent interaction signals to lead propensity scoring. (Completed in v6.5.0)
+- [x] Orchestrate automated outreach via health monitor background task. (Completed in v6.6.0)
+- [x] Add manual dispatch and quick-status transition controls to Admin Leads UI. (Completed in v6.6.0)
 
 ## Infrastructure & Maintenance (v5.4.1)
 - [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
