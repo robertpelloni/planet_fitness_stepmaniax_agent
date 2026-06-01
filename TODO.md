@@ -41,7 +41,8 @@
 15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
 
 ## Strategic Initiative: Marathon Content (v7.0.0)
-- [ ] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro.
-- [ ] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture).
+- [x] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro. (Documented in `outreach/manufacturer_contacts.md`)
+- [x] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture). (Documented in `technical_docs/autoarrow_ml_specs.md`)
+- [x] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training. (Documented in `technical_docs/marathon_content_inventory.md`)
 - [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
-- [ ] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training.
+- [ ] Implement Phase 1 ML Prototype: 15-minute chart generation for a single track.
