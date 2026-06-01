@@ -41,7 +41,7 @@ SERVER_PID=$!
 sleep 5
 
 # Execute Playwright tests
-if PYTHONPATH=. pytest tests/integration/test_ui.py; then
+if PYTHONPATH=. pytest tests/integration/test_ui.py tests/integration/test_pipeline_ui.py; then
     echo "✅ UI Tests Passed"
 else
     echo "❌ UI Tests Failed"

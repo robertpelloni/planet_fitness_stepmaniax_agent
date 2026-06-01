@@ -66,6 +66,13 @@
         {% endif %}
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2">
+        {% if lead.status in ['Pilot Operational', 'Contract Finalized'] %}
+        <form action="{{ url_for('admin.convert_lead_to_partner', lead_id=lead.id) }}" method="POST" onsubmit="return confirm('Convert this lead to a Partner account?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-yellow-400 hover:text-yellow-600 font-bold" title="Convert to Partner Account">Convert</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('admin.download_proposal', lead_id=lead.id) }}" class="text-green-400 hover:text-green-600" title="Generate Commercial Proposal">Proposal</a>
         <a href="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) }}" class="text-indigo-400 hover:text-indigo-600">Edit</a>
         <form action="{{ url_for('admin.admin_lead_delete', lead_id=lead.id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

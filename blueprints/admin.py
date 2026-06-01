@@ -8,7 +8,7 @@ import analytics
 import os
 import secrets
 from blueprints.decorators import role_required, permission_required
-from report_generator import generate_report
+from report_generator import generate_report, generate_commercial_proposal, PROPOSALS_DIR
 from extensions import log_security_event, csrf
 
 admin_bp = Blueprint('admin', __name__)
@@ -321,6 +321,38 @@ def admin_command_center():
                            current_region=region,
                            dispatches=dispatches)
 
+@admin_bp.route('/pipeline')
+@login_required
+@role_required(['Admin'])
+def admin_pipeline():
+    """Kanban-style Sales Pipeline Visualization (v6.7.0)"""
+    region = request.args.get('region')
+    query = Lead.query
+    if region:
+        query = query.filter_by(region_cluster=region)
+    leads = query.all()
+
+    stages = [
+        "Researching",
+        "Ready for Outreach",
+        "Outreach Active",
+        "Discovery Call Scheduled",
+        "Pilot MOU Signed",
+        "Pilot Operational"
+    ]
+
+    pipeline_data = {stage: [] for stage in stages}
+    pipeline_data["Other"] = []
+
+    for lead in leads:
+        if lead.status in pipeline_data:
+            pipeline_data[lead.status].append(lead)
+        else:
+            pipeline_data["Other"].append(lead)
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+    return render_template('admin_pipeline.html', pipeline_data=pipeline_data, stages=stages, all_regions=all_regions, current_region=region)
+
 @admin_bp.route('/leads')
 @login_required
 @role_required(['Admin'])
@@ -444,6 +476,46 @@ def admin_lead_delete(lead_id):
     flash(f"Lead {company} deleted.")
     return redirect(url_for('admin.admin_leads'))
 
+@admin_bp.route('/leads/convert/<lead_id>', methods=['POST'])
+@login_required
+@role_required(['Admin'])
+def convert_lead_to_partner(lead_id):
+    """Converts a successful lead into a 'Franchisee' user account (v6.7.0)"""
+    lead = Lead.query.get_or_404(lead_id)
+
+    existing_user = User.query.filter_by(franchise_id=lead.id).first()
+    if existing_user:
+        flash(f"Partner account already exists for {lead.company} ({existing_user.username}).", "warning")
+        return redirect(url_for('admin.admin_leads'))
+
+    # Generate Partner Account
+    username = lead.email if lead.email else f"partner_{lead.id.lower()}"
+    password = secrets.token_hex(8)
+
+    new_user = User(
+        username=username,
+        role='Franchisee',
+        franchise_id=lead.id,
+        region_cluster=lead.region_cluster or 'US-EAST-1',
+        perm_crm_view=True,
+        perm_crm_edit=False,
+        perm_ops_view=True,
+        perm_revenue_view=True
+    )
+    new_user.set_password(password)
+
+    # Auto-promote status if not already advanced
+    if lead.status not in ['Contract Finalized', 'Pilot Operational']:
+        lead.status = 'Contract Finalized'
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    log_security_event(current_user.id, f"CONVERSION: Lead {lead.company} converted to Partner. User: {username}")
+    flash(f"SUCCESS: {lead.company} has been converted to a Partner! Login: {username} | Temp Password: {password}", "success")
+
+    return redirect(url_for('admin.admin_leads'))
+
 @admin_bp.route('/update_lead_status', methods=['POST'])
 @login_required
 @permission_required('perm_crm_edit')
@@ -503,6 +575,17 @@ def generate_unit_report(unit_id):
     else:
         flash("Failed to generate performance report.")
     return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/leads/download-proposal/<lead_id>')
+@login_required
+@role_required(['Admin'])
+def download_proposal(lead_id):
+    """Generates and downloads a commercial expansion proposal (v6.7.0)"""
+    filepath = generate_commercial_proposal(lead_id)
+    if filepath:
+        return send_from_directory(PROPOSALS_DIR, os.path.basename(filepath), as_attachment=True)
+    flash("Error generating proposal.")
+    return redirect(url_for('admin.admin_leads'))
 
 @admin_bp.route('/prospect/<token>')
 def prospect_portal(token):

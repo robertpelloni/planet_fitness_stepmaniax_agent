@@ -228,9 +228,9 @@ def populate():
     cursor.execute("PRAGMA foreign_keys = ON")
 
     leads = [
-        ('EPIC-001', 'EPIC Fitness Group', 'John Doe', 'VP Operations', 'john@epicfitness.com', 'Midwest', 'Pilot MOU Signed', 'High', 15, 0.04, 20.0, 150000, 'token-epic', 'US-EAST-1', 42.3314, -83.0458),
+        ('EPIC-001', 'EPIC Fitness Group', 'John Doe', 'VP Operations', 'john@epicfitness.com', 'Midwest', 'Pilot Operational', 'High', 15, 0.04, 20.0, 150000, 'token-epic', 'US-EAST-1', 42.3314, -83.0458),
         ('FLY-002', 'Flynn Group', 'Jane Smith', 'Chief Operating Officer', 'jane@flynngroup.com', 'National', 'Identified', 'High', 120, 0.03, 15.0, 850000, 'token-flynn', 'US-EAST-1', 41.8781, -87.6298),
-        ('UK-003', 'UK Fitness Corp', 'Nigel Farad', 'Director', 'nigel@ukfitness.co.uk', 'London', 'Ready for Outreach', 'Medium', 10, 0.03, 20.0, 100000, 'token-uk', 'UK-NORTH', 51.5074, -0.1278),
+        ('UK-003', 'UK Fitness Corp', 'Nigel Farad', 'Director', 'nigel@ukfitness.co.uk', 'London', 'Pilot Operational', 'Medium', 10, 0.03, 20.0, 100000, 'token-uk', 'UK-NORTH', 51.5074, -0.1278),
         ('CAN-004', 'Canada Gyms', 'Justin T', 'CEO', 'justin@canadagyms.ca', 'Toronto', 'Identified', 'Low', 5, 0.02, 18.0, 50000, 'token-canada', 'CAN-WEST', 43.6532, -79.3832)
     ]
     cursor.executemany("INSERT INTO leads (id, company, contact_name, title, email, region, status, priority, num_clubs, retention_lift, avg_monthly_fee, projected_annual_profit, public_token, region_cluster, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", leads)

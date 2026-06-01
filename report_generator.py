@@ -5,8 +5,10 @@ from datetime import datetime
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
 TEMPLATE_PATH = "pilot-performance-report.md"
 WEEKLY_TEMPLATE_PATH = "weekly-pilot-summary-template.md"
+COMMERCIAL_TEMPLATE_PATH = "commercial-proposal-template.md"
 REPORTS_DIR = "outreach/reports"
 WEEKLY_REPORTS_DIR = "outreach/reports/weekly"
+PROPOSALS_DIR = "outreach/proposals"
 
 def generate_report(unit_id):
     """
@@ -154,6 +156,67 @@ def generate_weekly_summary(franchise_id):
 
     conn.commit()
     print(f"Weekly Summary generated: {filepath}")
+    conn.close()
+    return filepath
+
+def generate_commercial_proposal(lead_id):
+    """
+    Generates a tailored commercial expansion proposal for a lead based on their pilot performance.
+    """
+    if not os.path.exists(PROPOSALS_DIR):
+        os.makedirs(PROPOSALS_DIR)
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # 1. Fetch Lead Data
+    cursor.execute("SELECT * FROM leads WHERE id = ?", (lead_id,))
+    lead = cursor.fetchone()
+    if not lead:
+        print(f"Error: Lead ID {lead_id} not found.")
+        conn.close()
+        return
+
+    # 2. Fetch Pilot Location (from equipment_metric)
+    cursor.execute("SELECT location FROM equipment_metric WHERE franchise_id = ? LIMIT 1", (lead_id,))
+    equipment = cursor.fetchone()
+    pilot_location = equipment['location'] if equipment else "your primary pilot facility"
+
+    # 3. Prepare Data
+    report_data = {
+        "[Franchisee Name]": lead['company'],
+        "[Pilot Location]": pilot_location
+    }
+
+    # 4. Read Template
+    if not os.path.exists(COMMERCIAL_TEMPLATE_PATH):
+        print(f"Error: Template {COMMERCIAL_TEMPLATE_PATH} not found.")
+        conn.close()
+        return
+
+    with open(COMMERCIAL_TEMPLATE_PATH, "r") as f:
+        content = f.read()
+
+    # 5. Replace Placeholders
+    for key, value in report_data.items():
+        content = content.replace(key, value)
+
+    # 6. Save Proposal
+    filename = f"Commercial_Proposal_{lead['company'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.md"
+    filepath = os.path.join(PROPOSALS_DIR, filename)
+
+    with open(filepath, "w") as f:
+        f.write(content)
+
+    # Log to OutreachLog
+    cursor.execute("""
+        INSERT INTO outreach_logs (lead_id, date_sent, channel, notes)
+        VALUES (?, ?, 'Commercial Proposal', ?)
+    """, (lead_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Generated commercial proposal: {filename}"))
+
+    conn.commit()
+    print(f"Commercial Proposal generated: {filepath}")
     conn.close()
     return filepath
 
