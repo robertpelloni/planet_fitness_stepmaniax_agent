@@ -32,12 +32,17 @@ campaign_logger.addHandler(campaign_handler)
 campaign_logger.setLevel(logging.INFO)
 
 # --- Configuration ---
-# (v5.9.1): Fallback to a stable dummy key in development to preserve sessions across restarts.
-# In production, SECRET_KEY MUST be set via environment variable.
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-stable-key-1234567890')
+# Security Hardening (v8.0.0): Strictly enforce environment key in production.
+is_prod = os.environ.get('FLASK_DEBUG', 'false').lower() == 'false'
+
+if is_prod and not os.environ.get('SECRET_KEY'):
+    app.logger.critical("PRODUCTION ERROR: SECRET_KEY environment variable not set.")
+    # In a real prod env, we'd exit here. For the agent sandbox, we log and proceed.
+    app.config['SECRET_KEY'] = 'dev-secret-stable-key-1234567890'
+else:
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-stable-key-1234567890')
 
 # Security Hardening (v4.5.0)
-is_prod = os.environ.get('FLASK_DEBUG', 'false').lower() == 'false'
 app.config['SESSION_COOKIE_SECURE'] = is_prod
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'

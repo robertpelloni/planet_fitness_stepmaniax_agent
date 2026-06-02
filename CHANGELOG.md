@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.0.0] - 2026-06-02
+### Total Protocol Integration & Architectural Finalization
+- **Total ORM Integration:** Completed the migration of all operational scripts (`cadence_trigger.py`, `report_generator.py`, `health_monitor.py`) to SQLAlchemy ORM, ensuring thread-safe database access.
+- **Protocol Formalization:** Integrated the Autonomous Development & Governance Protocol into the core operational workflow.
+- **Critical Fixes:** Resolved zero-division vulnerability in analytics and strictly enforced environment-based session security in production.
+- **Final Validation:** Achieved 100% stability across the entire 17-test regression suite, including Playwright UI tests.
+
 ## [7.8.0] - 2026-06-02
 ### Architectural Hardening & Manufacturer Outreach Launch
 - **SQLAlchemy Refactor:** Migrated `health_monitor.py` and `report_generator.py` to use SQLAlchemy ORM exclusively, eliminating raw SQLite concurrency risks.

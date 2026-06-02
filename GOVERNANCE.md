@@ -1,4 +1,4 @@
-# Autonomous Development & Governance Protocol (v1.0.0)
+# Autonomous Development & Governance Protocol (v8.0.0)
 
 This document formalizes the operational framework for AI-driven development and repository maintenance for the StepManiaX B2B Platform.
 

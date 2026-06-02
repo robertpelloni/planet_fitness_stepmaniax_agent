@@ -195,12 +195,16 @@ def calculate_capacity_utilization(total_sessions, uptime_percent):
     """
     Calculates the capacity utilization percentage (0-100).
     Assumes a max capacity of 500 sessions per reporting period.
+    (v8.0.0): Added guard for zero uptime.
     """
-    if not total_sessions:
+    if not total_sessions or not uptime_percent:
         return 0.0
 
     # Capacity is reduced if uptime is not 100%
     max_capacity = 500 * (uptime_percent / 100.0)
+    if max_capacity <= 0:
+        return 0.0
+
     utilization = (total_sessions / max_capacity) * 100
 
     return round(min(100.0, utilization), 1)
