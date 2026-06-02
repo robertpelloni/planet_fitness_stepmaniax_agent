@@ -104,9 +104,12 @@ def generate_ssc(output_path, bpm, onset_times, difficulty="Medium", intensity=N
     # Grid of notes (0000 = no note)
     grid = ["0000"] * total_sixteenths
 
-    # Map onsets to grid with Metabolic Pacing & Fatigue Curve
+    # Map onsets to grid with Pattern Generation, Metabolic Pacing & Fatigue Curve
     arrows = ["1000", "0100", "0010", "0001"] # Up, Down, Left, Right
     last_grid_idx = -1
+
+    # Track used arrows for pattern variety
+    pattern_history = []
 
     for t in onset_times:
         # Fatigue Curve: Intensity drops gradually over long-form session
@@ -124,8 +127,29 @@ def generate_ssc(output_path, bpm, onset_times, difficulty="Medium", intensity=N
         grid_idx = (grid_idx // steps_per_sixteenth) * steps_per_sixteenth
 
         if grid_idx < len(grid) and grid_idx > last_grid_idx:
-            # Pattern logic: cycle through arrows
-            grid[grid_idx] = arrows[grid_idx % 4]
+            # Pattern Generation Logic (v7.6.0)
+
+            # 1. Base selection: weighted random or cyclic
+            choice_idx = np.random.choice([0, 1, 2, 3], p=[0.25, 0.25, 0.25, 0.25])
+            note = arrows[choice_idx]
+
+            # 2. Higher difficulty: Jumps (two arrows at once)
+            if difficulty in ["Hard", "Challenge"] and np.random.random() < (current_intensity * 0.3):
+                # Pick a second distinct arrow
+                second_idx = (choice_idx + np.random.randint(1, 4)) % 4
+                note_list = ["0"] * 4
+                note_list[choice_idx] = "1"
+                note_list[second_idx] = "1"
+                note = "".join(note_list)
+
+            # 3. Simple Flow constraint: avoid three of same arrow in row
+            if len(pattern_history) >= 2 and pattern_history[-1] == note and pattern_history[-2] == note:
+                 # Force change
+                 choice_idx = (choice_idx + 1) % 4
+                 note = arrows[choice_idx]
+
+            grid[grid_idx] = note
+            pattern_history.append(note)
             last_grid_idx = grid_idx
 
     # Construct measures from grid
