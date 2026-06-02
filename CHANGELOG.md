@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.5.0] - 2026-06-02
+### Multi-Difficulty Engine & Marathon Mode ROI Integration
+- **Multi-Difficulty Support:** Extended `autoarrow_proto.py` to support Beginner, Easy, Medium, Hard, and Challenge levels.
+- **Dynamic Quantization:** Implemented difficulty-specific rhythmic resolution (4th/8th/16th notes).
+- **ROI Simulator Integration:** Added 'Marathon Mode' toggle to the Prospect Portal with synergistic retention logic (+23% profit lift).
+
+## [7.4.0] - 2026-06-02
+### Metabolic Pacing & SSC Quantization Engine
+- **Quantization Engine:** Implemented 16th-note snapping in `autoarrow_proto.py` for precise rhythmic alignment.
+- **Metabolic Pacing:** Integrated stochastic note density control based on an intensity parameter.
+- **Fatigue Curve:** Added logic to gradually reduce note density over long-form cardio durations to simulate metabolic drift.
+
+## [7.3.0] - 2026-06-01
+### Marathon Content Engine & Session Consolidation
+- **SSC Generation:** Enhanced `autoarrow_proto.py` to output structurally valid StepManiaX (.ssc) chart files.
+- **Handoff Documentation:** Consolidated all v6.x and v7.x progress in `HANDOFF.md`.
+- **Dependency Hardening:** Corrected and locked stable versions for the audio processing stack in `requirements.txt`.
+
+## [7.2.0] - 2026-06-01
+### Flow-State Analytics & ML Prototype Scaffolding
+- **Flow-State Research:** Released `technical_docs/flow_state_analytics.md` covering the psychological and metabolic benefits of long-form rhythmic cardio.
+- **Demonstration Script:** Drafted the POC video storyboard in `outreach/poc_video_script.md`.
+- **DSP Scaffolding:** Implemented initial onset analysis and beat tracking in `autoarrow_proto.py`.
+
+## [7.1.0] - 2026-06-01
+### Technical Deep-Dive - AutoArrow ML & Manufacturer Research
+- **Manufacturer Research:** Documented key contacts and strategies for Step Revolution, Konami, and Andamiro in `outreach/manufacturer_contacts.md`.
+- **Technical Specs:** Released AutoArrow ML Engine Specification v1.0.0 in `technical_docs/autoarrow_ml_specs.md`.
+- **Content Inventory:** Compiled `technical_docs/marathon_content_inventory.md` for ML training.
+
+## [7.0.0] - 2026-06-01
+### Strategic Content Initiative - Psytrance Marathon & AutoArrow ML
+- **Strategic Pivot:** Expanded the project vision to include influencing industry leaders for long-form marathon content.
+- **Manufacturer Pitch:** Created `outreach/manufacturer_marathon_pitch.md` for targeted manufacturer engagement.
+
 ## [6.9.0] - 2026-06-01
 ### Repository Refresh & Feature Consolidation
 - **Dual-Direction Merge:** Successfully reconciled `main` with all active feature branches (`feat/enterprise-sync`, `feat/lead-research`).

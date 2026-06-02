@@ -42,13 +42,28 @@ def analyze_track(file_path):
 
     # 6. Generate Basic .ssc File
     output_ssc = file_path.rsplit('.', 1)[0] + ".ssc"
-    intensity = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0
-    generate_ssc(output_ssc, tempo, onset_times, intensity=intensity)
+    difficulty = sys.argv[2] if len(sys.argv) > 2 else "Medium"
+    intensity = float(sys.argv[3]) if len(sys.argv) > 3 else None
+
+    generate_ssc(output_ssc, tempo, onset_times, difficulty=difficulty, intensity=intensity)
 
     print("--- Analysis Complete ---")
 
-def generate_ssc(output_path, bpm, onset_times, intensity=1.0):
-    print(f"Generating Quantized .ssc file (Intensity: {intensity}): {output_path}")
+def generate_ssc(output_path, bpm, onset_times, difficulty="Medium", intensity=None):
+    # Difficulty Calibration
+    diff_settings = {
+        "Beginner": {"meter": 2, "intensity": 0.3, "quantize": 4},
+        "Easy": {"meter": 4, "intensity": 0.5, "quantize": 8},
+        "Medium": {"meter": 6, "intensity": 0.7, "quantize": 16},
+        "Hard": {"meter": 9, "intensity": 0.9, "quantize": 16},
+        "Challenge": {"meter": 12, "intensity": 1.1, "quantize": 16}
+    }
+
+    settings = diff_settings.get(difficulty, diff_settings["Medium"])
+    if intensity is None:
+        intensity = settings["intensity"]
+
+    print(f"Generating Quantized .ssc file | Difficulty: {difficulty} | Intensity: {intensity} | Target: {output_path}")
 
     # Header
     ssc_content = [
@@ -66,19 +81,22 @@ def generate_ssc(output_path, bpm, onset_times, intensity=1.0):
         "#NOTEDATA:;",
         "#CHARTNAME:Marathon Cardio;",
         "#STEPSTYPE:dance-single;",
-        "#DESCRIPTION:ML Quantized Endurance Set;",
+        f"#DESCRIPTION:ML Quantized {difficulty} Endurance Set;",
         "#CHARTSTYLE:;",
-        "#DIFFICULTY:Medium;",
-        "#METER:5;",
+        f"#DIFFICULTY:{difficulty};",
+        f"#METER:{settings['meter']};",
         "#RADARVALUES:0,0,0,0,0;",
         "#CREDIT:AutoArrow;",
         "#NOTES:"
     ]
 
-    # Quantization Engine: Snap to 16th notes
-    # 1 measure = 4 beats = 16 sixteenths
+    # Quantization Engine: Snap based on difficulty settings
+    if bpm <= 0:
+        bpm = 120.0 # Default fallback
     beat_duration = 60.0 / bpm
     sixteenth_duration = beat_duration / 4.0
+    quantize_res = settings["quantize"] # 4, 8, or 16
+    steps_per_sixteenth = 16 // quantize_res
 
     total_duration = max(onset_times) if len(onset_times) > 0 else 0
     total_sixteenths = int(total_duration / sixteenth_duration) + 16
@@ -91,17 +109,22 @@ def generate_ssc(output_path, bpm, onset_times, intensity=1.0):
     last_grid_idx = -1
 
     for t in onset_times:
-        # Fatigue Curve: Intensity drops by 5% every 15 minutes (900 seconds)
-        fatigue_modifier = max(0.5, 1.0 - (t / 18000.0)) # Gradual drop over 5 hours
+        # Fatigue Curve: Intensity drops gradually over long-form session
+        fatigue_modifier = max(0.6, 1.0 - (t / 18000.0))
         current_intensity = intensity * fatigue_modifier
 
-        # Stochastic metabolic pacing: skip notes based on intensity
+        # Stochastic metabolic pacing
         if np.random.random() > current_intensity:
             continue
 
+        # Standardize to sixteenth grid index
         grid_idx = int(round(t / sixteenth_duration))
+
+        # Apply difficulty-based quantization snapping
+        grid_idx = (grid_idx // steps_per_sixteenth) * steps_per_sixteenth
+
         if grid_idx < len(grid) and grid_idx > last_grid_idx:
-            # Basic pattern: cycle through arrows
+            # Pattern logic: cycle through arrows
             grid[grid_idx] = arrows[grid_idx % 4]
             last_grid_idx = grid_idx
 
@@ -109,7 +132,6 @@ def generate_ssc(output_path, bpm, onset_times, intensity=1.0):
     notes_block = []
     for i in range(0, len(grid), 16):
         measure = grid[i:i+16]
-        # Pad short last measure
         if len(measure) < 16:
             measure += ["0000"] * (16 - len(measure))
         notes_block.extend(measure)
@@ -124,6 +146,7 @@ def generate_ssc(output_path, bpm, onset_times, intensity=1.0):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python autoarrow_proto.py <path_to_audio_file>")
+        print("Usage: python autoarrow_proto.py <audio_file> [difficulty] [intensity_override]")
+        print("Difficulties: Beginner, Easy, Medium, Hard, Challenge")
     else:
         analyze_track(sys.argv[1])
