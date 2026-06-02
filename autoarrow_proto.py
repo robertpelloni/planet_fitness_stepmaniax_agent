@@ -149,6 +149,19 @@ def generate_ssc(output_path, bpm, onset_times, difficulty="Medium", intensity=N
                  note = arrows[choice_idx]
 
             grid[grid_idx] = note
+
+            # Leg-Safety & Flow Validator (v7.7.0)
+            if len(pattern_history) > 0:
+                # Rule 1: No rapid double-steps on the same arrow (exhaustion prevention)
+                if note == pattern_history[-1] and (grid_idx - last_grid_idx) < 4:
+                    # Shift note to avoid rapid repeat
+                    note_list = list(note)
+                    idx = note_list.index("1") if "1" in note_list else 0
+                    note_list[idx] = "0"
+                    note_list[(idx + 1) % 4] = "1"
+                    note = "".join(note_list)
+                    grid[grid_idx] = note
+
             pattern_history.append(note)
             last_grid_idx = grid_idx
 

@@ -100,10 +100,9 @@ def forgot_password():
             user.reset_token_expiry = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
             db.session.commit()
             # In a production app, we would send an email here.
-            # For the pilot, we flash the reset URL for the simulator.
+            # (v7.7.0): Removed insecure flashing of reset link. Link is now only logged for admin reference.
             reset_url = url_for('auth.reset_password', token=token, _external=True)
-            log_security_event(user.id, f"Password reset requested: {email}")
-            flash(f"Reset link generated (Pilot Simulation): {reset_url}")
+            log_security_event(user.id, f"Password reset requested: {email}. Simulation Link: {reset_url}")
         else:
             # Prevent user enumeration
             flash("If an account exists for that email, a reset link has been sent.")

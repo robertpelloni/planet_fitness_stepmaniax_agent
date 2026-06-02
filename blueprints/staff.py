@@ -332,6 +332,32 @@ def create_schedule():
     units = EquipmentMetric.query.all() if current_user.role == 'Admin' else EquipmentMetric.query.filter_by(franchise_id=current_user.franchise_id).all()
     return render_template('staff_edit_schedule.html', action="Create", members=members, units=units)
 
+@staff_bp.route('/api/marathon-stats')
+@login_required
+@role_required(['Admin', 'Staff', 'Franchisee'])
+def marathon_stats_api():
+    """Simulates real-time marathon session metrics (v7.7.0)"""
+    import random
+
+    # Mock dynamic metrics
+    mets = round(random.uniform(7.5, 9.5), 1)
+    sps = round(random.uniform(2.8, 4.5), 1)
+    fatigue = random.randint(5, 25)
+    hydration_alert = random.choice([True, False, False, False])
+
+    # Progress simulation based on minute of hour
+    now = datetime.now()
+    progress = (now.minute % 60) / 60.0 * 100
+
+    return {
+        "mets": mets,
+        "sps": sps,
+        "fatigue": fatigue,
+        "hydration_alert": hydration_alert,
+        "progress_pct": round(progress, 0),
+        "session_duration": f"{now.minute}m"
+    }
+
 @staff_bp.route('/schedule/edit/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
 @role_required(['Admin', 'Staff'])
