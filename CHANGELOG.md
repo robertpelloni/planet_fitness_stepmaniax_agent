@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.8.0] - 2026-06-02
+### Architectural Hardening & Manufacturer Outreach Launch
+- **SQLAlchemy Refactor:** Migrated `health_monitor.py` and `report_generator.py` to use SQLAlchemy ORM exclusively, eliminating raw SQLite concurrency risks.
+- **Security Hardening:** Removed insecure password reset link flashing in `blueprints/auth.py`; links are now only recorded in secure audit logs.
+- **Manufacturer Outreach:** Drafted formal engagement letters for Step Revolution, Konami, and Andamiro in `outreach/manufacturer_letters.md`.
+- **Safety Validator:** Enhanced `autoarrow_proto.py` with a Leg-Safety & Flow validator to prevent repetitive step exhaustion.
+- **Marathon Monitoring:** Launched the 'Marathon Session Monitor' API and UI partial with real-time HTMX polling.
+
 ## [7.5.0] - 2026-06-02
 ### Multi-Difficulty Engine & Marathon Mode ROI Integration
 - **Multi-Difficulty Support:** Extended `autoarrow_proto.py` to support Beginner, Easy, Medium, Hard, and Challenge levels.

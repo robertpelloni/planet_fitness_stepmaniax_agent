@@ -40,12 +40,13 @@
 14. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
 15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
 
-## Strategic Initiative: Marathon Content (v7.0.0)
+## Strategic Initiative: Marathon Content (v7.8.0)
 - [x] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro. (Documented in `outreach/manufacturer_contacts.md`)
 - [x] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture). (Documented in `technical_docs/autoarrow_ml_specs.md`)
 - [x] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training. (Documented in `technical_docs/marathon_content_inventory.md`)
 - [x] Research and document 'Flow-State Analytics' for marathon rhythmic cardio. (Documented in `technical_docs/flow_state_analytics.md`)
 - [x] Draft a script and storyboard for the 'Proof of Concept' demonstration video. (Documented in `outreach/poc_video_script.md`)
 - [x] Implement 'AutoArrow ML Prototype' scaffolding (onset analysis). (See `autoarrow_proto.py`)
+- [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
+- [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
 - [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
-- [ ] Implement Phase 1 ML Prototype: 15-minute chart generation for a single track.
