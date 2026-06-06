@@ -1,0 +1,1 @@
+['id', 'username', 'password_hash', 'role', 'franchise_id', 'last_login', 'failed_login_attempts', 'is_locked', 'perm_crm_view', 'perm_crm_edit', 'perm_ops_view', 'perm_revenue_view', 'perm_admin_access', 'mfa_secret', 'mfa_enabled']

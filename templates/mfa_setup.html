@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}MFA Setup - StepManiaX B2B{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 p-8 text-center text-white">
+            <h2 class="text-2xl font-bold italic uppercase tracking-widest">Secure Your Account</h2>
+            <p class="text-slate-400 text-sm mt-2 font-medium">Step-by-step Multi-Factor Authentication setup</p>
+        </div>
+
+        <div class="p-8 space-y-8">
+            <div class="space-y-4">
+                <h3 class="font-black text-slate-800 uppercase tracking-tight">1. Install an Authenticator App</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Download and install an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator on your mobile device.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="font-black text-slate-800 uppercase tracking-tight">2. Scan this QR Code</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Open your authenticator app and scan the QR code below to link your StepManiaX B2B account.
+                </p>
+                <div class="flex justify-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <img src="{{ url_for('auth.mfa_qr') }}" alt="MFA QR Code" class="w-48 h-48">
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Or enter this code manually</p>
+                    <code class="bg-slate-100 px-4 py-2 rounded-lg font-mono text-sm text-slate-700">{{ secret }}</code>
+                </div>
+            </div>
+
+            <div class="space-y-4 pt-8 border-t border-slate-100">
+                <h3 class="font-black text-slate-800 uppercase tracking-tight">3. Verify & Enable</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Enter the 6-digit code from your app to complete the setup.
+                </p>
+                <form action="{{ url_for('auth.mfa_verify') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="text" name="token" required
+                        class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center text-xl font-bold tracking-widest"
+                        placeholder="000 000">
+                    <button type="submit" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg uppercase tracking-widest text-sm">
+                        Verify & Enable MFA
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
