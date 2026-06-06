@@ -38,6 +38,48 @@
             </div>
         </div>
 
+        <!-- Workout Plan Goal (v5.4.0) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-red-500"></i>
+                Active Goal
+            </h3>
+            {% if member.workout_plan %}
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-2">
+                        <span class="text-slate-500 uppercase tracking-widest">Scan Target</span>
+                        <span class="text-slate-900">{{ member.points }} / {{ member.workout_plan.target_scans }}</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        {% set scan_prog = (member.points / member.workout_plan.target_scans * 100)|round|int %}
+                        <div class="bg-blue-500 h-full transition-all" style="width: {{ [scan_prog, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-2">
+                        <span class="text-slate-500 uppercase tracking-widest">Duration Goal</span>
+                        <span class="text-slate-900">{{ member.total_duration|default(0) }} / {{ member.workout_plan.target_duration }}m</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                         {% set dur_prog = ((member.total_duration|default(0) / member.workout_plan.target_duration) * 100)|round|int %}
+                        <div class="bg-green-500 h-full transition-all" style="width: {{ [dur_prog, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <p class="text-xs font-medium text-blue-800 leading-relaxed">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        Complete your scans to hit your weekly target and earn bonus points.
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="text-slate-400 text-sm italic">No active workout plan assigned. Visit the front desk to start a challenge!</p>
+            </div>
+            {% endif %}
+        </div>
+
         <div class="bg-slate-900 rounded-2xl p-8 text-white shadow-xl">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-bolt text-yellow-400"></i>
@@ -74,6 +116,40 @@
             </h3>
             <div class="h-64">
                 <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Workout History (v4.7.0) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Recent Workout History</h3>
+                <i class="fa-solid fa-person-running text-slate-400"></i>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                            <th class="px-6 py-4">Date/Time</th>
+                            <th class="px-6 py-4">Unit</th>
+                            <th class="px-6 py-4">Scans</th>
+                            <th class="px-6 py-4">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for workout in workout_history %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-700">{{ workout.timestamp }}</td>
+                            <td class="px-6 py-4 text-xs">{{ workout.equipment }}</td>
+                            <td class="px-6 py-4 text-xs font-black text-blue-600">{{ workout.scans }}</td>
+                            <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ workout.duration }} min</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 italic text-sm">No workouts recorded yet. Get moving!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 

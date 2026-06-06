@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="bg-gray-800 shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-white">{{ action }} Lead</h3>
+            <form action="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) if action == 'Edit' else url_for('admin.admin_lead_create') }}" method="POST" class="mt-5 space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div>
+                    <label for="company" class="block text-sm font-medium text-gray-400">Company Name</label>
+                    <input type="text" name="company" id="company" value="{{ lead.company if lead else '' }}" required
+                           class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="contact_name" class="block text-sm font-medium text-gray-400">Contact Name</label>
+                        <input type="text" name="contact_name" id="contact_name" value="{{ lead.contact_name if lead else '' }}"
+                               class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-400">Title</label>
+                        <input type="text" name="title" id="title" value="{{ lead.title if lead else '' }}"
+                               class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-400">Email</label>
+                    <input type="email" name="email" id="email" value="{{ lead.email if lead else '' }}"
+                           class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="region" class="block text-sm font-medium text-gray-400">Region</label>
+                    <input type="text" name="region" id="region" value="{{ lead.region if lead else '' }}"
+                           class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-400">Status</label>
+                        <select name="status" id="status" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            {% for s in ['New', 'Identified', 'Ready for Outreach', 'Outreach Active', 'Discovery Call', 'Pilot Placement', 'Contracted', 'Onboarded', 'Closed'] %}
+                            <option value="{{ s }}" {% if lead and lead.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="priority" class="block text-sm font-medium text-gray-400">Priority</label>
+                        <select name="priority" id="priority" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            {% for p in ['Low', 'Medium', 'High', 'Critical'] %}
+                            <option value="{{ p }}" {% if lead and lead.priority == p %}selected{% endif %}>{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="num_clubs" class="block text-sm font-medium text-gray-400">Num Clubs</label>
+                        <input type="number" name="num_clubs" id="num_clubs" value="{{ lead.num_clubs if lead else 0 }}"
+                               class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-400">Notes</label>
+                    <textarea name="notes" id="notes" rows="3"
+                              class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm">{{ lead.notes if lead else '' }}</textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <a href="{{ url_for('admin.admin_leads') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded shadow">Cancel</a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
+                        {{ action }} Lead
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

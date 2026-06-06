@@ -2,6 +2,173 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.0.0] - 2026-06-02
+### Total Protocol Integration & Architectural Finalization
+- **Total ORM Integration:** Completed the migration of all operational scripts (`cadence_trigger.py`, `report_generator.py`, `health_monitor.py`) to SQLAlchemy ORM, ensuring thread-safe database access.
+- **Protocol Formalization:** Integrated the Autonomous Development & Governance Protocol into the core operational workflow.
+- **Critical Fixes:** Resolved zero-division vulnerability in analytics and strictly enforced environment-based session security in production.
+- **Final Validation:** Achieved 100% stability across the entire 17-test regression suite, including Playwright UI tests.
+
+## [7.8.0] - 2026-06-02
+### Architectural Hardening & Manufacturer Outreach Launch
+- **SQLAlchemy Refactor:** Migrated `health_monitor.py` and `report_generator.py` to use SQLAlchemy ORM exclusively, eliminating raw SQLite concurrency risks.
+- **Security Hardening:** Removed insecure password reset link flashing in `blueprints/auth.py`; links are now only recorded in secure audit logs.
+- **Manufacturer Outreach:** Drafted formal engagement letters for Step Revolution, Konami, and Andamiro in `outreach/manufacturer_letters.md`.
+- **Safety Validator:** Enhanced `autoarrow_proto.py` with a Leg-Safety & Flow validator to prevent repetitive step exhaustion.
+- **Marathon Monitoring:** Launched the 'Marathon Session Monitor' API and UI partial with real-time HTMX polling.
+
+## [7.5.0] - 2026-06-02
+### Multi-Difficulty Engine & Marathon Mode ROI Integration
+- **Multi-Difficulty Support:** Extended `autoarrow_proto.py` to support Beginner, Easy, Medium, Hard, and Challenge levels.
+- **Dynamic Quantization:** Implemented difficulty-specific rhythmic resolution (4th/8th/16th notes).
+- **ROI Simulator Integration:** Added 'Marathon Mode' toggle to the Prospect Portal with synergistic retention logic (+23% profit lift).
+
+## [7.4.0] - 2026-06-02
+### Metabolic Pacing & SSC Quantization Engine
+- **Quantization Engine:** Implemented 16th-note snapping in `autoarrow_proto.py` for precise rhythmic alignment.
+- **Metabolic Pacing:** Integrated stochastic note density control based on an intensity parameter.
+- **Fatigue Curve:** Added logic to gradually reduce note density over long-form cardio durations to simulate metabolic drift.
+
+## [7.3.0] - 2026-06-01
+### Marathon Content Engine & Session Consolidation
+- **SSC Generation:** Enhanced `autoarrow_proto.py` to output structurally valid StepManiaX (.ssc) chart files.
+- **Handoff Documentation:** Consolidated all v6.x and v7.x progress in `HANDOFF.md`.
+- **Dependency Hardening:** Corrected and locked stable versions for the audio processing stack in `requirements.txt`.
+
+## [7.2.0] - 2026-06-01
+### Flow-State Analytics & ML Prototype Scaffolding
+- **Flow-State Research:** Released `technical_docs/flow_state_analytics.md` covering the psychological and metabolic benefits of long-form rhythmic cardio.
+- **Demonstration Script:** Drafted the POC video storyboard in `outreach/poc_video_script.md`.
+- **DSP Scaffolding:** Implemented initial onset analysis and beat tracking in `autoarrow_proto.py`.
+
+## [7.1.0] - 2026-06-01
+### Technical Deep-Dive - AutoArrow ML & Manufacturer Research
+- **Manufacturer Research:** Documented key contacts and strategies for Step Revolution, Konami, and Andamiro in `outreach/manufacturer_contacts.md`.
+- **Technical Specs:** Released AutoArrow ML Engine Specification v1.0.0 in `technical_docs/autoarrow_ml_specs.md`.
+- **Content Inventory:** Compiled `technical_docs/marathon_content_inventory.md` for ML training.
+
+## [7.0.0] - 2026-06-01
+### Strategic Content Initiative - Psytrance Marathon & AutoArrow ML
+- **Strategic Pivot:** Expanded the project vision to include influencing industry leaders for long-form marathon content.
+- **Manufacturer Pitch:** Created `outreach/manufacturer_marathon_pitch.md` for targeted manufacturer engagement.
+
+## [6.9.0] - 2026-06-01
+### Repository Refresh & Feature Consolidation
+- **Dual-Direction Merge:** Successfully reconciled `main` with all active feature branches (`feat/enterprise-sync`, `feat/lead-research`).
+- **Synchronized Architecture:** Verified total system alignment following the v6.8.0 engagement intelligence launch.
+- **Protocol Adherence:** Completed the Executive Protocol for repository synchronization and intelligent merge.
+
+## [6.8.0] - 2026-06-01
+### Engagement Intelligence & Portal Lead Capture
+- **Lead Capture Form:** Implemented a 'Request Pilot Demo' form on the Prospect Portal with HTMX-powered submission.
+- **Discovery Status Integration:** Submission of the demo form automatically transitions lead status to 'Discovery Call Scheduled' and logs contact details to Lead Notes.
+- **Engagement Visualization:** Added an "Engagement" column to the Lead Management UI displaying Portal Views and Propensity Scores.
+- **Real-time Indicators:** Implemented CSS pulsing animations for high-engagement leads (>80 propensity or active views).
+- **Campaign Pulse Widget:** Launched an outreach volume visualization widget in the Global Command Center.
+- **System Hygiene:** Cleaned up internal log rotation files and generated markdown assets from Git tracking.
+
+## [6.7.0] - 2026-06-01
+### Sales Pipeline & Conversion Flow
+- **Pipeline Kanban:** Implemented a visual, stage-based Sales Pipeline at `/admin/pipeline`.
+- **Proposal Generator:** Added automated commercial proposal generation based on pilot performance data.
+- **Lead Conversion:** Launched the Lead-to-Franchisee conversion flow, auto-provisioning secure user accounts for successful leads.
+- **UI Expansion:** Integrated Proposal and Convert actions into the primary Lead Management dashboard.
+
+## [6.6.1] - 2026-06-01
+### Repository Consolidation & Synchronization
+- **Intelligent Merge:** Successfully consolidated legacy feature branches (`feat/enterprise-sync`, `feat/lead-research`) into the `main` branch.
+- **Repository Sync:** Established 100% synchronization between local and remote `main` branch.
+- **Protocol Adherence:** Verified all structural documentation and execution scripts following the repository refresh.
+
+## [6.6.0] - 2026-06-01
+### Outreach Orchestration & Manual Controls
+- **Background Orchestration:** Integrated `launch_outreach()` into `health_monitor.py` for fully autonomous cadence processing every minute.
+- **Manual Dispatch UI:** Added "Dispatch" buttons to the Leads dashboard to trigger initial or follow-up outreach tiers immediately.
+- **Quick-Status Transitions:** Implemented a status dropdown in the Leads table with HTMX-powered updates and audit logging.
+- **Circular Import Resolution:** Optimized blueprint and background task imports to maintain architectural stability during expansion.
+- **Database Safety:** Refined background task execution order to mitigate SQLite 'database is locked' errors during concurrent SQLAlchemy and raw SQL access.
+
+## [6.5.0] - 2026-05-31
+### High-Intent Lead Intelligence
+- **Interactive ROI Simulator:** Launched a real-time portfolio lift calculator on the Prospect Portal with club-count and retention sliders.
+- **Intent Tracking:** Integrated a secure tracking endpoint to log simulator interactions as "High Intent" signals.
+- **Dynamic Propensity Scoring:** Updated `analytics.py` to award a +30 point boost to leads interacting with the simulator, prioritizing them for immediate follow-up.
+- **Architectural Cleanup:** Refactored CSRF protection into `extensions.py` to support cross-blueprint namespaced exemptions.
+
+## [6.4.0] - 2026-05-31
+### Automated Outreach Cadence
+- **Multi-tier Follow-up Engine:** Implemented automated Day 3, 7, and 14 follow-up tiers in `launch_outreach.py` with timing and tier-selection logic.
+- **Cadence Dashboard:** Enhanced the Admin Leads interface with real-time cadence tracking and HTMX controls for pausing, resuming, and resetting outreach states.
+- **Model Enhancement:** Added `cadence_paused` field to the `Lead` model to allow granular control over automated sequences.
+- **Integration Testing:** Launched `tests/integration/test_cadence.py` verifying automated tier progression and timing logic.
+
+## [6.3.0] - 2026-05-31
+### Internationalization & Pilot Analytics
+- **Real-time Translation:** Integrated `googletrans` into the outreach engine to support automated localization for Mexico (Spanish) and Canada (French) regions.
+- **Pilot Success Dashboard:** Launched `/admin/pilot-success` providing real-time ROI tracking against franchise-specific MOU targets.
+- **Geolocation Seeding:** Updated `populate_test_data.py` with regional coordinates (Detroit, Chicago, London, Toronto) to support spatial visualization.
+- **Verification Suite:** Finalized `validate_system.sh` ensuring 100% pass rate across 13 integration and UI tests.
+
+## [6.2.0] - 2026-05-31
+### Enterprise Security & Reporting Refinement
+- **IP-based Access Lists:** Implemented IP filtering for Enterprise APIs. Administrators can now restrict API access to specific whitelisted IPs per user.
+- **Reporting Persistence:** Refined the weekly summary trigger in `health_monitor.py` to prevent duplicate report generation using `AutomationHeartbeat` tracking.
+- **Security Hardening:** Updated `require_api_or_role` and `require_api_key` decorators to enforce IP validation.
+
+## [6.1.0] - 2026-05-31
+### Automated Performance Reporting
+- **Weekly Pilot Summaries:** Launched background engine in `health_monitor.py` to aggregate and generate weekly ROI reports for all active pilot franchises.
+- **Enhanced Reporting Engine:** Added `generate_weekly_summary` to `report_generator.py` with cross-table metric aggregation.
+- **Reporting Infrastructure:** Created `weekly-pilot-summary-template.md` and dedicated report output directories.
+
+## [6.0.0] - 2026-05-31
+### Advanced Analytics & Global Expansion
+- **Regional Heatmap:** Integrated Leaflet.js into the Admin Command Center for global fleet and lead visualization.
+- **Geolocation API:** Launched `/api/v1/analytics/geo` to serve spatial data for units and prospects.
+- **Spatial Schema:** Added `latitude` and `longitude` support to Lead and Equipment models.
+- **UI Hardening:** Resolved structural template errors and implemented output escaping for system logs.
+
+## [5.9.1] - 2026-05-31
+### Multi-Region Scalability & Outreach Optimization
+- **Multi-Region Support:** Implemented granular data filtering by `region_cluster` across all Admin and Staff dashboards.
+- **UI Consolidation:** Launched a reusable `region_selector.html` partial for consistent fleet management.
+- **Optimized Outreach:** Enhanced `launch_outreach.py` with ML-simulation for lead prioritization and sentiment-aware regional messaging.
+- **Architectural Cleanup:** Centralized `log_security_event` in `extensions.py` and stabilized development session keys in `app.py`.
+- **Scraper Hardening:** Fully restored Playwright-based lead scraping heuristics in `scrape_leads.py`.
+- **Governance Compliance:** Fixed `.gitignore` and documentation standards to align with the Principal Directive.
+
+## [5.8.1] - 2026-05-31
+- **UI Test Infrastructure:** Integrated `pytest-playwright` and added a visual verification suite (`tests/integration/test_ui.py`) for Admin and Staff portals.
+- **Database Alignment:** Fixed `populate_test_data.py` to include mandatory tables (`audit_log`, `outreach_logs`, `service_dispatch`) required for production-ready state.
+- **Routing Namespacing:** Synchronized UI tests with the namespaced blueprint routing architecture.
+- **Verification Completion:** Achieved 100% pass rate across backend (11) and frontend (2) integration test suites.
+
+## [5.8.0]
+- **Governance Protocol Initialization:** Formally documented the Autonomous Development & Governance Protocol in `GOVERNANCE.md`.
+- **System Consolidation:** Successfully merged all v5.7.0 features into the `main` branch.
+
+## [5.7.0]
+- **Lead Management Refactor:** Migrated legacy flat-file lead data into SQLite and launched a full CRUD Admin interface.
+- **Enhanced Scraper:** Updated `scrape_leads.py` with targeted heuristics for major franchise groups and Playwright support.
+- **Automated Outreach Engine:** Launched `launch_outreach.py` for automated personalized message generation and stage tracking.
+
+## [5.6.0]
+- **Automated Service Dispatch:** Integrated a work order management system that automatically triggers service dispatches for offline equipment.
+- **Maintenance UI:** Added an "Active Work Orders" module to the Global Command Center and "Dispatch" buttons to critical alert cards.
+- **Service API:** Launched `/api/v1/dispatches` endpoint for programmatic ticket management.
+- **Log Rotation:** Implemented `RotatingFileHandler` across all core background services and the main application server.
+
+## [5.5.0]
+- **Multi-Region Cluster Support:** Implemented `region_cluster` filtering across Admin and Staff dashboards to support international expansion.
+- **Enhanced Background Logging:** Integrated `RotatingFileHandler` into `health_monitor.py` and `backup_job.py`.
+
+## [5.4.1]
+- **Repository Consolidation:** Successfully merged `feat/lead-research-v0.4.0` containing advanced hardware integration, MFA, and enterprise API features.
+- **Security Hardening:** Integrated TOTP-based Multi-Factor Authentication and secure session cookie policies.
+- **Hardware Integration:** Added support for Biometric and NFC-based member check-ins via telemetry endpoints.
+- **Enterprise Capabilities:** Launched secure REST endpoints for BI export and lead synchronization.
+- **Maintenance Automation:** Implemented log rotation and enhanced backup verification suites.
+
 ## [0.7.0]
 - **Discovery Infrastructure:** Developed `discovery-call-script.md` and `pilot-faq.md` for structured decision-maker engagement.
 - **Commercial Framework:** Created `commercial-proposal-template.md` and `pilot-performance-report.md` to bridge pilot success with regional procurement contracts.

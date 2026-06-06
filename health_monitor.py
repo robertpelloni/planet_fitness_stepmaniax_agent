@@ -1,123 +1,159 @@
-import sqlite3
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta
 import analytics
 from notifications import send_notification
-from app import app, db # Need context for SQLAlchemy models if we use them, or just raw SQL
+from app import app, db
+from models import EquipmentMetric, Alert, AutomationHeartbeat, ServiceDispatch, Lead
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crm.db')
+# --- Log Rotation Setup ---
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+logger = logging.getLogger('health_monitor')
+handler = RotatingFileHandler('logs/health_monitor.log', maxBytes=10240, backupCount=10)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def monitor_health():
     """
     Scans equipment metrics and generates alerts for operational anomalies.
+    Refactored to use SQLAlchemy ORM (v7.7.0) to prevent SQLite concurrency issues.
     """
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Health Monitor...")
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    with app.app_context():
+        logger.info("Starting Health Monitor...")
 
-    # 1. Fetch all metrics
-    cursor.execute("SELECT * FROM equipment_metric")
-    units = cursor.fetchall()
+        # Lead Cadence Processing (v6.6.0 Orchestration)
+        from launch_outreach import launch_outreach
+        try:
+            launch_outreach()
+        except Exception as e:
+            logger.error(f"Error in launch_outreach() during health monitor cycle: {e}")
 
-    for unit in units:
-        # A. Uptime check (Warning for < 98%)
-        if unit['uptime_percent'] < 98.0 and unit['uptime_percent'] >= 95.0:
-            generate_alert(cursor, "Warning", f"Degraded performance on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
+        # 1. Fetch all metrics
+        units = EquipmentMetric.query.all()
 
-        # B. Uptime check (Critical for < 95%) - already handled in app.py but good to have here too
-        elif unit['uptime_percent'] < 95.0:
-            generate_alert(cursor, "Critical", f"Low Uptime detected on {unit['equipment_name']} at {unit['location']}: {unit['uptime_percent']}%", unit['id'])
+        for unit in units:
+            # A. Uptime check (Warning for < 98%)
+            if unit.uptime_percent < 98.0 and unit.uptime_percent >= 95.0:
+                generate_alert("Warning", f"Degraded performance on {unit.equipment_name} at {unit.location}: {unit.uptime_percent}%", unit.id)
 
-        # C. Session variance check (Warning if avg session is < 5 mins - potentially user frustration)
-        if unit['total_scans'] > 10 and unit['avg_session_duration'] < 5.0:
-             generate_alert(cursor, "Warning", f"Short session duration anomaly on {unit['equipment_name']} at {unit['location']}: {unit['avg_session_duration']}m avg.", unit['id'])
+            # B. Uptime check (Critical for < 95%)
+            elif unit.uptime_percent < 95.0:
+                generate_alert("Critical", f"Low Uptime detected on {unit.equipment_name} at {unit.location}: {unit.uptime_percent}%", unit.id)
 
-        # D. Heartbeat / Offline Check (Critical if no heartbeat > 10 mins)
-        if unit['last_heartbeat']:
-            last_hb = datetime.strptime(unit['last_heartbeat'], "%Y-%m-%d %H:%M:%S")
-            diff = (datetime.now() - last_hb).total_seconds()
-            if diff > 600: # 10 minutes
-                generate_alert(cursor, "Critical", f"UNIT OFFLINE: {unit['equipment_name']} at {unit['location']} has not reported a heartbeat for > 10 minutes.", unit['id'])
-        else:
-            generate_alert(cursor, "Warning", f"Heartbeat Missing: {unit['equipment_name']} at {unit['location']} has never reported a heartbeat.", unit['id'])
+            # C. Session variance check (Warning if avg session is < 5 mins)
+            if unit.total_scans > 10 and unit.avg_session_duration < 5.0:
+                 generate_alert("Warning", f"Short session duration anomaly on {unit.equipment_name} at {unit.location}: {unit.avg_session_duration}m avg.", unit.id)
 
-        # E. Predictive Health Calculation (v3.7.0)
-        unit_data = dict(unit)
-        score = analytics.calculate_predictive_health_score(unit_data)
-        cursor.execute("UPDATE equipment_metric SET predictive_health_score = ? WHERE id = ?", (score, unit['id']))
+            # D. Heartbeat / Offline Check (Critical if no heartbeat > 10 mins)
+            if unit.last_heartbeat:
+                last_hb = datetime.strptime(unit.last_heartbeat, "%Y-%m-%d %H:%M:%S")
+                diff = (datetime.now() - last_hb).total_seconds()
+                if diff > 600: # 10 minutes
+                    generate_alert("Critical", f"UNIT OFFLINE: {unit.equipment_name} at {unit.location} has not reported a heartbeat for > 10 minutes.", unit.id)
+            else:
+                generate_alert("Warning", f"Heartbeat Missing: {unit.equipment_name} at {unit.location} has never reported a heartbeat.", unit.id)
 
-    # 2. Lead Cadence Processing (v3.9.0)
-    process_cadence(cursor)
+            # E. Predictive Health Calculation (v3.7.0)
+            # Create a dict from the unit object for analytics logic
+            unit_data = {
+                'total_sessions': unit.total_sessions,
+                'uptime_percent': unit.uptime_percent,
+                'total_scans': unit.total_scans,
+                'avg_session_duration': unit.avg_session_duration
+            }
+            unit.predictive_health_score = analytics.calculate_predictive_health_score(unit_data)
 
-    # 3. Database Backup (v4.4.0)
-    from backup_job import run_backup
-    run_backup()
+        # Weekly Pilot Summary Generation (v6.2.0)
+        now = datetime.now()
+        if now.weekday() == 6 and now.hour == 23:
+            week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
 
-    # 4. Automation Heartbeat (v3.9.0)
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute("""
-        INSERT INTO automation_heartbeat (task_name, last_run, status)
-        VALUES ('Health Monitor', ?, 'Healthy')
-        ON CONFLICT(task_name) DO UPDATE SET last_run=excluded.last_run, status='Healthy'
-    """, (timestamp,))
+            heartbeat = AutomationHeartbeat.query.filter_by(task_name='Weekly Summary Trigger').first()
 
-    conn.commit()
-    conn.close()
-    print("Health Monitor check complete.")
+            if not heartbeat or heartbeat.last_run[:10] < week_start:
+                logger.info(f"Executing Weekly Pilot Summary generation for week starting {week_start}...")
+                active_pilots = Lead.query.filter(Lead.status.contains('Pilot')).all()
+                from report_generator import generate_weekly_summary
+                for pilot in active_pilots:
+                    generate_weekly_summary(pilot.id)
 
-def generate_alert(cursor, severity, message, equipment_id):
+                if not heartbeat:
+                    heartbeat = AutomationHeartbeat(task_name='Weekly Summary Trigger')
+                    db.session.add(heartbeat)
+
+                heartbeat.last_run = now.strftime("%Y-%m-%d %H:%M:%S")
+                heartbeat.status = 'Healthy'
+
+        # 3. Database Backup (v4.4.0)
+        from backup_job import run_backup
+        run_backup()
+
+        # 4. Automation Heartbeat (v3.9.0)
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+        monitor_hb = AutomationHeartbeat.query.filter_by(task_name='Health Monitor').first()
+        if not monitor_hb:
+            monitor_hb = AutomationHeartbeat(task_name='Health Monitor')
+            db.session.add(monitor_hb)
+        monitor_hb.last_run = timestamp
+        monitor_hb.status = 'Healthy'
+
+        db.session.commit()
+        logger.info("Health Monitor check complete.")
+
+def generate_alert(severity, message, equipment_id):
     """
     Inserts an alert if it doesn't already exist and is unresolved.
     """
-    # Check for existing unresolved alert with same message
-    cursor.execute("SELECT id FROM alert WHERE message = ? AND is_resolved = 0", (message,))
-    if cursor.fetchone():
+    existing = Alert.query.filter_by(message=message, is_resolved=False).first()
+    if existing:
         return
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-    cursor.execute("INSERT INTO alert (severity, message, timestamp, is_resolved, equipment_id) VALUES (?, ?, ?, 0, ?)",
-                   (severity, message, timestamp, equipment_id))
-    print(f"Alert Generated: [{severity}] {message}")
+    new_alert = Alert(
+        severity=severity,
+        message=message,
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        is_resolved=False,
+        equipment_id=equipment_id
+    )
+    db.session.add(new_alert)
+    logger.warning(f"Alert Generated: [{severity}] {message}")
+
+    # Automated Service Dispatch (v5.6.0)
+    if severity == "Critical" and "OFFLINE" in message:
+        import secrets
+        ticket_id = f"AUTO-SRV-{secrets.token_hex(4).upper()}"
+        new_dispatch = ServiceDispatch(
+            ticket_id=ticket_id,
+            equipment_id=equipment_id,
+            provider='AutoDispatch-v7.7',
+            notes='Heartbeat failure detected by SQLAlchemy monitor',
+            status='Pending',
+            created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        db.session.add(new_dispatch)
+        unit = EquipmentMetric.query.get(equipment_id)
+        if unit:
+            unit.maintenance_status = 'Service Dispatched'
+        logger.info(f"Automated Dispatch Triggered: {ticket_id} for Unit {equipment_id}")
 
     # Send Notification (Franchise filtering)
-    cursor.execute("SELECT location FROM equipment_metric WHERE id = ?", (equipment_id,))
-    loc = cursor.fetchone()[0]
-    cursor.execute("SELECT id FROM leads WHERE ? LIKE '%' || company || '%'", (loc,))
-    lead = cursor.fetchone()
-    fid = lead[0] if lead else None
-
-    emoji = "⚠️" if severity == "Warning" else "🚨"
-    with app.app_context():
+    unit = EquipmentMetric.query.get(equipment_id)
+    if unit:
+        lead = Lead.query.filter(Lead.company.contains(unit.location)).first()
+        fid = lead.id if lead else None
+        emoji = "⚠️" if severity == "Warning" else "🚨"
         send_notification(f"{emoji} [{severity}] {message}", franchise_id=fid)
-
-def process_cadence(cursor):
-    """
-    Identifies leads due for follow-up and notifies the admin.
-    """
-    threshold_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-    query = """
-    SELECT id, company, follow_up_count FROM leads
-    WHERE status = 'Outreach Active' AND last_contact_date < ?
-    """
-    cursor.execute(query, (threshold_date,))
-    due_leads = cursor.fetchall()
-
-    for lead in due_leads:
-        msg = f"🔔 FOLLOW-UP DUE: {lead['company']} is ready for Cadence Touch #{lead['follow_up_count'] + 1}."
-        print(msg)
-        with app.app_context():
-            send_notification(msg)
 
 import time
 
 if __name__ == "__main__":
-    # In production, this script runs in a continuous loop via systemd
     while True:
         try:
             monitor_health()
         except Exception as e:
-            print(f"Health Monitor encountered an error: {e}")
-
-        # Check every 60 seconds
+            logger.error(f"Health Monitor encountered an error: {e}")
         time.sleep(60)

@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user
-from models import db, User, EquipmentMetric, Alert, Member, TelemetryHistory, AutomationHeartbeat, Payment, Lead
+from models import db, User, EquipmentMetric, Alert, Member, TelemetryHistory, AutomationHeartbeat, Payment, Lead, MemberSchedule
 from blueprints.decorators import role_required
 from datetime import datetime
+import analytics
 
 staff_bp = Blueprint('staff', __name__)
 
@@ -12,24 +13,39 @@ staff_bp = Blueprint('staff', __name__)
 def staff_dashboard():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        metrics = EquipmentMetric.query.all()
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
-        from models import MemberSchedule
-        schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
+        query_metrics = EquipmentMetric.query
+        if region:
+            query_metrics = query_metrics.filter_by(region_cluster=region)
+        metrics = query_metrics.all()
+        metric_ids = [m.id for m in metrics]
+
+        if region:
+            alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+        else:
+            alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
+            schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
-        from models import MemberSchedule
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
+
+    for m in metrics:
+        m.utilization_score = analytics.calculate_capacity_utilization(m.total_sessions, m.uptime_percent) if hasattr(analytics, 'calculate_capacity_utilization') else 0
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
 
     return render_template('staff_dashboard.html',
                            metrics=metrics,
                            alerts=alerts,
                            schedules=schedules,
-                           franchise_name=current_user.franchise_id or "Global Admin")
+                           franchise_name=current_user.franchise_id or "Global Admin",
+                           all_regions=all_regions,
+                           current_region=region)
 
 @staff_bp.route('/operations')
 @login_required
@@ -37,35 +53,46 @@ def staff_dashboard():
 def facility_operations():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        metrics = EquipmentMetric.query.all()
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+        query_metrics = EquipmentMetric.query
+        if region:
+            query_metrics = query_metrics.filter_by(region_cluster=region)
+        metrics = query_metrics.all()
+        metric_ids = [m.id for m in metrics]
+
         today = datetime.now().strftime("%Y-%m-%d")
-        from models import MemberSchedule
-        schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+        if region:
+            alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(20).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids), MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
+        else:
+            alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+            schedules = MemberSchedule.query.filter(MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [m.id for m in metrics]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(20).all()
         today = datetime.now().strftime("%Y-%m-%d")
-        from models import MemberSchedule
         schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids), MemberSchedule.start_time.contains(today)).order_by(MemberSchedule.start_time.asc()).all()
 
-    # Determine online status (heartbeat within last 5 minutes)
     for m in metrics:
         if m.last_heartbeat:
             last_hb = datetime.strptime(m.last_heartbeat, "%Y-%m-%d %H:%M:%S")
             diff = (datetime.now() - last_hb).total_seconds()
-            m.is_online = diff < 300 # 5 minutes
+            m.is_online = diff < 300
         else:
             m.is_online = False
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
 
     return render_template('facility_ops.html',
                            metrics=metrics,
                            alerts=alerts,
                            schedules=schedules,
-                           franchise_name=current_user.franchise_id or "Global Admin")
+                           franchise_name=current_user.franchise_id or "Global Admin",
+                           all_regions=all_regions,
+                           current_region=region)
 
 @staff_bp.route('/members')
 @login_required
@@ -73,13 +100,21 @@ def facility_operations():
 def staff_members():
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
 
     if is_admin:
-        members = Member.query.all()
+        query = Member.query
+        if region:
+            query = query.filter(Member.franchise_id.in_(
+                db.session.query(Lead.id).filter_by(region_cluster=region)
+            ))
+        members = query.all()
     else:
         members = Member.query.filter_by(franchise_id=franchise_id).all()
 
-    return render_template('staff_members.html', members=members)
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]] if is_admin else []
+
+    return render_template('staff_members.html', members=members, all_regions=all_regions, current_region=region)
 
 @staff_bp.route('/members/update/<int:member_id>', methods=['POST'])
 @login_required
@@ -88,7 +123,6 @@ def staff_update_member_status(member_id):
     member = Member.query.get_or_404(member_id)
     new_status = request.form.get('status')
 
-    # Check multi-tenant permission
     if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
         abort(403)
 
@@ -97,66 +131,70 @@ def staff_update_member_status(member_id):
     flash(f"Status updated for member {member.name}")
     return redirect(url_for('staff.staff_members'))
 
+@staff_bp.route('/members/assign-plan/<int:member_id>', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def staff_assign_plan(member_id):
+    member = Member.query.get_or_404(member_id)
+    if current_user.role != 'Admin' and member.franchise_id != current_user.franchise_id:
+        abort(403)
+
+    from models import WorkoutPlan
+    plan_name = request.form.get('name')
+    target_scans = int(request.form.get('target_scans'))
+    target_duration = int(request.form.get('target_duration'))
+
+    # If member already has a plan, update it, otherwise create new
+    if member.workout_plan:
+        member.workout_plan.name = plan_name
+        member.workout_plan.target_scans = target_scans
+        member.workout_plan.target_duration = target_duration
+    else:
+        new_plan = WorkoutPlan(
+            member_id=member.id,
+            name=plan_name,
+            target_scans=target_scans,
+            target_duration=target_duration
+        )
+        db.session.add(new_plan)
+
+    db.session.commit()
+    flash(f"Workout plan assigned to {member.name}")
+    return redirect(url_for('staff.staff_members'))
+
 @staff_bp.route('/manager/dashboard')
 @login_required
 @role_required(['Admin', 'Franchisee'])
 def manager_dashboard():
-    """Manager-specific intelligence dashboard (v3.9.0)"""
     franchise_id = current_user.franchise_id
     is_admin = (current_user.role == 'Admin')
 
-    # 1. Equipment Stability & Health
     if is_admin:
         units = EquipmentMetric.query.all()
-    else:
-        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
-
-    # 2. Staff Schedule & Reservations
-    from models import MemberSchedule
-    if is_admin:
         schedules = MemberSchedule.query.order_by(MemberSchedule.start_time.asc()).limit(20).all()
-    else:
-        metric_ids = [u.id for u in units]
-        schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
-
-    # 3. Live Activity Feed (Recent Scans)
-    if is_admin:
         activity = db.session.query(TelemetryHistory, Member.name)\
             .outerjoin(Member, TelemetryHistory.member_id == Member.id)\
             .order_by(TelemetryHistory.timestamp.desc()).limit(10).all()
+        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(5).all()
+        from models import AuditLog
+        security_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
+        recent_payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
     else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
         metric_ids = [u.id for u in units]
+        schedules = MemberSchedule.query.filter(MemberSchedule.equipment_id.in_(metric_ids)).order_by(MemberSchedule.start_time.asc()).all()
         activity = db.session.query(TelemetryHistory, Member.name)\
             .outerjoin(Member, TelemetryHistory.member_id == Member.id)\
             .filter(TelemetryHistory.equipment_id.in_(metric_ids))\
             .order_by(TelemetryHistory.timestamp.desc()).limit(10).all()
-
-    # 4. Automation Efficiency
-    automation_status = AutomationHeartbeat.query.all()
-
-    # 5. Critical Alerts
-    if is_admin:
-        alerts = Alert.query.filter_by(is_resolved=False).order_by(Alert.timestamp.desc()).limit(5).all()
-    else:
-        metric_ids = [u.id for u in units]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).all()
-
-    # 6. Revenue & Payments (v3.9.2)
-    if is_admin:
-        recent_payments = Payment.query.order_by(Payment.timestamp.desc()).limit(10).all()
-    else:
-        # Get all members in this franchise
+        from models import AuditLog
+        security_logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(5).all()
         m_ids = [m.id for m in Member.query.filter_by(franchise_id=franchise_id).all()]
         recent_payments = Payment.query.filter(Payment.member_id.in_(m_ids)).order_by(Payment.timestamp.desc()).all()
 
-    # 7. Security & Access Audit
-    from models import AuditLog
-    if is_admin:
-        security_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
-    else:
-        security_logs = AuditLog.query.filter_by(user_id=current_user.id).order_by(AuditLog.timestamp.desc()).limit(5).all()
-
-    franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global Fleet"
+    automation_status = AutomationHeartbeat.query.all()
+    franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global fleet"
 
     return render_template('manager_dashboard.html',
                            units=units,
@@ -179,7 +217,6 @@ def staff_api_metrics():
     else:
         metrics = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
 
-    # Determine online status
     for m in metrics:
         if m.last_heartbeat:
             last_hb = datetime.strptime(m.last_heartbeat, "%Y-%m-%d %H:%M:%S")
@@ -238,3 +275,104 @@ def staff_api_alerts():
         metric_ids = [m.id for m in metrics]
         alerts = Alert.query.filter(Alert.equipment_id.in_(metric_ids), Alert.is_resolved == False).order_by(Alert.timestamp.desc()).limit(10).all()
     return render_template('partials/staff_alerts.html', alerts=alerts)
+
+@staff_bp.route('/live-ops')
+@login_required
+@role_required(['Admin', 'Staff', 'Franchisee'])
+def live_ops_wallboard():
+    franchise_id = current_user.franchise_id
+    is_admin = (current_user.role == 'Admin')
+    region = request.args.get('region')
+
+    if is_admin:
+        query = EquipmentMetric.query
+        if region:
+            query = query.filter_by(region_cluster=region)
+        units = query.all()
+        all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+    else:
+        units = EquipmentMetric.query.filter_by(franchise_id=franchise_id).all()
+        all_regions = []
+
+    franchise_name = Lead.query.get(franchise_id).company if franchise_id else "Global Fleet"
+    if region:
+        franchise_name += f" - {region}"
+
+    return render_template('live_ops_wallboard.html',
+                           units=units,
+                           franchise_name=franchise_name,
+                           all_regions=all_regions,
+                           current_region=region)
+
+@staff_bp.route('/schedule/create', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def create_schedule():
+    if request.method == 'POST':
+        member_id = request.form.get('member_id')
+        member_name = request.form.get('member_name')
+        start_time = request.form.get('start_time')
+        duration = int(request.form.get('duration', 10))
+        unit_id = request.form.get('equipment_id')
+
+        new_booking = MemberSchedule(
+            member_id=member_id if member_id else None,
+            member_name=member_name,
+            start_time=start_time,
+            duration_minutes=duration,
+            equipment_id=unit_id,
+            status='Scheduled'
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        flash("New session scheduled successfully.")
+        return redirect(url_for('staff.staff_dashboard'))
+
+    members = Member.query.all() if current_user.role == 'Admin' else Member.query.filter_by(franchise_id=current_user.franchise_id).all()
+    units = EquipmentMetric.query.all() if current_user.role == 'Admin' else EquipmentMetric.query.filter_by(franchise_id=current_user.franchise_id).all()
+    return render_template('staff_edit_schedule.html', action="Create", members=members, units=units)
+
+@staff_bp.route('/api/marathon-stats')
+@login_required
+@role_required(['Admin', 'Staff', 'Franchisee'])
+def marathon_stats_api():
+    """Simulates real-time marathon session metrics (v7.7.0)"""
+    import random
+
+    # Mock dynamic metrics
+    mets = round(random.uniform(7.5, 9.5), 1)
+    sps = round(random.uniform(2.8, 4.5), 1)
+    fatigue = random.randint(5, 25)
+    hydration_alert = random.choice([True, False, False, False])
+
+    # Progress simulation based on minute of hour
+    now = datetime.now()
+    progress = (now.minute % 60) / 60.0 * 100
+
+    return {
+        "mets": mets,
+        "sps": sps,
+        "fatigue": fatigue,
+        "hydration_alert": hydration_alert,
+        "progress_pct": round(progress, 0),
+        "session_duration": f"{now.minute}m"
+    }
+
+@staff_bp.route('/schedule/edit/<int:schedule_id>', methods=['GET', 'POST'])
+@login_required
+@role_required(['Admin', 'Staff'])
+def edit_schedule(schedule_id):
+    booking = MemberSchedule.query.get_or_404(schedule_id)
+    if request.method == 'POST':
+        booking.member_name = request.form.get('member_name')
+        booking.start_time = request.form.get('start_time')
+        booking.duration_minutes = int(request.form.get('duration', 10))
+        booking.equipment_id = request.form.get('equipment_id')
+        booking.status = request.form.get('status')
+        db.session.commit()
+        flash("Schedule updated.")
+        return redirect(url_for('staff.staff_dashboard'))
+
+    members = Member.query.all() if current_user.role == 'Admin' else Member.query.filter_by(franchise_id=current_user.franchise_id).all()
+    units = EquipmentMetric.query.all() if current_user.role == 'Admin' else EquipmentMetric.query.filter_by(franchise_id=current_user.franchise_id).all()
+    return render_template('staff_edit_schedule.html', action="Edit", booking=booking, members=members, units=units)

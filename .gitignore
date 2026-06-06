@@ -12,3 +12,19 @@ env/
 
 # Secrets
 .env
+
+# CRM Database
+crm.db
+backups/
+
+# Logs
+*.log
+
+
+# Generated Outreach Assets
+outreach/generated/
+outreach/generated_messages/
+outreach/reports/
+outreach/proposals/
+technical_docs/reports/
+verification/

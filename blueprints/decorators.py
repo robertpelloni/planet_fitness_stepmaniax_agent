@@ -1,6 +1,7 @@
 from functools import wraps
-from flask import flash, redirect, url_for, abort
-from flask_login import current_user, login_manager
+from flask import flash, redirect, url_for, abort, request
+from flask_login import current_user
+import config
 
 def role_required(roles):
     def decorator(f):
@@ -38,15 +39,25 @@ def permission_required(permission_attr):
 
 def require_api_or_role(roles):
     """Advanced decorator for v3.9.2 that handles API-Key (Global scope) or Role-Based session access."""
-    from flask import request
-    import config
+    from models import User
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            # 1. Check for valid API Key (provides Global scope)
+            # 1. Check for valid API Key
             api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-            if api_key and api_key == config.API_KEY:
-                return f(*args, **kwargs)
+            if api_key:
+                # Check global legacy key first
+                if api_key == config.API_KEY:
+                    return f(*args, **kwargs)
+                # Check per-user keys
+                user = User.query.filter_by(api_key=api_key).first()
+                if user:
+                    # IP-based Access List check (v6.2.0)
+                    if user.allowed_ips:
+                        allowed_list = [ip.strip() for ip in user.allowed_ips.split(',')]
+                        if request.remote_addr not in allowed_list:
+                            return {"error": "Unauthorized IP address"}, 403
+                    return f(*args, **kwargs)
 
             # 2. Check for Authenticated Session
             if not current_user.is_authenticated:
@@ -62,12 +73,23 @@ def require_api_or_role(roles):
 
 def require_api_key(f):
     """Simple API Key or Session check for public/semi-public APIs."""
-    from flask import request
-    import config
+    from models import User
     @wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-        if (api_key and api_key == config.API_KEY) or (current_user and current_user.is_authenticated):
+        if api_key:
+            if api_key == config.API_KEY:
+                return f(*args, **kwargs)
+            user = User.query.filter_by(api_key=api_key).first()
+            if user:
+                # IP-based Access List check (v6.2.0)
+                if user.allowed_ips:
+                    allowed_list = [ip.strip() for ip in user.allowed_ips.split(',')]
+                    if request.remote_addr not in allowed_list:
+                        return {"error": "Unauthorized IP address"}, 403
+                return f(*args, **kwargs)
+
+        if current_user and current_user.is_authenticated:
             return f(*args, **kwargs)
         return {"error": "Unauthorized access. API-KEY or Session required."}, 401
     return decorated_function

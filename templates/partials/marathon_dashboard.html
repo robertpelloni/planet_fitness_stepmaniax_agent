@@ -1,0 +1,86 @@
+<!-- Marathon Mode Dashboard Partial (v7.6.0) -->
+<div class="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden border border-slate-800 shadow-2xl"
+     hx-get="/staff/api/marathon-stats"
+     hx-trigger="every 5s"
+     hx-swap="none"
+     id="marathon-monitor">
+    <div class="relative z-10">
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
+                    <i class="fa-solid fa-person-running text-blue-500"></i> Marathon Session Monitor
+                </h3>
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Real-time Metabolic Analytics</p>
+            </div>
+            <span class="bg-blue-600/20 text-blue-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-blue-500/30" id="m-duration">
+                Active Session: --
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Target METs</p>
+                <p class="text-2xl font-black text-white" id="m-mets">--</p>
+                <p class="text-[9px] text-green-500 font-bold mt-1 uppercase italic">Optimal Zone</p>
+            </div>
+            <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Current SPS</p>
+                <p class="text-2xl font-black text-blue-500" id="m-sps">--</p>
+                <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">Notes/Sec</p>
+            </div>
+            <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Fatigue Factor</p>
+                <p class="text-2xl font-black text-yellow-500" id="m-fatigue">--</p>
+                <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">Drift Detected</p>
+            </div>
+            <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Hydration</p>
+                <p class="text-2xl font-black text-blue-400" id="m-hydration">OK</p>
+                <p class="text-[9px] text-red-500 font-bold mt-1 uppercase italic" id="m-hydration-status">Monitoring</p>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-slate-800/30 rounded-2xl p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Psytrance Marathon: Phase 4 Progression</p>
+                <span class="text-[10px] font-bold text-slate-500 italic">AutoArrow ML Engine v1.1</span>
+            </div>
+            <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                <div class="bg-blue-600 h-full w-0 transition-all duration-1000" id="m-progress"></div>
+            </div>
+            <div class="flex justify-between mt-3 text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                <span>Warmup</span>
+                <span class="text-blue-400">Main Set</span>
+                <span>Cooldown</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="absolute -bottom-10 -right-10 opacity-5 text-9xl">
+        <i class="fa-solid fa-infinity"></i>
+    </div>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        if (evt.detail.xhr.responseURL.includes('/staff/api/marathon-stats')) {
+            const data = JSON.parse(evt.detail.xhr.responseText);
+            document.getElementById('m-mets').innerText = data.mets;
+            document.getElementById('m-sps').innerText = data.sps;
+            document.getElementById('m-fatigue').innerText = data.fatigue + '%';
+            document.getElementById('m-duration').innerText = 'Active Session: ' + data.session_duration;
+            document.getElementById('m-progress').style.width = data.progress_pct + '%';
+
+            if (data.hydration_alert) {
+                document.getElementById('m-hydration').innerText = 'ALERT';
+                document.getElementById('m-hydration').classList.add('text-red-500');
+                document.getElementById('m-hydration-status').innerText = 'Reminder Sent';
+            } else {
+                document.getElementById('m-hydration').innerText = 'OK';
+                document.getElementById('m-hydration').classList.remove('text-red-500');
+                document.getElementById('m-hydration-status').innerText = 'Monitoring';
+            }
+        }
+    });
+</script>

@@ -1,9 +1,28 @@
 # TODO - Immediate Actions
 
-## Infrastructure & Maintenance (v4.4.x)
-- [ ] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
-- [ ] Add unit tests for `backup_job.py` to verify snapshot integrity.
-- [ ] Implement automated restoration test in a staging environment.
+## Next Phase: Advanced Analytics & Global Expansion (v6.2.0)
+- [x] Implement Regional Heatmap visualization in the Admin Command Center using Leaflet.js. (Completed in v6.0.0)
+- [x] Develop automated "Pilot Summary" generation for regional managers at the end of every week. (Completed in v6.1.0)
+- [x] Hardened security: Implement IP-based access lists for the Enterprise Export API. (Completed in v6.2.0)
+- [x] Integrate real-time translation for outreach messages to support Mexico/Canada expansion. (Completed in v6.3.0)
+- [x] Launch Pilot Success Dashboard tracking ROI targets vs. actual performance. (Completed in v6.3.0)
+- [x] Implement automated follow-up engine (Day 3, 7, 14) with translation support. (Completed in v6.4.0)
+- [x] Add Admin UI for pausing/resetting outreach cadence. (Completed in v6.4.0)
+- [x] Implement interactive ROI simulator on the prospect portal. (Completed in v6.5.0)
+- [x] Wire high-intent interaction signals to lead propensity scoring. (Completed in v6.5.0)
+- [x] Orchestrate automated outreach via health monitor background task. (Completed in v6.6.0)
+- [x] Add manual dispatch and quick-status transition controls to Admin Leads UI. (Completed in v6.6.0)
+- [x] Launch Sales Pipeline Kanban at `/admin/pipeline`. (Completed in v6.7.0)
+- [x] Implement automated commercial proposal generation. (Completed in v6.7.0)
+- [x] Launch Lead-to-Franchisee conversion flow. (Completed in v6.7.0)
+- [x] Implement lead capture form on Prospect Portal. (Completed in v6.8.0)
+- [x] Add 'Campaign Pulse' widget to Command Center. (Completed in v6.8.0)
+- [x] Perform Dual-Direction Intelligent Merge (Executive Protocol). (Completed in v6.9.0)
+
+## Infrastructure & Maintenance (v5.4.1)
+- [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
+- [x] Add unit tests for `backup_job.py` to verify snapshot integrity.
+- [x] Implement automated restoration test in a staging environment.
 
 1. [x] Complete project audit and initialize standard documentation.
 2. [x] **Phase 1.2:** Build the "Interactive Cardio" Pitch Deck (`pitch-deck.md`).
@@ -20,3 +39,14 @@
 13. [x] **Phase 4.2 (Framework):** Formalized commercial expansion proposals and ROI reporting templates.
 14. [x] **Phase 2+ (Ongoing):** Implement Agent Performance Metrics (KPI Tracker) (`kpi-tracker.md`).
 15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
+
+## Strategic Initiative: Marathon Content (v7.8.0)
+- [x] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro. (Documented in `outreach/manufacturer_contacts.md`)
+- [x] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture). (Documented in `technical_docs/autoarrow_ml_specs.md`)
+- [x] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training. (Documented in `technical_docs/marathon_content_inventory.md`)
+- [x] Research and document 'Flow-State Analytics' for marathon rhythmic cardio. (Documented in `technical_docs/flow_state_analytics.md`)
+- [x] Draft a script and storyboard for the 'Proof of Concept' demonstration video. (Documented in `outreach/poc_video_script.md`)
+- [x] Implement 'AutoArrow ML Prototype' scaffolding (onset analysis). (See `autoarrow_proto.py`)
+- [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
+- [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
+- [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.

@@ -89,9 +89,7 @@ def show_portfolio_analytics():
     total_clubs = 0
     total_annual_profit = 0
 
-    print("===========================================================")
     print("   StepManiaX B2B Portfolio Analytics")
-    print("===========================================================")
     print(f"{'Company':<25} | {'Clubs':<6} | {'Projected Annual Profit'}")
     print("-" * 65)
 
@@ -107,7 +105,6 @@ def show_portfolio_analytics():
 
     print("-" * 65)
     print(f"{'TOTAL PORTFOLIO':<25} | {total_clubs:<6} | ${total_annual_profit:,.2f}")
-    print("===========================================================")
     conn.close()
 
 def create_user(username, password, role='Franchisee', franchise_id=None):

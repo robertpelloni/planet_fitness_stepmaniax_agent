@@ -10,14 +10,29 @@ TARGET_GROUPS = [
     {"name": "Excel Fitness", "url": "https://www.excelfitness.com/leadership"}, # Inferred
     {"name": "Grand Fitness Partners", "url": "https://grandfitnesspartners.com/team"}, # Inferred
     {"name": "United Fitness Partners", "url": "https://pffranchisee.org/united-fp-rings-in-the-new-year-with-big-leadership-changes/"},
+    {"name": "United Fitness Partners", "url": "https://www.unitedpf.com/leadership/"}, # Updated URL
+    {"name": "Flynn Group", "url": "https://flynn.com/flynn-fitness/"},
+    {"name": "CDM Fitness Holdings", "url": "https://www.fitearth.com/"},
+    {"name": "Ohana Growth Partners", "url": "https://www.ohanagp.com/team"},
+    {"name": "EPIC Fitness Group", "url": "https://www.epicfitnessgroup.com/"}
 ]
 
 OUTPUT_FILE = "franchise_leads.csv"
 
-def scrape_leadership(group):
-    """
-    Scrapes a franchise group's leadership/team page.
-    """
+def is_junk(text):
+    junk_keywords = [
+        "lorem", "ipsum", "dolor", "sit", "amet",
+        "locations totals", "loading details", "loading location",
+        "apply now", "join our team", "careers",
+        "premier zone", "judgement free", "all rights reserved"
+    ]
+    if not text: return True
+    text_lower = text.lower()
+    if any(junk in text_lower for junk in junk_keywords): return True
+    if len(text) < 3 or len(text) > 100: return True
+    return False
+
+def scrape_leadership_playwright(browser, group):
     name = group['name']
     url = group['url']
     print(f"--- Scraping {name} via Playwright at {url} ---")
@@ -40,36 +55,74 @@ def scrape_leadership(group):
 
     # NFP Specific Parsing
     if "nfpfit.com" in url:
-        # Based on search snippet: Meet the NFP Leadership Team
-        # Common pattern: h3 or h4 for names, p or span for titles
         for person in soup.find_all(['h3', 'h4']):
             full_name = person.text.strip()
-            title = person.find_next(['p', 'span']).text.strip() if person.find_next(['p', 'span']) else "Unknown"
-            if len(full_name.split()) > 1: # Basic filter for noise
+            title_tag = person.find_next(['p', 'span'])
+            title = title_tag.text.strip() if title_tag else "Leadership"
+            if len(full_name.split()) > 1 and not is_junk(full_name):
                 leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
-    # United FP / PFIFC Specific Parsing
-    elif "pffranchisee.org" in url:
-        # Looking for names mentioned in the article
-        content = soup.find('div', class_='entry-content') or soup.body
-        if content:
-            # Simple heuristic: capitalized names near titles like CEO, CFO, VP
-            text = content.get_text()
-            keywords = ["CEO", "CFO", "President", "VP", "Director"]
-            # This is a bit complex for a simple scraper, so we might just log that we found content
-            print(f"Found article content for {name}, manually extracting top names for LEADS.md")
+    # Ohana Growth Partners Parsing
+    elif "ohanagp.com" in url:
+        for person in soup.find_all(['h5', 'h4']):
+            full_name = person.text.strip()
+            title_tag = person.find_next(['p', 'span', 'div'])
+            title = title_tag.text.strip() if title_tag else "Leadership"
+            if len(full_name.split()) > 1 and not is_junk(full_name):
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
 
-    # Generic Fallback
+    # Flynn Group Parsing
+    elif "flynn.com" in url:
+        for person in soup.find_all(['h3', 'strong']):
+            full_name = person.text.strip()
+            if len(full_name.split()) > 1 and not is_junk(full_name):
+                leads.append({'Franchise Group': name, 'Name': full_name, 'Title': "Leadership"})
+
+    # United FP / PFIFC Specific Parsing
+    elif "pffranchisee.org" in url or "unitedpf.com" in url:
+        content_div = soup.find('div', class_='entry-content') or soup.find('main') or soup.body
+        if content_div:
+            for item in content_div.find_all(['h2', 'h3', 'h4', 'strong']):
+                text = item.text.strip()
+                if len(text.split()) > 1 and not is_junk(text):
+                    leads.append({'Franchise Group': name, 'Name': text, 'Title': "Executive"})
+
+    # Generic Fallback & Improved Parsing Heuristics
     else:
         print(f"No specific parser for {url}, using generic heuristic.")
-        for item in soup.find_all(['h2', 'h3']):
-            text = item.text.strip()
-            if any(key in text for key in ["Team", "Leadership", "Executive"]):
-                continue
-            leads.append({'Franchise Group': name, 'Name': text, 'Title': "Consult LEADS.md"})
+        keywords = ["CEO", "President", "Director", "Manager", "Founder", "VP", "Vice President"]
 
-    print(f"Found {len(leads)} potential leads for {name}.")
-    return leads
+        for tag in soup.find_all(['h2', 'h3', 'h4', 'h5', 'strong']):
+            text = tag.get_text(separator=' ').strip()
+            if is_junk(text): continue
+
+            # Check if this element or its parent contain a leadership keyword
+            parent = tag.parent
+            combined_text = parent.get_text(separator=' ')
+
+            if any(kw in combined_text for kw in keywords):
+                full_name = text
+                title = "Leadership"
+                for sibling in tag.find_next_siblings(['p', 'span', 'div']):
+                    sib_text = sibling.get_text().strip()
+                    if any(kw in sib_text for kw in keywords):
+                        title = sib_text
+                        break
+
+                if 1 < len(full_name.split()) < 5:
+                    leads.append({'Franchise Group': name, 'Name': full_name, 'Title': title})
+
+    # Deduplicate
+    unique_leads = []
+    seen = set()
+    for lead in leads:
+        key = (lead['Name'], lead['Franchise Group'])
+        if key not in seen:
+            unique_leads.append(lead)
+            seen.add(key)
+
+    print(f"Found {len(unique_leads)} potential leads for {name}.")
+    return unique_leads
 
 def save_to_csv(leads, filename):
     if not leads:

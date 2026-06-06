@@ -11,6 +11,7 @@
     </div>
     <div class="flex justify-between mt-1 text-[10px] text-slate-400 font-medium">
         <span>Location: {{ unit.location }}</span>
+        <span>Util: <span class="{{ 'text-blue-500' if unit.utilization_score > 80 else 'text-slate-500' }}">{{ unit.utilization_score }}%</span></span>
         <span class="{{ 'text-green-500' if unit.is_online else 'text-red-500' }}">{{ 'ONLINE' if unit.is_online else 'OFFLINE' }}</span>
     </div>
 </div>

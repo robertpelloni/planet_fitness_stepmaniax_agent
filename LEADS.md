@@ -70,6 +70,28 @@ This document tracks major regional Planet Fitness Franchise Groups, their opera
 - **LinkedIn:** https://www.linkedin.com/company/ohanagp
 - **Notes:** Expanding footprint in Michigan.
 
+## 9. Flynn Group (Fitness Division)
+- **Base:** San Francisco, CA / Independence, OH
+- **Scale:** Acquired 37 locations from Alder Partners; world's largest franchise operator overall.
+- **President:** Stan DeMartinis Jr.
+- **VP of Operations:** Stella Giangregorio
+- **Website:** https://flynn.com/flynn-fitness/
+- **Notes:** High-value target due to massive scale and recent entry into fitness.
+
+## 10. CDM Fitness Holdings
+- **Base:** Foxborough, MA
+- **Scale:** 88+ locations across MA, RI, NH, VT, and WA.
+- **Director of Operations:** Lane Milliken
+- **Website:** https://www.fitearth.com/
+- **Notes:** Strong New England presence. Portfolio company of SBJ Capital.
+
+## 11. ECP-PF Holdings Group
+- **Base:** Orange, CT
+- **Scale:** One of the largest developers and operators in the PF system.
+- **CEO:** Ryan Berk
+- **President/COO:** Joseph Pepe
+- **Notes:** Owned by TowerBrook. Operates across multiple states (CT, NY, TN, SK).
+
 ---
 
 ## Target Regional Strategy

@@ -8,8 +8,8 @@ import config
 def calculate_detailed_metrics(
     num_clubs=1,
     members_per_club=6000,
-    avg_monthly_fee=config.DEFAULT_MONTHLY_FEE,
-    retention_lift_percent=config.DEFAULT_RETENTION_LIFT,
+    avg_monthly_fee=None,
+    retention_lift_percent=None,
     avg_member_lifetime_months=18,
     smx_monthly_cost_per_club=600.0,
     onboarding_conversion_rate=1.0 # 1.0 = 100%
@@ -17,6 +17,16 @@ def calculate_detailed_metrics(
     """
     Calculates comprehensive ROI metrics using the LTV framework.
     """
+    # Defensive handling for None inputs
+    if num_clubs is None: num_clubs = 1
+    if members_per_club is None: members_per_club = 6000
+
+    # Use defaults from config if not provided
+    if avg_monthly_fee is None:
+        avg_monthly_fee = getattr(config, 'AVG_MONTHLY_FEE_DEFAULT', 15.0)
+    if retention_lift_percent is None:
+        retention_lift_percent = getattr(config, 'RETENTION_LIFT_DEFAULT', 0.03)
+
     total_members = num_clubs * members_per_club
 
     # 1. Base LTV Analysis
@@ -107,6 +117,11 @@ def calculate_propensity_score(lead_data):
     if avg_rating >= 4.5: score += 10
     elif avg_rating < 3.0: score -= 15
 
+    # 8. High-Intent Interaction (v6.5.0)
+    # If notes contain the ROI Simulator signature, boost score
+    if "HIGH INTENT: Prospect interacted with ROI Simulator." in (lead_data.get('notes') or ""):
+        score += 30
+
     # Cap at 100
     return min(100, score)
 
@@ -175,3 +190,21 @@ def calculate_predictive_health_score(unit_data, recent_history=[]):
             pass
 
     return max(0.0, min(100.0, score))
+
+def calculate_capacity_utilization(total_sessions, uptime_percent):
+    """
+    Calculates the capacity utilization percentage (0-100).
+    Assumes a max capacity of 500 sessions per reporting period.
+    (v8.0.0): Added guard for zero uptime.
+    """
+    if not total_sessions or not uptime_percent:
+        return 0.0
+
+    # Capacity is reduced if uptime is not 100%
+    max_capacity = 500 * (uptime_percent / 100.0)
+    if max_capacity <= 0:
+        return 0.0
+
+    utilization = (total_sessions / max_capacity) * 100
+
+    return round(min(100.0, utilization), 1)

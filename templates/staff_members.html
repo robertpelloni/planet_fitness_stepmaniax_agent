@@ -5,7 +5,10 @@
 {% block content %}
 <div class="flex justify-between items-center mb-8">
     <h1 class="text-2xl font-black text-slate-800 tracking-tight">MEMBER MANAGEMENT</h1>
-    <div>
+    <div class="flex items-center gap-4">
+        {% if current_user.role == 'Admin' %}
+            {% include 'partials/region_selector.html' %}
+        {% endif %}
         <button class="bg-white border border-slate-200 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm" onclick="alert('Exporting to CSV...')">
             <i class="fa-solid fa-download mr-2"></i>Export CSV
         </button>
@@ -21,6 +24,7 @@
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Email</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Franchise</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Plan</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Engagement</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Points</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
@@ -50,6 +54,16 @@
                         </span>
                     </td>
                     <td class="px-6 py-4">
+                        {% if member.workout_plan %}
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-800">{{ member.workout_plan.name }}</span>
+                            <span class="text-[9px] text-slate-400 font-medium">{{ member.workout_plan.target_scans }} Scans / {{ member.workout_plan.target_duration }}m</span>
+                        </div>
+                        {% else %}
+                        <span class="text-[10px] text-slate-300 italic">No Plan</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
                                 <div class="h-full bg-blue-500" style="width: {{ member.engagement_score * 100 }}%;"></div>
@@ -58,7 +72,10 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 font-black text-slate-700 text-sm">{{ member.points }}</td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="togglePlanForm('plan-form-{{ member.id }}')" class="text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest">
+                            Assign Plan
+                        </button>
                         <form action="{{ url_for('staff.staff_update_member_status', member_id=member.id) }}" method="POST" class="inline-block">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <select name="status" onchange="this.form.submit()" class="text-xs bg-white border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -69,9 +86,41 @@
                         </form>
                     </td>
                 </tr>
+                <tr id="plan-form-{{ member.id }}" class="hidden bg-slate-50 border-b border-slate-100">
+                    <td colspan="8" class="px-6 py-4">
+                        <form action="/staff/members/assign-plan/{{ member.id }}" method="POST" class="flex items-end gap-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Plan Name</label>
+                                <input type="text" name="name" required class="block w-48 text-xs border-slate-200 rounded p-2" placeholder="e.g. 30-Day Sprint">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Target Scans</label>
+                                <input type="number" name="target_scans" required class="block w-24 text-xs border-slate-200 rounded p-2" placeholder="1000">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Target Duration (m)</label>
+                                <input type="number" name="target_duration" required class="block w-24 text-xs border-slate-200 rounded p-2" placeholder="300">
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-blue-700 transition-colors">
+                                Save Plan
+                            </button>
+                            <button type="button" onclick="togglePlanForm('plan-form-{{ member.id }}')" class="bg-slate-200 text-slate-600 px-4 py-2 rounded text-xs font-bold hover:bg-slate-300">
+                                Cancel
+                            </button>
+                        </form>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+function togglePlanForm(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('hidden');
+}
+</script>
 {% endblock %}
