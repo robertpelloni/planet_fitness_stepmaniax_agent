@@ -271,3 +271,8 @@ def populate():
 
 if __name__ == "__main__":
     populate()
+
+from app import app
+from models import db
+with app.app_context():
+    db.create_all()

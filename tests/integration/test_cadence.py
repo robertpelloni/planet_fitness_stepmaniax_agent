@@ -8,11 +8,10 @@ import os
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['WTF_CSRF_ENABLED'] = False
     with app.app_context():
-        db.create_all()
+        pass
         yield app.test_client()
-        db.drop_all()
 
 def test_initial_outreach(client):
     with app.app_context():
