@@ -49,4 +49,4 @@
 - [x] Implement 'AutoArrow ML Prototype' scaffolding (onset analysis). (See `autoarrow_proto.py`)
 - [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
 - [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
-- [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
+- [x] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio. (Script finalized in `outreach/poc_video_script.md`)

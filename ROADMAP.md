@@ -23,7 +23,7 @@
 - [x] **AutoArrow ML Prototype:** Developed functional content generator with difficulty-specific quantization and safety validators. (Completed in v7.6.0)
 - [x] **Manufacturer Outreach:** Drafted formal outreach letters for Step Revolution, Konami, and Andamiro. (Completed in v7.7.0)
 - [x] **Flow-State Analytics:** Researched and documented metabolic benefits of rhythmic cardio. (Completed in v7.2.0)
-- [ ] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner.
+- [x] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner. (Documented in `outreach/technical_pilot_plan.md`)
 
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
@@ -36,7 +36,7 @@
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch
 - [x] **Personalized Collateral:** Developed tailored outreach scripts for priority Michigan targets in `outreach/`.
 - [x] **Follow-up Infrastructure:** Established multi-touch follow-up cadence (Day 3, 7, 14) in `outreach/follow-ups.md`.
-- [ ] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot.
+- [x] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot. (Documented in `outreach/cold_outreach_campaign.md`)
 - [x] **Negotiation & Objection Handling:** Drafted `maintenance-slas.md` to address technical and service-level concerns.
 
 ## Phase 4: Contract Negotiation & Deal Closure
