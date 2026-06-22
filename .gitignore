@@ -28,3 +28,6 @@ outreach/reports/
 outreach/proposals/
 technical_docs/reports/
 verification/
+
+# Agent metadata
+.pi/memory-blocks/

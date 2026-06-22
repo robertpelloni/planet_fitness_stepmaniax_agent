@@ -50,3 +50,19 @@
 - [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
 - [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
 - [ ] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio.
+
+## Strategic Initiative: Custom 9-Panel Fitness Platform (v9.0.0)
+- [x] Revise VISION.md with two-path strategic model (regional pilots + custom hardware corporate path).
+- [x] Draft Andamiro hardware partnership proposal covering 9-panel stage specs, pricing, and pilot path. (See `outreach/andamiro_custom_hardware_proposal.md`)
+- [x] Release technical specification for StepMania fitness fork: 9-panel driver, fitness UI, telemetry, OTA. (See `technical_docs/stepmania_fitness_fork_spec.md`)
+- [x] Document system architecture with block diagrams, data flows, and integration map. (See `docs/ai/design/01_custom_9panel_fitness_platform_architecture.md`)
+- [ ] Implement 9-panel input driver (standalone C++ test harness with SPI ADC interface).
+- [ ] Patch StepMania engine for 9-panel GameButton support and compile on ARM64.
+- [ ] Implement Fitness UI theme (Qt QML): all screens from attract through session summary.
+- [ ] Wire Bluetooth heart-rate monitor integration and real-time zone display.
+- [ ] Implement telemetry upload client on the machine.
+- [ ] Implement OTA content pull pipeline (poll + download + verify new charts).
+- [ ] Extend AutoArrow ML prototype to output 9-panel Fitness-Marathon chart format.
+- [ ] Build end-to-end test: select workout → play 60-min Marathon → telemetry upload → view on admin dashboard.
+- [ ] Draft corporate-facing pitch deck for Planet Fitness procurement. (See `pitch-deck-corporate.md`)
+- [ ] Submit Andamiro feasibility study request and receive preliminary MOQ estimate.

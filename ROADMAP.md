@@ -25,6 +25,19 @@
 - [x] **Flow-State Analytics:** Researched and documented metabolic benefits of rhythmic cardio. (Completed in v7.2.0)
 - [ ] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner.
 
+## Phase 14: Custom Hardware Vertical Integration (v9.0.0)
+- [x] **Two-Path Strategic Vision:** Converged regional pilot strategy with custom hardware + corporate engagement path. (Completed in v9.0.0)
+- [x] **Andamiro Partnership Proposal:** Drafted formal hardware co-development proposal for custom 9-panel fitness stage. (Completed in v9.0.0)
+- [x] **StepMania Fitness Fork Spec:** Released technical specification for 9-panel driver, fitness UI, telemetry pipeline, and OTA content delivery. (Completed in v9.0.0)
+- [x] **System Architecture Design:** Documented block diagram, data flows, interface contracts, and integration map for the custom platform. (Completed in v9.0.0)
+- [ ] **9-Panel Input Driver:** Implement standalone C++ driver with SPI ADC interface and load cell calibration routine.
+- [ ] **StepMania Fork Build:** Patch engine for 9-panel GameButton support and compile on ARM64 target.
+- [ ] **Fitness UI Theme:** Implement all screens (Workout Select, Active Session, Session Summary) with heart-rate zone display.
+- [ ] **Telemetry Pipeline:** Wire session upload from machine to existing B2B analytics backend.
+- [ ] **AutoArrow 9-Panel Output:** Extend chart generator to output Fitness-Marathon format for 9-panel layout at all 5 difficulty levels.
+- [ ] **Andamiro Engineering Review:** Submit feasibility study request and receive preliminary MOQ/tooling estimate.
+- [ ] **Prototype Build:** 5-unit pilot batch with Andamiro for gym installation and certification testing.
+
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
 - [x] **Build the Pitch Deck:** Designed B2B presentation focusing on "Gamified HIIT" and member retention.
