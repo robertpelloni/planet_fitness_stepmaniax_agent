@@ -50,3 +50,20 @@
 - [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
 - [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
 - [x] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio. (Script finalized in `outreach/poc_video_script.md`)
+### 🔧 Critical Infrastructure & Bug Fixes
+- [x] **BUG:** Resolve test collection error in `final_test_report.txt` by restoring or rebuilding the missing `tests/integration/test_member_api.py` file.
+
+### 🖥️ StepMania Fitness Fork & UI/UX Development
+- [x] Implement `Scripts/FitnessDifficulties.lua` to translate raw Notes Per Second (NPS) arrays cleanly into the standardized 1-10 intensity scale.
+- [ ] Rewrite `ScreenTitleMenu overlay.lua` to implement immediate auto-join and screen bypass to `ScreenSelectMusic`.
+- [ ] Build the stripped fitness post-game summary actor frame (Total Time, Total Steps, MET-calculated Caloric Burn) and disable arcade grading panels.
+- [ ] Write integration hooks to pipe real-time Bluetooth Heart Rate Monitor (HRM) data directly into the StepMania UI layer.
+
+### 🔌 Firmware & Input Driver Engineering
+- [ ] Write the C++ SPI ADC hardware driver for the 9-panel load cell matrix configuration.
+- [ ] Implement an automated auto-calibration loop in the microcontroller firmware to calculate baseline ambient weight and adjust for structural shifting.
+- [ ] Add hysteresis filtering logic to the input decoder to eliminate sensor chatter during high-velocity 16th-note continuous runs.
+
+### 📈 Sales & Pipeline Execution
+- [ ] Hardcode target lead URLs into `scrape_leads.py` and run Playwright to populate remaining blanks in the SQLite CRM database.
+- [ ] Deploy the first flight of the automated cold outreach templates to the top 3 regional franchise groups in `LEADS.md` to establish the Phase 1 pilot baseline.
