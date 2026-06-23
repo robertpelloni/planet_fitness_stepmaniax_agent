@@ -1,0 +1,6 @@
+[submodule "fcdm"]
+	path = fcdm
+	url = https://github.com/robertpelloni/fcdm.git
+[submodule "fitness_center_dance_machine"]
+	path = fitness_center_dance_machine
+	url = https://github.com/robertpelloni/fcdm.git
