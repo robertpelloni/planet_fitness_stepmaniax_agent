@@ -5,9 +5,10 @@ from models import db, User, Member, EquipmentMetric
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()
+            pass
         yield client
 
 def test_hardware_checkin_nfc(client):
@@ -17,6 +18,7 @@ def test_hardware_checkin_nfc(client):
         member = Member(name="NFC Member", email="nfc@test.com", nfc_uid="nfc-123", registration_date="2026-05-01")
         unit = EquipmentMetric(equipment_name="SMX-1", location="Test Gym")
         admin = User(username='admin_checkin', role='Admin', api_key='checkin-key')
+        admin.set_password('Admin123!')
         db.session.add_all([member, unit, admin])
         db.session.commit()
         unit_id = unit.id
@@ -38,6 +40,7 @@ def test_hardware_checkin_biometric(client):
         member = Member(name="Bio Member", email="bio@test.com", biometric_token="bio-token-456", registration_date="2026-05-01")
         unit = EquipmentMetric(equipment_name="SMX-2", location="Test Gym")
         admin = User(username='admin_checkin_2', role='Admin', api_key='checkin-key-2')
+        admin.set_password('Admin123!')
         db.session.add_all([member, unit, admin])
         db.session.commit()
         unit_id = unit.id

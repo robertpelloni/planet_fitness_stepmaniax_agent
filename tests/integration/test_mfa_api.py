@@ -6,9 +6,10 @@ import pyotp
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()
+            pass
         yield client
 
 def test_mfa_login_sequence(client):
