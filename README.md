@@ -1,3 +1,5 @@
+# 🚧 UNDER CONSTRUCTION — ALPHA STATE! 🚧
+
 # Planet Fitness StepManiaX B2B Sales Agent
 
 This repository serves as a hybrid **B2B sales workspace and automated data-gathering utility**. Its ultimate purpose is to act as a case study in autonomous AI agents, enabling an AI (like Hermes-Agent running GPT-5.5) to persuade regional Planet Fitness Franchise Groups to deploy StepManiaX (SMX) commercial cardio units—without further human input or intervention.
