@@ -55,7 +55,7 @@
 
 ### 🖥️ StepMania Fitness Fork & UI/UX Development
 - [x] Implement `Scripts/FitnessDifficulties.lua` to translate raw Notes Per Second (NPS) arrays cleanly into the standardized 1-10 intensity scale.
-- [ ] Rewrite `ScreenTitleMenu overlay.lua` to implement immediate auto-join and screen bypass to `ScreenSelectMusic`.
+- [x] Rewrite `ScreenTitleMenu overlay.lua` to implement immediate auto-join and screen bypass to `ScreenSelectMusic`.
 - [ ] Build the stripped fitness post-game summary actor frame (Total Time, Total Steps, MET-calculated Caloric Burn) and disable arcade grading panels.
 - [ ] Write integration hooks to pipe real-time Bluetooth Heart Rate Monitor (HRM) data directly into the StepMania UI layer.
 
