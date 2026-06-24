@@ -25,6 +25,39 @@
 - [x] **Flow-State Analytics:** Researched and documented metabolic benefits of rhythmic cardio. (Completed in v7.2.0)
 - [x] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner. (Documented in `outreach/technical_pilot_plan.md`)
 
+## Phase 14: Custom Hardware Vertical Integration (v9.0.0)
+**Target Horizon:** Q3 2026 - Q4 2026
+**Objective:** Transition from off-the-shelf commercial kiosks to proprietary 9-panel exergaming hardware manufactured via Andamiro, running the decoupled StepMania Fitness Fork.
+
+### Strategic Foundation (v9.0.0 — Complete)
+- [x] **Two-Path Strategic Vision:** Converged regional pilot strategy with custom hardware + corporate engagement path. (Completed in v9.0.0)
+- [x] **Andamiro Partnership Proposal:** Drafted formal hardware co-development proposal for custom 9-panel fitness stage. (Completed in v9.0.0)
+- [x] **StepMania Fitness Fork Spec:** Released technical specification for 9-panel driver, fitness UI, telemetry pipeline, and OTA content delivery. (Completed in v9.0.0)
+- [x] **System Architecture Design:** Documented block diagram, data flows, interface contracts, and integration map for the custom platform. (Completed in v9.0.0)
+- [x] **FitnessDifficulty.lua:** Implemented Lua script to translate NPS arrays into standardized 1-10 intensity scale. (Completed in v9.0.0)
+- [x] **Test Infrastructure Restored:** Rebuilt missing `test_member_api.py` and centralized conftest with Gunicorn management. (Completed in v9.0.0)
+
+### 14.1 Hardware Prototyping & Andamiro Engagement
+- [ ] **Andamiro Engineering Review:** Submit formal Partnership Proposal to Andamiro International corporate procurement and receive preliminary MOQ/tooling estimate.
+- [ ] **9-Panel Mechanical Feasibility Study:** Validate 3x3 load cell matrix layout, structural load capacity of panels under 24/7 commercial abuse.
+- [ ] **Firmware Architecture:** Finalize low-level firmware for Teensy 4.0 / SPI ADC interface with hysteresis filtering and auto-calibration to prevent sensor drift.
+- [ ] **Prototype Build:** 5-unit pilot batch with Andamiro for gym installation and certification testing.
+
+### 14.2 Software Fork Implementation (Core Engine)
+- [ ] **9-Panel Input Driver:** Implement standalone C++ SPI ADC hardware driver with auto-calibration loop and hysteresis filtering.
+- [ ] **StepMania Fork Build:** Fork StepMania/OutFox, patch engine for 9-panel GameButton support, compile on ARM64 target.
+- [ ] **Fitness UI Theme:** Implement all screens (Workout Select, Active Session, Session Summary) with heart-rate zone display, calorie tracking, MET display. Strip arcade GUI artifacts.
+- [ ] **Telemetry Pipeline:** Build WebSocket telemetry loop to sync hardware runtime events (session data, step counts, HRM data) with the centralized Flask management backend.
+- [ ] **OTA Content Delivery:** Implement content pull pipeline (poll manifest + download + verify new charts from AutoArrow).
+- [ ] **AutoArrow 9-Panel Output:** Extend chart generator to output Fitness-Marathon format for 9-panel layout at all 5 difficulty levels.
+- [ ] **Bluetooth HRM:** Wire integration hooks to pipe real-time heart-rate monitor data into the StepMania UI layer.
+
+### 14.3 Corporate Procurement Alignment
+- [ ] **National Vendor Approval Deck:** Convert regional pilot operational data (retention, member engagement, MET output) into a formal Planet Fitness corporate proposal.
+- [ ] **Certification:** Complete UL, CE, and ADA compliance certification blueprints for the custom cabinet assembly.
+- [ ] **Corporate-Facing Pitch Deck:** Deliver procurement-ready deck positioning the platform as a new equipment category. (Drafted in `pitch-deck-corporate.md`)
+- [ ] **Cold Outreach Campaign:** Deploy automated cold outreach templates to top 3 regional franchise groups to establish Phase 1 pilot baseline. (Strategy in `outreach/cold_outreach_campaign.md`)
+
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
 - [x] **Build the Pitch Deck:** Designed B2B presentation focusing on "Gamified HIIT" and member retention.
@@ -43,21 +76,3 @@
 - [x] **Memorandum of Understanding (MOU):** Drafted 90-day pilot agreement (`pilot-mou.md`).
 - [x] **Performance Reporting:** Established `pilot-performance-report.md` for data-driven ROI presentation.
 - [x] **The "Land and Expand" Trigger:** Developed `commercial-proposal-template.md` detailing regional procurement models.
-## Phase 14: Custom Hardware Integration & Enterprise Vendor Pipeline (Path B)
-**Target Horizon:** Q3 2026 - Q4 2026
-**Objective:** Transition from off-the-shelf commercial kiosks to proprietary 9-panel exergaming hardware manufactured via Andamiro, running the decoupled StepMania Fitness Fork.
-
-### 14.1 Hardware Prototyping & Andamiro Engagement
-- [ ] Submit formal Partnership Proposal to Andamiro International corporate procurement.
-- [ ] Fund and initiate a 9-Panel Mechanical Feasibility Study (3x3 load cell matrix layout).
-- [ ] Engineering Review: Validate structural load capacity of 1/2-inch Polycarbonate panels under 24/7 continuous commercial club abuse.
-- [ ] Finalize low-level firmware architecture for the Teensy 4.0/SPI ADC interface to prevent FSR thermal drift.
-
-### 14.2 Software Fork Implementation (Core Engine)
-- [ ] Fork StepMania/OutFox repository and implement custom C++ input layer to handle 9-panel matrix addressing.
-- [ ] Strip arcade GUI artifacts out of the engine; implement bare-metal Openbox X11 kiosk display layer for Linux ARM64 systems.
-- [ ] Build the WebSocket telemetry loop to sync hardware runtime events with the centralized Flask management backend.
-
-### 14.3 Corporate Procurement Alignment
-- [ ] Convert regional pilot operational data (retention, member engagement, MET output) into a National Vendor Approval deck.
-- [ ] Complete UL, CE, and ADA compliance certification blueprints for the custom cabinet assembly.
