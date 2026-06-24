@@ -1,14 +1,5 @@
 # Changelog
 
-## [9.1.0] - 2026-06-22
-### Changed
-- Executed Dual-Direction Intelligent Merge Engine (Executive Protocol).
-- Fetched and tracked all upstream commits. Fast-forwarded local state to match origin/main.
-- Reconciled branch states, abandoning outdated, unrelated-history feature branches (`feat/enterprise-sync` and `feat/lead-research`) to prevent structural regression.
-- Maintained core logic of Path B Andamiro Hardware Partnership & StepMania UI Lua scripts.
-
-# Changelog
-
 All notable changes to this project will be documented in this file.
 
 ## [8.0.0] - 2026-06-02

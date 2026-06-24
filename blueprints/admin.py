@@ -359,7 +359,8 @@ def admin_pipeline():
         "Outreach Active",
         "Discovery Call Scheduled",
         "Pilot MOU Signed",
-        "Pilot Operational"
+        "Pilot Operational",
+        "Corporate Vendor Approval"
     ]
 
     pipeline_data = {stage: [] for stage in stages}

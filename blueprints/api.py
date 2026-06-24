@@ -449,6 +449,8 @@ def api_enterprise_export():
         "location": u.location,
         "uptime": u.uptime_percent,
         "scans": u.total_scans,
+        "avg_session_duration": u.avg_session_duration,
+        "estimated_met_capacity": 6.5, # Static fallback; would use raw Lua telemetry in production
         "health_score": u.predictive_health_score,
         "status": u.maintenance_status
     } for u in units]

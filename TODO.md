@@ -1,7 +1,6 @@
 # TODO - Immediate Actions
 
 ## Next Phase: Advanced Analytics & Global Expansion (v6.2.0)
-
 - [x] Implement Regional Heatmap visualization in the Admin Command Center using Leaflet.js. (Completed in v6.0.0)
 - [x] Develop automated "Pilot Summary" generation for regional managers at the end of every week. (Completed in v6.1.0)
 - [x] Hardened security: Implement IP-based access lists for the Enterprise Export API. (Completed in v6.2.0)
@@ -20,13 +19,7 @@
 - [x] Add 'Campaign Pulse' widget to Command Center. (Completed in v6.8.0)
 - [x] Perform Dual-Direction Intelligent Merge (Executive Protocol). (Completed in v6.9.0)
 
-## Executive Sync Protocol (v9.1.0)
-- [x] Run comprehensive repository refresh and upstream tracking.
-- [x] Reconcile active feature branches (bypassed stale/unrelated remotes).
-- [x] Finalize version governance and changelog generation.
-
 ## Infrastructure & Maintenance (v5.4.1)
-
 - [x] Implement log rotation for `server.log` and `campaign_launch.log` to prevent disk bloat.
 - [x] Add unit tests for `backup_job.py` to verify snapshot integrity.
 - [x] Implement automated restoration test in a staging environment.
@@ -48,7 +41,6 @@
 15. [x] **Documentation Refactor:** Rewrite `README.md` to reflect the complete hybrid architecture and autonomous agent execution goals.
 
 ## Strategic Initiative: Marathon Content (v7.8.0)
-
 - [x] Research and identify key product managers and engineering leads at Konami, StepManiaX, and Andamiro. (Documented in `outreach/manufacturer_contacts.md`)
 - [x] Draft technical prototype requirements for the "AutoArrow ML" engine (LSTM/Transformer architecture). (Documented in `technical_docs/autoarrow_ml_specs.md`)
 - [x] Compile a list of 10-15 high-quality, royalty-free Psytrance tracks for initial ML training. (Documented in `technical_docs/marathon_content_inventory.md`)
@@ -58,49 +50,26 @@
 - [x] Implement Phase 1 ML Prototype: Multi-difficulty chart generation with pattern generation logic. (See `autoarrow_proto.py`)
 - [x] Draft formal outreach letters for Step Revolution, Konami, and Andamiro. (Documented in `outreach/manufacturer_letters.md`)
 - [x] Record a 5-minute "Proof of Concept" video demonstrating the "Flow State" benefits of long-form rhythmic cardio. (Script finalized in `outreach/poc_video_script.md`)
-
-## Strategic Initiative: Custom 9-Panel Fitness Platform (v9.0.0)
-
-### ✅ Completed (v9.0.0 Foundation)
-
-- [x] Revise VISION.md with two-path strategic model (regional pilots + custom hardware corporate path).
-- [x] Draft Andamiro hardware partnership proposal covering 9-panel stage specs, pricing, and pilot path. (See `outreach/andamiro_custom_hardware_proposal.md`)
-- [x] Release technical specification for StepMania fitness fork: 9-panel driver, fitness UI, telemetry, OTA. (See `technical_docs/stepmania_fitness_fork_spec.md`)
-- [x] Document system architecture with block diagrams, data flows, and integration map. (See `docs/ai/design/01_custom_9panel_fitness_platform_architecture.md`)
-- [x] Draft corporate-facing pitch deck for Planet Fitness procurement. (See `pitch-deck-corporate.md`)
-- [x] Implement `Scripts/FitnessDifficulties.lua` to translate raw NPS arrays into standardized 1-10 intensity scale.
-- [x] **BUG:** Resolve test collection error in `final_test_report.txt` by restoring missing `tests/integration/test_member_api.py`.
-- [x] Centralize test configuration with conftest.py + Gunicorn management for Playwright UI tests.
-
-### 🔌 Firmware & Input Driver Engineering
-
-- [ ] Write the C++ SPI ADC hardware driver for the 9-panel load cell matrix configuration (standalone test harness).
-- [ ] Implement automated auto-calibration loop in microcontroller firmware to calculate baseline ambient weight and adjust for structural shifting.
-- [ ] Add hysteresis filtering logic to input decoder to eliminate sensor chatter during high-velocity 16th-note continuous runs.
+### 🔧 Critical Infrastructure & Bug Fixes
+- [x] **BUG:** Resolve test collection error in `final_test_report.txt` by restoring or rebuilding the missing `tests/integration/test_member_api.py` file.
 
 ### 🖥️ StepMania Fitness Fork & UI/UX Development
+- [x] Implement `Scripts/FitnessDifficulties.lua` to translate raw Notes Per Second (NPS) arrays cleanly into the standardized 1-10 intensity scale.
+- [x] Rewrite `ScreenTitleMenu overlay.lua` to implement immediate auto-join and screen bypass to `ScreenSelectMusic`.
+- [ ] Build the stripped fitness post-game summary actor frame (Total Time, Total Steps, MET-calculated Caloric Burn) and disable arcade grading panels.
+- [ ] Write integration hooks to pipe real-time Bluetooth Heart Rate Monitor (HRM) data directly into the StepMania UI layer.
 
-- [ ] Patch StepMania engine for 9-panel GameButton support and compile on ARM64 target.
-- [ ] Implement Fitness UI theme (Qt QML or Lua): all screens from attract through session summary.
-- [ ] Rewrite ScreenTitleMenu overlay.lua to implement immediate auto-join and screen bypass to ScreenSelectMusic.
-- [ ] Build stripped fitness post-game summary actor frame (Total Time, Total Steps, MET-calculated Caloric Burn) and disable arcade grading panels.
-- [ ] Write integration hooks to pipe real-time Bluetooth Heart Rate Monitor (HRM) data into the StepMania UI layer.
+### 🔌 Firmware & Input Driver Engineering
+- [ ] Write the C++ SPI ADC hardware driver for the 9-panel load cell matrix configuration.
+- [ ] Implement an automated auto-calibration loop in the microcontroller firmware to calculate baseline ambient weight and adjust for structural shifting.
+- [ ] Add hysteresis filtering logic to the input decoder to eliminate sensor chatter during high-velocity 16th-note continuous runs.
 
-### ☁️ Telemetry & OTA Infrastructure
 
-- [ ] Implement telemetry upload client on the machine (session data → Flask backend).
-- [ ] Implement OTA content pull pipeline (poll manifest + download + verify new charts from AutoArrow).
-- [ ] Build end-to-end test: select workout → play 60-min Marathon → telemetry upload → view on admin dashboard.
-
-### 🤖 AutoArrow ML Extension
-
-- [ ] Extend AutoArrow ML prototype to output 9-panel Fitness-Marathon chart format at all 5 difficulty levels.
-
-### 🔗 Andamiro Engagement
-
-- [ ] Submit formal Partnership Proposal to Andamiro International corporate procurement and receive preliminary MOQ/tooling estimate.
+### 📈 Sales & Pipeline Execution (Path B Enablement)
+- [x] Integrate Path B pricing model into dynamic commercial proposal templates.
+- [x] Expand Sales Pipeline Kanban to include 'Corporate Vendor Approval' stage.
+- [x] Wire METs and telemetry stats into Enterprise Export API for large group reporting.
 
 ### 📈 Sales & Pipeline Execution
-
 - [ ] Hardcode target lead URLs into `scrape_leads.py` and run Playwright to populate remaining blanks in the SQLite CRM database.
 - [ ] Deploy the first flight of the automated cold outreach templates to the top 3 regional franchise groups in `LEADS.md` to establish the Phase 1 pilot baseline.
