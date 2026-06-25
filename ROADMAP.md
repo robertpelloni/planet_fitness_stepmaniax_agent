@@ -66,3 +66,7 @@
 - [x] Update Commercial Proposals for Path B hardware pricing ($6,000 / 500 MOQ).
 - [x] Add "Corporate Vendor Approval" stage to Sales Pipeline Kanban.
 - [x] Integrate MET and Duration metrics into the Enterprise Reporting API.
+
+### 14.5 Path A Engagement
+- [x] Integrate High-Intent Lead Intelligence (Propensity Scoring) based on franchise group profiles.
+- [x] Enhance Automated Outreach Cadence to use professional B2B tone tailored to operational scale.

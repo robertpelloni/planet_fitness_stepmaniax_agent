@@ -74,10 +74,16 @@ def calculate_propensity_score(lead_data):
     elif num_clubs > 50: score += 15
     elif num_clubs > 20: score += 10
 
-    # 2. Regional Priority (Michigan/Midwest)
+    # 2. Regional Priority (Michigan/Midwest) & Franchise Identity Match
     region = (lead_data.get('region') or '').lower()
     if 'michigan' in region or 'mi' == region: score += 15
     elif 'ohio' in region or 'midwest' in region: score += 10
+
+    # NEW: High-Intent Franchise Group Profiling
+    company = (lead_data.get('company') or '').lower()
+    target_groups = ['epic fitness', 'flynn group', 'national fitness partners', 'united fitness partners', 'grand fitness']
+    if any(tg in company for tg in target_groups):
+        score += 20 # Massive boost for verified tier-1 corporate targets
 
     # 3. Status Bonus (Further down the funnel = higher propensity)
     status = lead_data.get('status') or 'Identified'
