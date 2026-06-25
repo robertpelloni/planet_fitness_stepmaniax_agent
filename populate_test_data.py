@@ -231,7 +231,7 @@ def populate():
 
 
     cursor.execute('''
-    CREATE TABLE webhook (
+    CREATE TABLE IF NOT EXISTS webhook (
         id INTEGER PRIMARY KEY,
         franchise_id TEXT,
         url TEXT NOT NULL,
