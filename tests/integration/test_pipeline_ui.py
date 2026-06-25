@@ -15,7 +15,7 @@ def test_admin_pipeline_and_proposal(page: Page):
 
     # 3. Check for Kanban columns
     expect(page.get_by_text("Pilot Operational")).to_be_visible()
-    expect(page.get_by_text("Ready for Outreach")).to_be_visible()
+    expect(page.get_by_role("heading", name="Ready for Outreach")).to_be_visible()
 
     # 4. Navigate to Lead Management
     page.goto("http://localhost:5000/admin/leads")

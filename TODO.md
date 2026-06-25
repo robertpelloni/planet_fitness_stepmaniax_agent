@@ -71,5 +71,5 @@
 - [x] Wire METs and telemetry stats into Enterprise Export API for large group reporting.
 
 ### 📈 Sales & Pipeline Execution
-- [ ] Hardcode target lead URLs into `scrape_leads.py` and run Playwright to populate remaining blanks in the SQLite CRM database.
-- [ ] Deploy the first flight of the automated cold outreach templates to the top 3 regional franchise groups in `LEADS.md` to establish the Phase 1 pilot baseline.
+- [x] Hardcode target lead URLs into `scrape_leads.py` and run Playwright to populate remaining blanks in the SQLite CRM database.
+- [x] Deploy the first flight of the automated cold outreach templates to the top 3 regional franchise groups in `LEADS.md` to establish the Phase 1 pilot baseline.

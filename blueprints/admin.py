@@ -444,6 +444,13 @@ def admin_toggle_cadence(lead_id):
     lead = Lead.query.get_or_404(lead_id)
     lead.cadence_paused = not lead.cadence_paused
     db.session.commit()
+    if request.headers.get('HX-Target', '').startswith('lead-card-'):
+        # Returning an empty string or relying on full page reload is complex with just partials available.
+        # Let's use HX-Refresh to force the pipeline board to reload completely on a status change, keeping it robust.
+        from flask import make_response
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
     return render_template('partials/lead_row.html', lead=lead)
 
 @admin_bp.route('/leads/reset-cadence/<lead_id>', methods=['POST'])
@@ -456,6 +463,13 @@ def admin_reset_cadence(lead_id):
     lead.last_contact_date = None
     lead.cadence_paused = False
     db.session.commit()
+    if request.headers.get('HX-Target', '').startswith('lead-card-'):
+        # Returning an empty string or relying on full page reload is complex with just partials available.
+        # Let's use HX-Refresh to force the pipeline board to reload completely on a status change, keeping it robust.
+        from flask import make_response
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
     return render_template('partials/lead_row.html', lead=lead)
 
 @admin_bp.route('/leads/update-status/<lead_id>', methods=['POST'])
@@ -469,6 +483,13 @@ def admin_update_lead_status(lead_id):
     lead.status = new_status
     db.session.commit()
     log_security_event(current_user.id, f"Lead {lead_id} Status Transition: {old_status} -> {new_status}")
+    if request.headers.get('HX-Target', '').startswith('lead-card-'):
+        # Returning an empty string or relying on full page reload is complex with just partials available.
+        # Let's use HX-Refresh to force the pipeline board to reload completely on a status change, keeping it robust.
+        from flask import make_response
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
     return render_template('partials/lead_row.html', lead=lead)
 
 @admin_bp.route('/leads/dispatch-outreach/<lead_id>', methods=['POST'])
@@ -484,6 +505,13 @@ def admin_dispatch_outreach(lead_id):
         print(f"Error in manual dispatch: {e}")
 
     lead = Lead.query.get_or_404(lead_id)
+    if request.headers.get('HX-Target', '').startswith('lead-card-'):
+        # Returning an empty string or relying on full page reload is complex with just partials available.
+        # Let's use HX-Refresh to force the pipeline board to reload completely on a status change, keeping it robust.
+        from flask import make_response
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
     return render_template('partials/lead_row.html', lead=lead)
 
 @admin_bp.route('/leads/delete/<lead_id>', methods=['POST'])
