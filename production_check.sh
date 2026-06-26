@@ -21,7 +21,14 @@ if ! pip freeze | grep -q "gunicorn"; then
     pip install gunicorn
 fi
 
-# 4. API Key Check
+# 4. Service Integration Check
+if [ ! -f "smx-dashboard.service" ]; then
+    echo "⚠️ WARNING: Systemd service files not configured. Run ./install_services.sh"
+    exit 1
+fi
+
+
+# 5. API Key Check
 if ! grep -q "SMX_API_KEY" .env; then
     echo "❌ ERROR: SMX_API_KEY not defined in .env."
     exit 1

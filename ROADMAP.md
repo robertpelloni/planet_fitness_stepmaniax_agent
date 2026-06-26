@@ -70,3 +70,6 @@
 ### 14.5 Path A Engagement
 - [x] Integrate High-Intent Lead Intelligence (Propensity Scoring) based on franchise group profiles.
 - [x] Enhance Automated Outreach Cadence to use professional B2B tone tailored to operational scale.
+
+### 14.6 Path B Corporate Collateral
+- [x] Draft the corporate procurement pitch deck outlining the Andamiro 9-panel matrix and software fork ROI.
