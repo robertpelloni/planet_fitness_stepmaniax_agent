@@ -60,9 +60,9 @@
 - [x] Write integration hooks to pipe real-time Bluetooth Heart Rate Monitor (HRM) data directly into the StepMania UI layer.
 
 ### 🔌 Firmware & Input Driver Engineering
-- [ ] Write the C++ SPI ADC hardware driver for the 9-panel load cell matrix configuration.
-- [ ] Implement an automated auto-calibration loop in the microcontroller firmware to calculate baseline ambient weight and adjust for structural shifting.
-- [ ] Add hysteresis filtering logic to the input decoder to eliminate sensor chatter during high-velocity 16th-note continuous runs.
+- [x] Write the C++ SPI ADC hardware driver for the 9-panel load cell matrix configuration.
+- [x] Implement an automated auto-calibration loop in the microcontroller firmware to calculate baseline ambient weight and adjust for structural shifting.
+- [x] Add hysteresis filtering logic to the input decoder to eliminate sensor chatter during high-velocity 16th-note continuous runs.
 
 
 ### 📈 Sales & Pipeline Execution (Path B Enablement)
