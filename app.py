@@ -51,7 +51,7 @@ app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 
 project_root = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(project_root, 'crm.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- Extensions Initialization ---

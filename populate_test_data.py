@@ -7,6 +7,10 @@ from datetime import datetime
 db_path = 'crm.db'
 
 def populate():
+    from app import app
+    from models import db
+    with app.app_context():
+        db.create_all()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -224,6 +228,16 @@ def populate():
         updated_at TEXT,
         FOREIGN KEY(equipment_id) REFERENCES equipment_metric(id)
     )""")
+
+
+    cursor.execute('''
+    CREATE TABLE webhook (
+        id INTEGER PRIMARY KEY,
+        franchise_id TEXT,
+        url TEXT NOT NULL,
+        service TEXT,
+        FOREIGN KEY(franchise_id) REFERENCES leads(id)
+    )''')
 
     cursor.execute("PRAGMA foreign_keys = ON")
 

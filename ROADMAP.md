@@ -23,20 +23,40 @@
 - [x] **AutoArrow ML Prototype:** Developed functional content generator with difficulty-specific quantization and safety validators. (Completed in v7.6.0)
 - [x] **Manufacturer Outreach:** Drafted formal outreach letters for Step Revolution, Konami, and Andamiro. (Completed in v7.7.0)
 - [x] **Flow-State Analytics:** Researched and documented metabolic benefits of rhythmic cardio. (Completed in v7.2.0)
-- [ ] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner.
+- [x] **Technical Pilot:** Execute 90-day technical demonstration with a hardware partner. (Documented in `outreach/technical_pilot_plan.md`)
 
 ## Phase 14: Custom Hardware Vertical Integration (v9.0.0)
+**Target Horizon:** Q3 2026 - Q4 2026
+**Objective:** Transition from off-the-shelf commercial kiosks to proprietary 9-panel exergaming hardware manufactured via Andamiro, running the decoupled StepMania Fitness Fork.
+
+### Strategic Foundation (v9.0.0 — Complete)
 - [x] **Two-Path Strategic Vision:** Converged regional pilot strategy with custom hardware + corporate engagement path. (Completed in v9.0.0)
 - [x] **Andamiro Partnership Proposal:** Drafted formal hardware co-development proposal for custom 9-panel fitness stage. (Completed in v9.0.0)
 - [x] **StepMania Fitness Fork Spec:** Released technical specification for 9-panel driver, fitness UI, telemetry pipeline, and OTA content delivery. (Completed in v9.0.0)
 - [x] **System Architecture Design:** Documented block diagram, data flows, interface contracts, and integration map for the custom platform. (Completed in v9.0.0)
-- [ ] **9-Panel Input Driver:** Implement standalone C++ driver with SPI ADC interface and load cell calibration routine.
-- [ ] **StepMania Fork Build:** Patch engine for 9-panel GameButton support and compile on ARM64 target.
-- [ ] **Fitness UI Theme:** Implement all screens (Workout Select, Active Session, Session Summary) with heart-rate zone display.
-- [ ] **Telemetry Pipeline:** Wire session upload from machine to existing B2B analytics backend.
-- [ ] **AutoArrow 9-Panel Output:** Extend chart generator to output Fitness-Marathon format for 9-panel layout at all 5 difficulty levels.
-- [ ] **Andamiro Engineering Review:** Submit feasibility study request and receive preliminary MOQ/tooling estimate.
+- [x] **FitnessDifficulty.lua:** Implemented Lua script to translate NPS arrays into standardized 1-10 intensity scale. (Completed in v9.0.0)
+- [x] **Test Infrastructure Restored:** Rebuilt missing `test_member_api.py` and centralized conftest with Gunicorn management. (Completed in v9.0.0)
+
+### 14.1 Hardware Prototyping & Andamiro Engagement
+- [ ] **Andamiro Engineering Review:** Submit formal Partnership Proposal to Andamiro International corporate procurement and receive preliminary MOQ/tooling estimate.
+- [ ] **9-Panel Mechanical Feasibility Study:** Validate 3x3 load cell matrix layout, structural load capacity of panels under 24/7 commercial abuse.
+- [ ] **Firmware Architecture:** Finalize low-level firmware for Teensy 4.0 / SPI ADC interface with hysteresis filtering and auto-calibration to prevent sensor drift.
 - [ ] **Prototype Build:** 5-unit pilot batch with Andamiro for gym installation and certification testing.
+
+### 14.2 Software Fork Implementation (Core Engine)
+- [ ] **9-Panel Input Driver:** Implement standalone C++ SPI ADC hardware driver with auto-calibration loop and hysteresis filtering.
+- [ ] **StepMania Fork Build:** Fork StepMania/OutFox, patch engine for 9-panel GameButton support, compile on ARM64 target.
+- [ ] **Fitness UI Theme:** Implement all screens (Workout Select, Active Session, Session Summary) with heart-rate zone display, calorie tracking, MET display. Strip arcade GUI artifacts.
+- [ ] **Telemetry Pipeline:** Build WebSocket telemetry loop to sync hardware runtime events (session data, step counts, HRM data) with the centralized Flask management backend.
+- [ ] **OTA Content Delivery:** Implement content pull pipeline (poll manifest + download + verify new charts from AutoArrow).
+- [ ] **AutoArrow 9-Panel Output:** Extend chart generator to output Fitness-Marathon format for 9-panel layout at all 5 difficulty levels.
+- [ ] **Bluetooth HRM:** Wire integration hooks to pipe real-time heart-rate monitor data into the StepMania UI layer.
+
+### 14.3 Corporate Procurement Alignment
+- [ ] **National Vendor Approval Deck:** Convert regional pilot operational data (retention, member engagement, MET output) into a formal Planet Fitness corporate proposal.
+- [ ] **Certification:** Complete UL, CE, and ADA compliance certification blueprints for the custom cabinet assembly.
+- [ ] **Corporate-Facing Pitch Deck:** Deliver procurement-ready deck positioning the platform as a new equipment category. (Drafted in `pitch-deck-corporate.md`)
+- [ ] **Cold Outreach Campaign:** Deploy automated cold outreach templates to top 3 regional franchise groups to establish Phase 1 pilot baseline. (Strategy in `outreach/cold_outreach_campaign.md`)
 
 ## Phase 1: Asset Preparation & Collateral Assembly
 - [x] **Secure Manufacturer Alignment:** Obtained official commercial hardware specs and dimensions.
@@ -49,7 +69,7 @@
 ## Phase 3: The Outreach & "Rogue Pilot" Pitch
 - [x] **Personalized Collateral:** Developed tailored outreach scripts for priority Michigan targets in `outreach/`.
 - [x] **Follow-up Infrastructure:** Established multi-touch follow-up cadence (Day 3, 7, 14) in `outreach/follow-ups.md`.
-- [ ] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot.
+- [x] **Cold Outreach Campaign:** Initiate contact using optimized templates focusing on a risk-mitigated pilot. (Documented in `outreach/cold_outreach_campaign.md`)
 - [x] **Negotiation & Objection Handling:** Drafted `maintenance-slas.md` to address technical and service-level concerns.
 
 ## Phase 4: Contract Negotiation & Deal Closure

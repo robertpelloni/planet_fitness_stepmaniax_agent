@@ -18,6 +18,20 @@
         <div>
             <h1 class="text-5xl font-black italic tracking-tighter text-yellow-400 uppercase">Live Ops Wallboard</h1>
             <p class="text-slate-400 font-bold tracking-widest mt-2">{{ franchise_name }} • REAL-TIME FACILITY INTELLIGENCE</p>
+            {% if all_regions %}
+            <div class="mt-4 flex gap-4">
+                <a href="{{ url_for('staff.live_ops_wallboard') }}"
+                   class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all border border-slate-700 {% if not current_region %}bg-yellow-400 text-black border-yellow-400{% else %}text-slate-500 hover:border-slate-500{% endif %}">
+                    Global
+                </a>
+                {% for region in all_regions %}
+                <a href="{{ url_for('staff.live_ops_wallboard', region=region) }}"
+                   class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all border border-slate-700 {% if current_region == region %}bg-yellow-400 text-black border-yellow-400{% else %}text-slate-500 hover:border-slate-500{% endif %}">
+                    {{ region }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         <div class="text-right">
             <div class="text-4xl font-mono font-black" id="clock">00:00:00</div>
@@ -27,7 +41,7 @@
 
     <!-- Live KPI Strip -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
-         hx-get="{{ url_for('api.api_live_occupancy') }}"
+         hx-get="{{ url_for('api.api_live_occupancy', franchise_id=request.args.get('franchise_id'), region=current_region) }}"
          hx-trigger="every 10s"
          hx-swap="none"
          hx-on::after-request="updateWallboard(event)">
