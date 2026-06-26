@@ -28,7 +28,8 @@ def test_enterprise_export_success(client):
     assert "telemetry" in data
     assert "engagement" in data
     assert "sentiment" in data
-    assert data["version"] == "4.8.0"
+    assert data["version"] == "4.8.1"
+    assert "pilot_session_logs" in data
 
 def test_enterprise_leads_success(client):
     """Test successful enterprise lead sync with API key."""

@@ -472,12 +472,23 @@ def api_enterprise_export():
         "franchise_id": f.franchise_id
     } for f in feedback]
 
+    # Path A Pilot Session Logs (from TelemetryHistory)
+    history = TelemetryHistory.query.all()
+    session_logs = [{
+        "equipment_id": h.equipment_id,
+        "member_id": h.member_id,
+        "timestamp": h.timestamp,
+        "scans_count": h.scans_count,
+        "duration_minutes": h.duration_minutes
+    } for h in history]
+
     return {
-        "version": "4.8.0",
+        "version": "4.8.1",
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "telemetry": telemetry_data,
         "engagement": engagement_data,
-        "sentiment": sentiment_data
+        "sentiment": sentiment_data,
+        "pilot_session_logs": session_logs
     }, 200
 
 @api_bp.route('/v1/enterprise/leads', methods=['GET'])
