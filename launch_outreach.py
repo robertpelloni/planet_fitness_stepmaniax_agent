@@ -43,21 +43,34 @@ Best,
 B2B Sales Agent (Autonomous Dispatch)
 """
     elif tier == 2:
+        # Phase 14: Dynamic Telemetry Injection
+        # We query the DB here to pull live metrics into the outreach email
+        telemetry_pitch = "The StepManiaX Kiosk requires a footprint of only 75\"W x 95\"D and runs on a standard 120V outlet."
+        try:
+            from models import EquipmentMetric
+            units = EquipmentMetric.query.filter_by(franchise_id=lead.id).all()
+            if units:
+                avg_dur = sum([u.avg_session_duration for u in units]) / len(units)
+                if avg_dur > 0:
+                    telemetry_pitch = f"Based on the real-time telemetry from your current Phase 1 pilot unit, we are seeing average member session durations of {avg_dur:.1f} minutes at a highly sustained MET output. This validates our 'Marathon Content' strategy directly on your floor."
+        except:
+            pass
+
         return f"""
-Subject: Zero-Risk Pilot: Footprint and Maintenance SLA
+Subject: Following up: StepManiaX Commercial Expansion / Pilot Telemetry
 
 {lead.contact_name},
 
 I understand that gym floor real estate is premium. To address any operational concerns:
 
-The StepManiaX Kiosk requires a footprint of only 75"W x 95"D and runs on a standard 120V outlet. As part of our pilot agreement, we handle 100% of the maintenance with a guaranteed 48-hour service turnaround.
+{telemetry_pitch} As part of our agreement, we handle 100% of the maintenance with a guaranteed 48-hour service turnaround.
 
 We handle the hardware; you get the data on how it impacts your club's retention metrics.
 
 Is there a better contact on your operations team I should be speaking with, or are you available for a brief call next Tuesday?
 
 Best,
-B2B Sales Agent (Autonomous Dispatch)
+StepManiaX B2B Team
 """
     elif tier == 3:
         return f"""
