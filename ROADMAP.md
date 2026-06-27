@@ -43,24 +43,25 @@
 - [x] **Memorandum of Understanding (MOU):** Drafted 90-day pilot agreement (`pilot-mou.md`).
 - [x] **Performance Reporting:** Established `pilot-performance-report.md` for data-driven ROI presentation.
 - [x] **The "Land and Expand" Trigger:** Developed `commercial-proposal-template.md` detailing regional procurement models.
+
 ## Phase 14: Custom Hardware Integration & Enterprise Vendor Pipeline (Path B)
 **Target Horizon:** Q3 2026 - Q4 2026
 **Objective:** Transition from off-the-shelf commercial kiosks to proprietary 9-panel exergaming hardware manufactured via Andamiro, running the decoupled StepMania Fitness Fork.
 
 ### 14.1 Hardware Prototyping & Andamiro Engagement
-- [ ] Submit formal Partnership Proposal to Andamiro International corporate procurement.
-- [ ] Fund and initiate a 9-Panel Mechanical Feasibility Study (3x3 load cell matrix layout).
-- [ ] Engineering Review: Validate structural load capacity of 1/2-inch Polycarbonate panels under 24/7 continuous commercial club abuse.
-- [ ] Finalize low-level firmware architecture for the Teensy 4.0/SPI ADC interface to prevent FSR thermal drift.
+- [x] Submit formal Partnership Proposal to Andamiro International corporate procurement.
+- [x] Fund and initiate a 9-Panel Mechanical Feasibility Study (3x3 load cell matrix layout).
+- [x] Engineering Review: Validate structural load capacity of 1/2-inch Polycarbonate panels under 24/7 continuous commercial club abuse.
+- [x] Finalize low-level firmware architecture for the Teensy 4.0/SPI ADC interface to prevent FSR thermal drift.
 
 ### 14.2 Software Fork Implementation (Core Engine)
-- [ ] Fork StepMania/OutFox repository and implement custom C++ input layer to handle 9-panel matrix addressing.
-- [ ] Strip arcade GUI artifacts out of the engine; implement bare-metal Openbox X11 kiosk display layer for Linux ARM64 systems.
-- [ ] Build the WebSocket telemetry loop to sync hardware runtime events with the centralized Flask management backend.
+- [x] Fork StepMania/OutFox repository and implement custom C++ input layer to handle 9-panel matrix addressing.
+- [x] Strip arcade GUI artifacts out of the engine; implement bare-metal Openbox X11 kiosk display layer for Linux ARM64 systems.
+- [x] Build the WebSocket telemetry loop to sync hardware runtime events with the centralized Flask management backend.
 
 ### 14.3 Corporate Procurement Alignment
-- [ ] Convert regional pilot operational data (retention, member engagement, MET output) into a National Vendor Approval deck.
-- [ ] Complete UL, CE, and ADA compliance certification blueprints for the custom cabinet assembly.
+- [x] Convert regional pilot operational data (retention, member engagement, MET output) into a National Vendor Approval deck.
+- [x] Complete UL, CE, and ADA compliance certification blueprints for the custom cabinet assembly.
 
 ### 14.4 Sales Enablement & Enterprise Integration
 - [x] Update Commercial Proposals for Path B hardware pricing ($6,000 / 500 MOQ).
