@@ -48,3 +48,11 @@ def test_category_floor(lua_fitness):
 
     # 11.9 NPS -> 9.9 Intensity -> Category 9
     assert lua_fitness.GetCategoryFromNPS(11.9) == 9
+
+def test_bridge_nps_to_intensity(lua_fitness):
+    """Test the Python bridge function that wraps the Lua module."""
+    from app import bridge_nps_to_intensity
+
+    assert bridge_nps_to_intensity(0) == 1.0
+    assert bridge_nps_to_intensity(6.0) == 5.0
+    assert bridge_nps_to_intensity(15.0) == 10.0
