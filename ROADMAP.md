@@ -74,3 +74,7 @@
 
 ### 14.6 Path B Corporate Collateral
 - [x] Draft the corporate procurement pitch deck outlining the Andamiro 9-panel matrix and software fork ROI.
+
+### 14.7 Core Engine Test Infrastructure
+- [x] Integrate embedded Lua runtime (`lupa`) for cross-language logic validation.
+- [x] Generate unit tests for `FitnessDifficulties.lua` validating heart-rate and MET algorithms.
