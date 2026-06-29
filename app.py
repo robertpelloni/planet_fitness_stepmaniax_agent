@@ -117,20 +117,7 @@ def prospect_portal(token):
 def serve_resources(filename):
     return redirect(url_for('admin.serve_resources', filename=filename))
 
-def bridge_nps_to_intensity(nps: float) -> float:
-    """
-    Bridge function calling out to the FitnessDifficulties.lua module
-    to fetch the intensity corresponding to a specific NPS.
-    """
-    import os
-    from lupa import LuaRuntime
-    lua = LuaRuntime(unpack_returned_tuples=True)
-    script_path = os.path.join(os.path.dirname(__file__), 'Scripts/FitnessDifficulties.lua')
-    with open(script_path, 'r') as f:
-        lua_code = f.read()
-    fitness_module = lua.execute(lua_code)
-    return fitness_module.GetIntensityFromNPS(nps)
-
+@app.cli.command("init-db")
 def init_db():
     db.create_all()
     print(f"Database tables created in {db_path}.")

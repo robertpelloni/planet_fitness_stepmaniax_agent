@@ -16,7 +16,3 @@
 - Use `VERSION.md` as the single source of truth for versioning.
 - Prefer explicit documentation over complex, un-commented code.
 - Prioritize multi-tenant isolation and granular RBAC for franchise safety.
-
-## Engineering Observations (Phase 14 & Testing)
-- **Lua-Python Interop Quirks:** Testing native StepMania UI scripts (`.lua`) inside the Flask/Python CI pipeline requires the `lupa` library. The embedded Lua runtime successfully parses module exports, allowing `pytest` to natively assert difficulty and MET scaling without spinning up the heavy C++ StepMania engine.
-- **Test Coverage Gaps:** Previous gaps around UI logic have been plugged using Playwright for HTML and Lupa for StepMania UI hooks.
