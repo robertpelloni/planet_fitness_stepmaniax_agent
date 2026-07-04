@@ -54,4 +54,4 @@ def test_per_user_api_key(client):
     headers = {'X-API-KEY': 'test-key-123'}
     response = client.get('/api/v1/enterprise/export', headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['version'] == '4.8.0'
+    assert response.get_json()['version'] == '4.8.1'

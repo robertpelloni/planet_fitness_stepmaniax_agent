@@ -42,8 +42,28 @@
                                     <span class="text-[8px] font-black text-blue-400">{{ lead.propensity_score }}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2">
-                                <a href="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) }}" class="text-slate-500 hover:text-white transition-colors">
+                            <div class="flex gap-2 items-center">
+                                <select name="status" hx-post="{{ url_for('admin.admin_update_lead_status', lead_id=lead.id) }}"
+                                        hx-target="#lead-card-{{ lead.id }}" hx-swap="outerHTML"
+                                        hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                                        class="text-[9px] bg-slate-700 text-slate-300 rounded border-none focus:ring-0 py-0.5 max-w-[100px]">
+                                    <option value="">Move...</option>
+                                    <option value="Researching">Researching</option>
+                                    <option value="Ready for Outreach">Ready for Outreach</option>
+                                    <option value="Outreach Active">Outreach Active</option>
+                                    <option value="Discovery Call Scheduled">Discovery Scheduled</option>
+                                    <option value="Pilot MOU Signed">MOU Signed</option>
+                                    <option value="Corporate Vendor Approval">Corporate Approval</option>
+                                </select>
+                                {% if lead.status == 'Ready for Outreach' %}
+                                <button hx-post="{{ url_for('admin.admin_dispatch_outreach', lead_id=lead.id) }}"
+                                        hx-target="#lead-card-{{ lead.id }}" hx-swap="outerHTML"
+                                        hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                                        class="text-[9px] bg-blue-600 hover:bg-blue-500 text-white rounded px-2 py-0.5 ml-1">
+                                    Dispatch
+                                </button>
+                                {% endif %}
+                                <a href="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) }}" class="text-slate-500 hover:text-white transition-colors ml-1">
                                     <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                                 </a>
                                 <a href="{{ url_for('admin.prospect_portal', token=lead.public_token) }}" target="_blank" class="text-slate-500 hover:text-blue-400 transition-colors">

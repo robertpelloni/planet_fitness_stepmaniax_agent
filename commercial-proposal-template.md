@@ -6,14 +6,14 @@
 ---
 
 ## 1. Executive Summary
-Based on the successful 90-day pilot data at [Pilot Location], we have demonstrated a clear member engagement lift and retention benefit for the "Interactive Generation." We are now proposing a structured commercial expansion to deploy StepManiaX All-In-One units across your regional portfolio.
+Based on the successful 90-day pilot data at [Pilot Location], we have demonstrated a clear member engagement lift and retention benefit for the "Interactive Generation." We are now proposing a structured commercial expansion to deploy custom 9-Panel Andamiro Fitness Matrix stages (Path B) across your regional portfolio.
 
 ## 2. Proposed Commercial Models
 We offer two primary pathways for regional expansion, designed to align with your capital expenditure and operational preferences.
 
 ### Option A: Regional Procurement (CapEx Focus)
 *Ideal for franchise groups seeking maximum ROI and total asset control.*
-- **Volume Pricing:** [Insert tiered pricing based on unit volume, e.g., 5-10 units, 10-25 units].
+- **Volume Pricing:** Tier 1 Pricing (MOQ 500 units): $6,000 USD per unit via direct corporate procurement.
 - **Commercial Warranty:** Includes a 12-month comprehensive manufacturer warranty on all mechanical and electrical components.
 - **Service Contract:** Optional monthly service plan including 48-hour on-site response and quarterly preventive maintenance.
 
