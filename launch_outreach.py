@@ -17,6 +17,14 @@ CADENCE_SCHEDULE = {
 
 def get_followup_template(tier, lead):
     """Returns the template for the specified follow-up tier."""
+
+    # Analyze franchise size for dynamic corporate tone
+    scale_mention = ""
+    if lead.num_clubs and lead.num_clubs >= 100:
+        scale_mention = f"Given {lead.company}'s scale of {lead.num_clubs} locations, "
+    else:
+        scale_mention = f"Given {lead.company}'s focus on high-quality fitness experiences, "
+
     if tier == 1:
         return f"""
 Subject: Re: Strategic Amenity Pilot: Interactive HIIT / Member Retention
@@ -27,7 +35,7 @@ I’m following up on my previous note regarding the StepManiaX 90-day pilot.
 
 One detail I didn’t emphasize: we’ve seen that gamified cardio doesn’t just attract Gen Z—it increases average session duration by up to 25% compared to traditional treadmills.
 
-Given {lead.company}’s focus on providing a high-quality fitness experience, this low-impact, high-engagement tool is specifically designed to reduce member churn by providing a structured, progression-based experience.
+{scale_mention} this low-impact, high-engagement tool is specifically designed to reduce member churn by providing a structured, progression-based experience.
 
 Do you have 5 minutes this Thursday or Friday for a quick sync?
 
