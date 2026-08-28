@@ -89,7 +89,24 @@ app.register_blueprint(api_bp, url_prefix='/api')
 
 csrf.exempt(api_bp)
 
+
+# --- WebSocket Setup ---
+try:
+    from flask_sock import Sock
+    sock = Sock(app)
+
+    @sock.route('/ws/telemetry')
+    def ws_telemetry(ws):
+        while True:
+            data = ws.receive()
+            if data:
+                # Basic mock integration for WS, ideally it would bridge logic to enterprise sync framework.
+                ws.send(f"Echo: {data}")
+except ImportError:
+    pass
+
 # --- Routes ---
+
 @app.route('/')
 @login_required
 def index():

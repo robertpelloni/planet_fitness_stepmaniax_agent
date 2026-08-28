@@ -364,8 +364,26 @@ def api_hardware_checkin():
     elif biometric_token:
         member = Member.query.filter_by(biometric_token=biometric_token).first()
 
+
     if not member:
         return {"error": "Member not identified"}, 404
+
+    met_estimate = None
+    if data.get('nps') is not None:
+        try:
+            from lupa import LuaRuntime
+            import os
+            lua = LuaRuntime(unpack_returned_tuples=True)
+            script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Scripts', 'FitnessDifficulties.lua')
+            with open(script_path, 'r') as f:
+                lua_code = f.read()
+            lua_module = lua.execute(lua_code)
+            met_estimate = lua_module.EstimateMET(float(data['nps']))
+        except Exception as e:
+            print(f"Error calculating METs from NPS via Lua: {e}")
+            from analytics import calculate_mets_from_nps
+            met_estimate = calculate_mets_from_nps(float(data['nps']))
+
 
     history = TelemetryHistory(
         equipment_id=equipment_id,
@@ -380,7 +398,8 @@ def api_hardware_checkin():
     return {
         "status": "success",
         "member_name": member.name,
-        "points_total": member.points
+        "points_total": member.points,
+        "met_estimate": met_estimate
     }, 200
 
 @api_bp.route('/v1/auth/member-login', methods=['POST'])

@@ -208,3 +208,39 @@ def calculate_capacity_utilization(total_sessions, uptime_percent):
     utilization = (total_sessions / max_capacity) * 100
 
     return round(min(100.0, utilization), 1)
+
+def calculate_mets_from_nps(nps):
+    """
+    Calculates the Metabolic Equivalent of Task (MET) from Notes Per Second (NPS).
+    """
+    if not nps or nps <= 0:
+        return 1.0
+
+    MAX_CARDIO_NPS = 12.0
+    raw_scale = (nps / MAX_CARDIO_NPS) * 10.0
+
+    if raw_scale > 10.0:
+        raw_scale = 10.0
+
+    intensity = round(raw_scale, 1)
+    met = 3.0 + (intensity - 1.0) * (9.0 / 9.0)
+
+    return round(met, 1)
+
+def classify_heart_rate_zone(bpm):
+    """
+    Classifies heart rate into a fitness zone based on BPM.
+    Assumes a max heart rate of roughly 190.
+    """
+    if bpm < 100:
+        return 'Resting'
+    elif bpm < 120:
+        return 'Zone 1 (Warmup)'
+    elif bpm < 140:
+        return 'Zone 2 (Fat Burn)'
+    elif bpm < 155:
+        return 'Zone 3 (Aerobic)'
+    elif bpm < 170:
+        return 'Zone 4 (Threshold)'
+    else:
+        return 'Zone 5 (Max)'

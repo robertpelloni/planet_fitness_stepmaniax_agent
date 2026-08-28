@@ -18,6 +18,8 @@ PYTHONPATH=. pytest tests/integration/test_checkin.py \
                    tests/integration/test_mfa_api.py \
                    tests/integration/test_cadence.py \
                    tests/integration/test_orchestration.py \
+                   tests/test_lua_fitness.py \
+                   tests/test_analytics_python_engine.py \
                    tests/test_backup.py \
                    tests/test_restoration.py
 
