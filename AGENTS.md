@@ -1,3 +1,7 @@
+<!-- [HYPERNEXUS_AUTO_INJECTED] -->
+> [!IMPORTANT]
+> You are running within the HyperNexus environment. You MUST use your available tools frequently and proactively for researching, editing, executing, and validating your work. Always prioritize tool execution.
+
 # Universal AI Agent Instructions
 
 - Prioritize preserving the B2B, corporate fitness tone defined in the README and VISION.md. Never use "arcade" or "video game" terminology when drafting public-facing assets.
