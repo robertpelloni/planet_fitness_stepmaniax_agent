@@ -78,3 +78,9 @@
 ### 📈 Sales & Pipeline Execution
 - [x] Hardcode target lead URLs into `scrape_leads.py` and run Playwright to populate remaining blanks in the SQLite CRM database.
 - [x] Deploy the first flight of the automated cold outreach templates to the top 3 regional franchise groups in `LEADS.md` to establish the Phase 1 pilot baseline.
+
+### 🎛️ Unified Operations Center & System Management (v9.3.0)
+- [x] Consolidate dashboard architecture into Global Operations Center (`/admin/unified-dashboard`) with comprehensive tooltips and interactive controls.
+- [x] Implement System Tray & Server Process Manager (`system_tray_manager.py`) with start/stop/restart/logs and GUI tray hooks.
+- [x] Bridge StepMania Lua fitness logic via `bridge_nps_to_intensity` and WebSocket telemetry endpoint in `app.py`.
+- [x] Non-destructively organize scripts and create backups in `backups/scripts/`.

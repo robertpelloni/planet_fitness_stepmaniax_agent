@@ -27,16 +27,18 @@
                 <div class="hidden md:flex items-center space-x-6">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role in ['Admin', 'Franchisee'] %}
+                            <a href="{{ url_for('admin.unified_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-black text-yellow-400 flex items-center gap-1.5" title="Consolidated multi-regional operations cockpit">
+                                <i class="fa-solid fa-gauge-high"></i>
+                                <span>Operations Center</span>
+                            </a>
                             <a href="{{ url_for('admin.dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Portfolio</a>
                             <a href="{{ url_for('staff.manager_dashboard') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Manager Ops</a>
                         {% endif %}
 
                         {% if current_user.role == 'Admin' %}
-                            <a href="{{ url_for('admin.admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium text-blue-400 font-bold">Command Center</a>
                             <a href="{{ url_for('admin.admin_pipeline') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Pipeline</a>
                             <a href="{{ url_for('admin.admin_pilot_success') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Pilot Success</a>
-                            <a href="{{ url_for('admin.admin_optimization') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Optimization</a>
-                            <a href="{{ url_for('admin.admin_feedback') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Feedback</a>
+                            <a href="{{ url_for('admin.admin_command_center') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Command Center</a>
                             <a href="{{ url_for('admin.admin_system_health') }}" class="hover:text-yellow-400 transition-colors text-sm font-medium">Health</a>
                         {% endif %}
 

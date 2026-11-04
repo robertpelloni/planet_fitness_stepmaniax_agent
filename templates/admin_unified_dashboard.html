@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block title %}Global Operations Center - StepManiaX B2B{% endblock %}
+
+{% block content %}
+<div class="space-y-8" x-data="{ activeTab: 'pipeline' }">
+    <!-- Header Section with High-Level Operational Metrics -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl border border-slate-700/60 relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-black tracking-widest uppercase bg-yellow-400 text-slate-900 shadow-sm">
+                        Global Operations Center
+                    </span>
+                    <span class="text-xs text-slate-400 flex items-center gap-1" title="Real-time multi-tenant telemetry and pipeline monitoring">
+                        <i class="fa-solid fa-circle text-[8px] text-emerald-400 animate-pulse"></i> Live Sync
+                    </span>
+                </div>
+                <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight mt-2 text-white">
+                    Executive Control Wallboard
+                </h1>
+                <p class="text-slate-300 text-sm mt-1 max-w-2xl">
+                    Unified multi-regional cockpit consolidating enterprise outreach pipeline, Path A &amp; Path B hardware telemetry, real-time ROI pacing, and autonomous dispatch controls.
+                </p>
+            </div>
+
+            <!-- Region Cluster Filter & Quick Actions -->
+            <div class="flex flex-wrap items-center gap-3">
+                {% if all_regions %}
+                <form method="GET" action="{{ url_for('admin.unified_dashboard') }}" class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-1.5 shadow-inner">
+                    <i class="fa-solid fa-globe text-slate-400 mr-2 text-xs"></i>
+                    <select name="region" onchange="this.form.submit()" class="bg-transparent text-xs text-slate-200 border-none focus:ring-0 cursor-pointer pr-6">
+                        <option value="">All Territory Clusters</option>
+                        {% for r in all_regions %}
+                        <option value="{{ r }}" {% if current_region == r %}selected{% endif %}>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                {% endif %}
+
+                <!-- Campaign Launch Action Form -->
+                <form method="POST" action="{{ url_for('admin.admin_launch_campaign') }}" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                            title="Trigger the autonomous scraping and tiered cold outreach campaign engine"
+                            class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs shadow-lg transition-transform active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Launch Campaign</span>
+                    </button>
+                </form>
+
+                <a href="{{ url_for('admin.admin_lead_create') }}"
+                   title="Manually create a new franchise partner target or corporate lead"
+                   class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-lg transition-transform active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Lead</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- KPI Executive Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Active Leads</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Total targeted franchise partner organizations currently in CRM"></i>
+                </div>
+                <div class="text-2xl font-black text-white mt-1">{{ total_leads }}</div>
+                <div class="text-[10px] text-blue-400 font-medium mt-0.5">{{ total_outreach }} touches sent</div>
+            </div>
+
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Active Pilots</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Franchises with 90-day pilot MOUs currently operational"></i>
+                </div>
+                <div class="text-2xl font-black text-emerald-400 mt-1">{{ active_pilots_count }}</div>
+                <div class="text-[10px] text-slate-400 font-medium mt-0.5">${{ "{:,.0f}".format(total_pilot_actual_revenue) }} revenue</div>
+            </div>
+
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Fleet Units</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Online and monitored 9-panel StepManiaX hardware units across clubs"></i>
+                </div>
+                <div class="text-2xl font-black text-white mt-1">{{ total_units }}</div>
+                <div class="text-[10px] text-emerald-400 font-medium mt-0.5">{{ avg_uptime }}% avg uptime</div>
+            </div>
+
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Total Scans</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Cumulative member RFID/QR check-ins and session starts"></i>
+                </div>
+                <div class="text-2xl font-black text-yellow-400 mt-1">{{ "{:,}".format(total_scans) }}</div>
+                <div class="text-[10px] text-slate-400 font-medium mt-0.5">{{ live_sessions }} live in gym</div>
+            </div>
+
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Active Alerts</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Unresolved hardware sensor, calibration, or network issues"></i>
+                </div>
+                <div class="text-2xl font-black {% if active_alerts > 0 %}text-amber-400{% else %}text-emerald-400{% endif %} mt-1">
+                    {{ active_alerts }}
+                </div>
+                <div class="text-[10px] text-slate-400 font-medium mt-0.5">{{ pending_dispatches }} pending SLA</div>
+            </div>
+
+            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/40">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Avg Member MET</span>
+                    <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="Fleet-wide Metabolic Equivalent of Task calculated from 9-panel load cell telemetry"></i>
+                </div>
+                <div class="text-2xl font-black text-purple-400 mt-1">{{ avg_fleet_met }}</div>
+                <div class="text-[10px] text-purple-300 font-medium mt-0.5">Cardio Intensity</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tab Bar for High-Value Operations -->
+    <div class="flex border-b border-slate-200 gap-6 overflow-x-auto text-sm font-bold">
+        <a href="#pipeline-section" class="pb-3 text-yellow-600 border-b-2 border-yellow-500 flex items-center gap-2">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Sales &amp; Partnership Pipeline</span>
+        </a>
+        <a href="#telemetry-section" class="pb-3 text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Fleet Hardware &amp; Telemetry</span>
+        </a>
+        <a href="#roi-section" class="pb-3 text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Pilot Financials &amp; ROI</span>
+        </a>
+        <a href="#health-section" class="pb-3 text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>System Health &amp; Dispatch</span>
+        </a>
+        <a href="#member-section" class="pb-3 text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-users"></i>
+            <span>Engagement &amp; Member Analytics</span>
+        </a>
+    </div>
+
+    <!-- SECTION 1: SALES & OUTREACH PIPELINE (HIGHEST STRATEGIC VALUE) -->
+    <div id="pipeline-section" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-funnel-dollar text-yellow-500"></i>
+                    Enterprise Franchise Pipeline
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Drag-free Kanban board with automated propensity intelligence, one-click tier progression, and proposal generation.
+                </p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200">
+                    <i class="fa-solid fa-brain"></i> Propensity Model: Active
+                </span>
+            </div>
+        </div>
+
+        <!-- Kanban Horizontal Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 overflow-x-auto pb-4">
+            {% for stage in pipeline_stages %}
+            <div class="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 flex flex-col min-w-[220px]">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-black uppercase text-slate-700 tracking-wider">{{ stage }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
+                        {{ pipeline_data[stage]|length }}
+                    </span>
+                </div>
+
+                <div class="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
+                    {% for lead in pipeline_data[stage] %}
+                    <div id="lead-card-{{ lead.id }}" class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200/90 hover:shadow-md transition-shadow relative">
+                        <div class="flex justify-between items-start gap-1">
+                            <span class="text-xs font-bold text-slate-900 truncate block max-w-[120px]" title="{{ lead.company }}">
+                                {{ lead.company }}
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-black {% if lead.propensity_score > 70 %}bg-purple-100 text-purple-700{% elif lead.propensity_score > 40 %}bg-blue-100 text-blue-700{% else %}bg-slate-100 text-slate-600{% endif %}" title="Lead Propensity Score (0-100)">
+                                {{ lead.propensity_score }}
+                            </span>
+                        </div>
+
+                        <div class="text-[10px] text-slate-500 mt-1 flex items-center justify-between">
+                            <span><i class="fa-solid fa-building text-[9px]"></i> {{ lead.num_clubs }} clubs</span>
+                            <span class="text-slate-400">{{ lead.region or 'National' }}</span>
+                        </div>
+
+                        <!-- Card Action Strip -->
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                            <!-- Quick Move Dropdown -->
+                            <form class="inline" hx-post="{{ url_for('admin.admin_update_lead_status', lead_id=lead.id) }}" hx-target="#lead-card-{{ lead.id }}" hx-swap="outerHTML">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <select name="status" onchange="this.form.requestSubmit()" class="text-[9px] bg-slate-100 text-slate-700 rounded border-none py-0.5 px-1 font-semibold cursor-pointer">
+                                    <option value="">Move...</option>
+                                    {% for target_stage in pipeline_stages %}
+                                    <option value="{{ target_stage }}" {% if lead.status == target_stage %}disabled{% endif %}>{{ target_stage }}</option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+
+                            <div class="flex items-center gap-1.5">
+                                {% if lead.status == 'Ready for Outreach' %}
+                                <form method="POST" action="{{ url_for('admin.admin_dispatch_outreach', lead_id=lead.id) }}" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="p-1 text-blue-600 hover:text-blue-800" title="Dispatch Automated Tier Outreach">
+                                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <a href="{{ url_for('admin.download_proposal', lead_id=lead.id) }}" class="p-1 text-slate-400 hover:text-emerald-600" title="Download Custom Commercial Proposal">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                </a>
+
+                                <a href="{{ url_for('admin.prospect_portal', token=lead.public_token) }}" target="_blank" class="p-1 text-slate-400 hover:text-purple-600" title="Open Prospect ROI Calculator Portal">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                </a>
+
+                                <a href="{{ url_for('admin.admin_lead_edit', lead_id=lead.id) }}" class="p-1 text-slate-400 hover:text-slate-800" title="Edit Lead Details">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-6 text-slate-400 text-xs italic">
+                        No targets
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- SECTION 2: HARDWARE FLEET TELEMETRY & DISPATCH -->
+    <div id="telemetry-section" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-server text-blue-600"></i>
+                    Hardware Telemetry &amp; Fleet Operations
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Real-time monitoring of deployed 9-panel StepManiaX hardware units across franchise locations, tracking sensor calibration and load cell integrity.
+                </p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                        <th class="pb-3">Unit Hardware</th>
+                        <th class="pb-3">Architecture Path</th>
+                        <th class="pb-3">Location &amp; Cluster</th>
+                        <th class="pb-3">Total Sessions</th>
+                        <th class="pb-3">Avg Duration</th>
+                        <th class="pb-3">Uptime</th>
+                        <th class="pb-3">Hardware Status</th>
+                        <th class="pb-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for unit in metrics %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3 font-bold text-slate-900">
+                            {{ unit.equipment_name }}
+                            <span class="block text-[10px] text-slate-400 font-normal">ID: #{{ unit.id }}</span>
+                        </td>
+                        <td class="py-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black {% if 'Andamiro' in (unit.hardware_path or '') %}bg-purple-100 text-purple-700{% else %}bg-blue-100 text-blue-700{% endif %}" title="Hardware implementation path">
+                                {{ unit.hardware_path or 'Path A (Commercial Kiosk)' }}
+                            </span>
+                        </td>
+                        <td class="py-3 text-slate-600">
+                            {{ unit.location }}
+                            <span class="block text-[10px] text-slate-400">{{ unit.region_cluster or 'US-EAST-1' }}</span>
+                        </td>
+                        <td class="py-3 font-semibold text-slate-700">{{ "{:,}".format(unit.total_sessions) }}</td>
+                        <td class="py-3 text-slate-600">{{ unit.avg_session_duration }} min</td>
+                        <td class="py-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ unit.uptime_percent }}%"></div>
+                                </div>
+                                <span class="font-bold text-slate-700">{{ unit.uptime_percent }}%</span>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            {% if unit.uptime_percent > 95 %}
+                            <span class="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                                <i class="fa-solid fa-circle text-[8px]"></i> Operational
+                            </span>
+                            {% elif unit.uptime_percent > 80 %}
+                            <span class="inline-flex items-center gap-1 text-amber-500 font-bold">
+                                <i class="fa-solid fa-triangle-exclamation text-[8px]"></i> Degraded
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 text-rose-500 font-bold">
+                                <i class="fa-solid fa-circle-xmark text-[8px]"></i> Offline
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 text-right">
+                            <a href="{{ url_for('admin.generate_unit_report', unit_id=unit.id) }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold bg-blue-50 px-2.5 py-1 rounded-lg hover:bg-blue-100 transition-colors">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span>Report</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-slate-400 italic">No hardware units registered in this cluster.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECTION 3: PILOT FINANCIALS & ROI TRACKER -->
+    <div id="roi-section" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-emerald-600"></i>
+                    Pilot Financials &amp; ROI Benchmark
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Live financial performance tracking revenue actuals against projected annual contracts for active franchise pilots.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for pilot in pilot_stats %}
+            <div class="bg-slate-50/70 border border-slate-200 rounded-2xl p-5 space-y-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-black text-slate-900 text-sm">{{ pilot.company }}</h3>
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wide">{{ pilot.region }}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        {{ pilot.status }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Weekly Target</span>
+                        <span class="font-bold text-slate-800">${{ "{:,.2f}".format(pilot.target) }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Actual Realized</span>
+                        <span class="font-bold text-emerald-600">${{ "{:,.2f}".format(pilot.actual) }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <span>Pacing vs. Pilot Goal</span>
+                        <span class="{% if pilot.score >= 100 %}text-emerald-600{% elif pilot.score >= 70 %}text-blue-600{% else %}text-amber-600{% endif %}">
+                            {{ pilot.score }}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div class="h-2 rounded-full {% if pilot.score >= 100 %}bg-emerald-500{% elif pilot.score >= 70 %}bg-blue-500{% else %}bg-amber-500{% endif %}" style="width: {{ pilot.score if pilot.score <= 100 else 100 }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-3 text-center py-8 text-slate-400 text-xs italic">
+                No active pilot programs currently in evaluation.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- SECTION 4: SYSTEM HEALTH, DISPATCH & LIVE LOGS -->
+    <div id="health-section" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-heart-pulse text-rose-500"></i>
+                    Automation Health &amp; SLA Service Dispatches
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Background daemons, backup snapshots, automated hardware repair dispatches, and live system logs.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Automation Heartbeats & Dispatches -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-700">Scheduled Automation Tasks</h3>
+                <div class="space-y-2">
+                    {% for task in health_data %}
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-2 h-2 rounded-full {% if task.status == 'Delayed' %}bg-amber-400{% elif task.status == 'Critical Gap' %}bg-rose-500{% else %}bg-emerald-400{% endif %}"></span>
+                            <span class="font-bold text-slate-800">{{ task.task_name }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-400 text-[11px]">{{ task.last_run }}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold {% if task.status == 'Delayed' %}bg-amber-100 text-amber-700{% elif task.status == 'Critical Gap' %}bg-rose-100 text-rose-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                {{ task.status }}
+                            </span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-slate-400 text-xs italic">No automation heartbeat tasks logged.</div>
+                    {% endfor %}
+                </div>
+
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 pt-2">Recent Service Dispatches (Andamiro SLAs)</h3>
+                <div class="space-y-2">
+                    {% for dispatch in dispatches %}
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-slate-800">Dispatch #{{ dispatch.id }} - Equipment {{ dispatch.equipment_id }}</span>
+                            <span class="block text-[10px] text-slate-500">{{ dispatch.issue_type }}: {{ dispatch.resolution_notes or 'Pending technician response' }}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold {% if dispatch.status == 'Resolved' %}bg-emerald-100 text-emerald-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+                            {{ dispatch.status }}
+                        </span>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3 text-slate-400 text-xs italic">No open dispatches. Fleet operating within SLA.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Live Streaming System Logs -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-700">Live Daemon Activity Stream</h3>
+                    <button hx-get="{{ url_for('admin.admin_api_logs') }}" hx-target="#stream-log-container" class="text-[10px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                    </button>
+                </div>
+                <div id="stream-log-container"
+                     hx-get="{{ url_for('admin.admin_api_logs') }}"
+                     hx-trigger="every 5s"
+                     class="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-[11px] h-[340px] overflow-y-auto border border-slate-800 shadow-inner">
+                    Loading telemetry logs...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 5: MEMBER & ENGAGEMENT ANALYTICS -->
+    <div id="member-section" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-users text-purple-600"></i>
+                    Member Biomechanics &amp; Feedback Analytics
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Member onboarding funnels, MET cardio intensity distributions, and real-time franchise survey sentiment.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 mb-3">Onboarding Funnel</h3>
+                <div class="space-y-2">
+                    {% for status, count in onboarding_stats.items() %}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-600 font-medium">{{ status }}</span>
+                        <span class="font-bold text-slate-900">{{ count }}</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-slate-400 text-xs italic">No member onboarding records.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 mb-3">Member Sentiment &amp; NPS</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-600">Average Rating</span>
+                        <span class="font-black text-amber-500 text-sm">★ {{ avg_feedback_rating }} / 5.0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-1">
+                        <span class="text-slate-600">Total Feedback Submissions</span>
+                        <span class="font-bold text-slate-900">{{ total_feedbacks }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 mb-3">Algorithmic Optimizations</h3>
+                <div class="space-y-2 text-xs">
+                    {% for rec in optimization_recommendations %}
+                    <div class="p-2.5 bg-white rounded-lg border border-slate-200/60 text-slate-700">
+                        <i class="fa-solid fa-lightbulb text-yellow-500 mr-1.5"></i>
+                        {{ rec }}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-slate-400 text-xs italic">All systems performing optimally.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
