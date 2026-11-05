@@ -86,3 +86,56 @@ To verify UI integrity and core user flows, execute the Playwright integration s
 pytest tests/integration/test_ui.py
 ```
 Note: Ensure the development server is running on port 5000 before executing tests.
+
+## 10. Phase 14: Custom Hardware & Telemetry Deployment Checklist (v9.2.0)
+With the transition to custom 9-panel hardware and the `FitnessDifficulties.lua` real-time WebSocket integration, additional configuration is required to proxy biomechanical telemetry to the backend.
+
+### 10.1 Nginx WebSocket Proxy Configuration
+The new `/ws/telemetry` endpoint requires specific Nginx directives to upgrade HTTP requests to WebSocket connections. Update your Nginx configuration:
+
+```nginx
+server {
+    listen 80;
+    server_name smx-dashboard.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Phase 14: Real-time Biomechanical Telemetry
+    location /ws/telemetry {
+        proxy_pass http://127.0.0.1:5000/ws/telemetry;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
+        # Increase timeouts for long-running Marathon sessions
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+}
+```
+
+### 10.2 Service Configuration for Health Monitor
+Ensure the `health_monitor.py` daemon is active to validate hardware telemetry offline states and automate Service Dispatch ticketing (simulate Andamiro SLAs). Use the provided `smx-monitor.service.example` file.
+
+1. **Verify Configuration**:
+   ```bash
+   cat /etc/systemd/system/smx-monitor.service
+   ```
+   *(Ensure the working directory points to your production folder, e.g., `/opt/smx-agent`, and Python executes from the `venv/bin/python3`)*
+
+2. **Reload and Restart**:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl restart smx-monitor
+   sudo systemctl status smx-monitor
+   ```
+
+3. **Verify WebSocket Sync**:
+   Execute the `ws_client_simulator.py` script locally to confirm the bi-directional handshake against the telemetry endpoints.

@@ -16,3 +16,7 @@
 - Use `VERSION.md` as the single source of truth for versioning.
 - Prefer explicit documentation over complex, un-commented code.
 - Prioritize multi-tenant isolation and granular RBAC for franchise safety.
+
+## Real-Time Telemetry
+- A bi-directional WebSocket connection (`/ws/telemetry`) is set up in `app.py` via `flask-sock`.
+- The first successful payload exchange validated the parsing of telemetry, Lua MET generation, and saving `TelemetryHistory` data natively in the backend loop. The handshake returned: `{"status": "success", "handshake": "Telemetry received and synced", "equipment_id": 1, "met_estimate": 9.1}`

@@ -205,3 +205,7 @@ All notable changes to this project will be documented in this file.
 - **Database Schema Update:** Added `Member` model to `crm.db` to track member lifecycle states.
 
 [... previous entries remain unchanged ...]
+
+## [9.2.0]
+- **Telemetry Integration**: Integrated Lua-Python interoperability through `lupa`. Mapped real-time `FitnessDifficulties.lua` logic via the `/ws/telemetry` endpoint.
+- **Test Infrastructure**: Expanded unit testing suite ensuring telemetry processes metrics reliably using Python and Lua environments simultaneously.
