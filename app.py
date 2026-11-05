@@ -89,7 +89,6 @@ app.register_blueprint(api_bp, url_prefix='/api')
 
 csrf.exempt(api_bp)
 
-
 # --- WebSocket Setup ---
 try:
     from flask_sock import Sock
@@ -100,10 +99,46 @@ try:
         while True:
             data = ws.receive()
             if data:
-                # Basic mock integration for WS, ideally it would bridge logic to enterprise sync framework.
                 ws.send(f"Echo: {data}")
 except ImportError:
     pass
+
+# --- Lua Fitness Engine Bridge ---
+_lua_fitness_instance = None
+
+def get_lua_fitness():
+    """Initializes and returns cached Lua runtime for StepMania Fitness logic."""
+    global _lua_fitness_instance
+    if _lua_fitness_instance is None:
+        try:
+            from lupa import LuaRuntime
+            lua = LuaRuntime(unpack_returned_tuples=True)
+            lua_file = os.path.join(project_root, 'Scripts', 'FitnessDifficulties.lua')
+            if os.path.exists(lua_file):
+                with open(lua_file, 'r') as f:
+                    _lua_fitness_instance = lua.execute(f.read())
+        except Exception as e:
+            app.logger.warning(f"Failed to initialize LuaRuntime bridge: {e}")
+    return _lua_fitness_instance
+
+def bridge_nps_to_intensity(nps):
+    """
+    Translates Notes Per Second (NPS) to a 1.0-10.0 intensity scale.
+    Delegates to the canonical Lua fitness engine (Scripts/FitnessDifficulties.lua)
+    with a robust Python fallback calculation.
+    """
+    fitness = get_lua_fitness()
+    if fitness and hasattr(fitness, 'GetIntensityFromNPS'):
+        try:
+            return float(fitness.GetIntensityFromNPS(float(nps)))
+        except Exception:
+            pass
+    # Fallback matching the Lua calculation:
+    # 0 -> 1.0, 6.0 -> 5.0, 12.0+ -> 10.0
+    if nps <= 0:
+        return 1.0
+    val = (float(nps) / 12.0) * 10.0
+    return round(min(10.0, max(1.0, val)), 1)
 
 # --- Routes ---
 

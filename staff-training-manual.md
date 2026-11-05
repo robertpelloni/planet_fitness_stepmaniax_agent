@@ -4,6 +4,12 @@
 
 ---
 
+## 0. Global Operations Center & System Management (v9.3.0)
+Management and technical staff can access the consolidated **Global Operations Center** (`/admin/unified-dashboard`):
+- **Executive Wallboard:** Comprehensive overview consolidating outreach pipelines, real-time fleet telemetry, pilot revenue tracking, and automated service dispatches.
+- **System Tray & Process Controls:** Launch or stop servers cleanly via `./system_tray_manager.py` (supporting `--start`, `--stop`, `--restart`, `--status`, `--logs`).
+- **Interactive Metrics & Tooltips:** Informational tooltips accompany every metric and control to assist staff in understanding MET calculations and telemetry health indicators.
+
 ## 1. Introduction to StepManiaX (The "Elevator Pitch")
 "StepManiaX is our new **Gamified HIIT** cardio amenity. It’s designed to make high-intensity cardio more engaging by turning it into an interactive experience. It’s low-impact, high-energy, and perfect for members looking for something more exciting than a traditional treadmill."
 

@@ -1,69 +1,47 @@
 #!/usr/bin/env bash
+# StepManiaX B2B Lead Generation & Operations Orchestrator (v9.3.0)
+# Consolidated pipeline for scraping leads, generating personalized outreach,
+# auditing system readiness, and launching sales campaigns.
 
-# Exit immediately if a command exits with a non-zero status.
 set -e
 
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_ROOT"
+
 echo "==========================================================="
-echo "   StepManiaX B2B Lead Generation Pipeline Setup"
+echo "   StepManiaX B2B Lead Generation & Operations Pipeline"
 echo "==========================================================="
 
-# 1. Check for Python 3
+# 1. Environment & Python Validation
 if ! command -v python3 &> /dev/null; then
-    echo "[ERROR] Python 3 could not be found. Please install Python 3.8+ to run the scraper."
-    exit 1
+    echo "[ERROR] Python 3 could not be found. Please install Python 3.10+."
+    return 1 2>/dev/null || exit 1
 fi
-echo "[OK] Python 3 is installed."
+echo "[OK] Python environment verified."
 
-# 2. Setup Virtual Environment
-if [ ! -d "venv" ]; then
-    echo "[INFO] Virtual environment not found. Creating 'venv'..."
-    python3 -m venv venv
+# 2. Database Initialization
+if [ ! -f "crm.db" ]; then
+    echo "[INFO] Initializing CRM database from schema..."
+    python3 initialize_crm_db.py
 else
-    echo "[OK] Virtual environment 'venv' already exists."
+    echo "[OK] Database crm.db exists."
 fi
 
-# 3. Activate Virtual Environment
-echo "[INFO] Activating virtual environment..."
-source venv/bin/activate
-
-# 4. Install Dependencies
-if [ -f "requirements.txt" ]; then
-    echo "[INFO] Installing dependencies from requirements.txt..."
-    pip install -r requirements.txt --quiet
-    echo "[INFO] Installing Playwright browsers..."
-    playwright install --with-deps chromium
-    echo "[OK] Dependencies installed."
-else
-    echo "[WARNING] requirements.txt not found. Skipping dependency installation."
+# 3. Optional Lead Scrape Step
+if [ "$1" == "--scrape" ]; then
+    echo "[INFO] Running automated franchise lead scraper..."
+    python3 scrape_leads.py
 fi
 
-# 5. Check for Secrets / .env configuration
-if [ ! -f ".env" ]; then
-    echo "-----------------------------------------------------------"
-    echo "[WARNING] .env file not found!"
-    echo "To run the scraper against authenticated targets (e.g., LinkedIn),"
-    echo "you must copy .env.example to .env and configure your secrets."
-    echo ""
-    echo "Would you like to run the scraper anyway? (It will likely fail if it requires auth)"
-    read -p "Continue? (y/N): " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "[INFO] Pipeline execution aborted by user. Please configure .env and try again."
-        deactivate
-        exit 0
-    fi
-else
-    echo "[OK] .env file found."
-fi
+# 4. Generate Personalized Outreach Assets
+echo "[INFO] Generating personalized sales assets & cadences..."
+python3 generate_personalized_assets.py
 
-# 6. Run the Scraper
-echo "==========================================================="
-echo "   Executing Lead Scraper..."
-echo "==========================================================="
-python3 scrape_leads.py
+# 5. System Health & Production Audit
+echo "[INFO] Performing production readiness audit..."
+bash production_check.sh
 
 echo "==========================================================="
-echo "   Pipeline Complete."
+echo " Pipeline execution completed successfully."
+echo " Launch the Operations Center via: ./system_tray_manager.py --start"
 echo "==========================================================="
-
-deactivate

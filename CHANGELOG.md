@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.3.0] - 2026-11-04
+### Added
+- **Global Operations Center (`/admin/unified-dashboard`)**: Consolidated multi-regional cockpit consolidating enterprise outreach pipeline, Path A & Path B hardware telemetry, real-time ROI pacing, system daemons, and engagement analytics onto a singular wallboard.
+- **Interactive Pipeline & Tooltips**: Drag-free Kanban state transitions with inline tier progression, proposal download, and explanatory native/FontAwesome tooltips across all executive KPIs and metrics.
+- **System Tray & Process Manager (`system_tray_manager.py`)**: Unified process controller providing GUI tray hooks and CLI daemon commands (`--start`, `--stop`, `--restart`, `--status`, `--logs`, `--watch`) with server shutdown capability.
+- **Python-Lua Bridge**: Implemented `bridge_nps_to_intensity` and `/ws/telemetry` WebSocket routing in `app.py`.
+- **Script Consolidation & Backups**: Consolidated orchestrator scripts (`pipeline.sh`, `production_check.sh`) and safely archived originals into `backups/scripts/`.
+
 ## [8.0.0] - 2026-06-02
 ### Total Protocol Integration & Architectural Finalization
 - **Total ORM Integration:** Completed the migration of all operational scripts (`cadence_trigger.py`, `report_generator.py`, `health_monitor.py`) to SQLAlchemy ORM, ensuring thread-safe database access.

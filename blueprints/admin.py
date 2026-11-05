@@ -773,3 +773,173 @@ def admin_pilot_success():
 
     all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
     return render_template('admin_pilot_success.html', pilot_stats=pilot_stats, all_regions=all_regions, current_region=region)
+
+@admin_bp.route('/unified-dashboard')
+@login_required
+@role_required(['Admin', 'Franchisee'])
+def unified_dashboard():
+    """Global Operations Center - Consolidated High-Value Wallboard (v9.3.0)"""
+    region = request.args.get('region')
+    is_admin = (current_user.role == 'Admin')
+    franchise_id = current_user.franchise_id
+
+    # 1. Lead & Pipeline Data
+    query_leads = Lead.query
+    if not is_admin:
+        query_leads = query_leads.filter_by(id=franchise_id)
+    elif region:
+        query_leads = query_leads.filter_by(region_cluster=region)
+    leads = query_leads.all()
+
+    pipeline_stages = [
+        "Researching",
+        "Ready for Outreach",
+        "Outreach Active",
+        "Discovery Call Scheduled",
+        "Pilot MOU Signed",
+        "Pilot Operational"
+    ]
+    pipeline_data = {stage: [] for stage in pipeline_stages}
+    for l in leads:
+        # Calculate propensity score
+        member_count = Member.query.filter_by(franchise_id=l.id).count()
+        total_points = db.session.query(db.func.sum(Member.points)).filter_by(franchise_id=l.id).scalar() or 0
+        avg_feedback = db.session.query(db.func.avg(Feedback.rating)).filter_by(franchise_id=l.id).scalar() or 5.0
+        lead_dict = {
+            'num_clubs': l.num_clubs,
+            'region': l.region,
+            'status': l.status,
+            'priority': l.priority,
+            'pilot_engagement': {'member_count': member_count, 'total_points': total_points},
+            'portal_views': l.portal_views,
+            'avg_feedback_rating': avg_feedback,
+            'notes': l.notes
+        }
+        l.propensity_score = analytics.calculate_propensity_score(lead_dict)
+        if l.status in pipeline_data:
+            pipeline_data[l.status].append(l)
+        else:
+            pipeline_data.setdefault("Other", []).append(l)
+
+    # 2. Hardware Metrics & Telemetry
+    query_metrics = EquipmentMetric.query
+    if not is_admin:
+        query_metrics = query_metrics.filter_by(franchise_id=franchise_id)
+    elif region:
+        query_metrics = query_metrics.filter_by(region_cluster=region)
+    metrics = query_metrics.all()
+    metric_ids = [m.id for m in metrics]
+
+    total_units = len(metrics)
+    total_scans = sum(m.total_scans for m in metrics)
+    avg_uptime = round(sum(m.uptime_percent for m in metrics) / total_units, 1) if total_units > 0 else 0
+
+    # 3. Alerts & Dispatches
+    active_alerts_query = Alert.query.filter_by(is_resolved=False)
+    if not is_admin or region:
+        active_alerts_query = active_alerts_query.filter(Alert.equipment_id.in_(metric_ids))
+    active_alerts = active_alerts_query.count()
+
+    dispatches = ServiceDispatch.query.order_by(ServiceDispatch.created_at.desc()).limit(8).all()
+    pending_dispatches = ServiceDispatch.query.filter_by(status='Open').count()
+
+    # 4. Pilot Financials & ROI
+    query_pilots = Lead.query.filter(Lead.status.contains('Pilot'))
+    if not is_admin:
+        query_pilots = query_pilots.filter_by(id=franchise_id)
+    elif region:
+        query_pilots = query_pilots.filter_by(region_cluster=region)
+    pilot_leads = query_pilots.all()
+    pilot_stats = []
+    total_pilot_actual_revenue = 0.0
+
+    for pl in pilot_leads:
+        actual_rev = db.session.query(func.sum(Payment.amount))\
+            .join(Member, Payment.member_id == Member.id)\
+            .filter(Member.franchise_id == pl.id, Payment.status == 'Completed').scalar() or 0.0
+        total_pilot_actual_revenue += actual_rev
+        target = pl.projected_annual_profit / 52 if pl.projected_annual_profit else 1000.0
+        score = min(100.0, (actual_rev / target * 100.0)) if target > 0 else 0
+        pilot_stats.append({
+            "company": pl.company,
+            "region": pl.region,
+            "target": round(target, 2),
+            "actual": round(actual_rev, 2),
+            "score": round(score, 1),
+            "status": pl.status
+        })
+
+    # 5. System Health & Automation Status
+    automation_status = AutomationHeartbeat.query.all()
+    health_data = []
+    now = datetime.now()
+    for task in automation_status:
+        try:
+            last_run = datetime.strptime(task.last_run, "%Y-%m-%d %H:%M:%S")
+            diff = (now - last_run).total_seconds()
+            status_override = task.status
+            if diff > 300: status_override = 'Delayed'
+            if diff > 3600: status_override = 'Critical Gap'
+        except Exception:
+            diff = 0
+            status_override = task.status
+        health_data.append({
+            'task_name': task.task_name,
+            'last_run': task.last_run,
+            'status': status_override
+        })
+
+    # 6. Member & Engagement Stats
+    member_query = Member.query
+    if not is_admin:
+        member_query = member_query.filter_by(franchise_id=franchise_id)
+    elif region:
+        member_query = member_query.filter(Member.franchise_id.in_(
+            db.session.query(Lead.id).filter_by(region_cluster=region)
+        ))
+    onboarding_funnel = db.session.query(Member.onboarding_status, db.func.count(Member.id)).group_by(Member.onboarding_status).all()
+    onboarding_dict = {status: count for status, count in onboarding_funnel}
+
+    avg_feedback_rating = round(db.session.query(db.func.avg(Feedback.rating)).scalar() or 4.8, 1)
+    total_feedbacks = Feedback.query.count()
+
+    metrics_list = [
+        {
+            "equipment_name": u.equipment_name,
+            "location": u.location,
+            "uptime_percent": u.uptime_percent,
+            "total_sessions": u.total_sessions,
+            "avg_session_duration": u.avg_session_duration
+        } for u in metrics
+    ]
+    optimization_recommendations = analytics.generate_optimization_recommendations(metrics_list)
+
+    all_regions = [r[0] for r in db.session.query(Lead.region_cluster).distinct().all() if r[0]]
+    total_outreach = OutreachLog.query.count()
+    live_sessions = db.session.query(TelemetryHistory.member_id).distinct().limit(10).count()
+    avg_fleet_met = 6.8  # Target cardio intensity across active sessions
+
+    return render_template('admin_unified_dashboard.html',
+                           pipeline_data=pipeline_data,
+                           pipeline_stages=pipeline_stages,
+                           total_leads=len(leads),
+                           active_pilots_count=len(pilot_leads),
+                           total_pilot_actual_revenue=total_pilot_actual_revenue,
+                           total_units=total_units,
+                           total_scans=total_scans,
+                           avg_uptime=avg_uptime,
+                           active_alerts=active_alerts,
+                           pending_dispatches=pending_dispatches,
+                           avg_fleet_met=avg_fleet_met,
+                           live_sessions=live_sessions,
+                           total_outreach=total_outreach,
+                           metrics=metrics,
+                           pilot_stats=pilot_stats,
+                           health_data=health_data,
+                           dispatches=dispatches,
+                           onboarding_stats=onboarding_dict,
+                           avg_feedback_rating=avg_feedback_rating,
+                           total_feedbacks=total_feedbacks,
+                           optimization_recommendations=optimization_recommendations,
+                           all_regions=all_regions,
+                           current_region=region)

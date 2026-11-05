@@ -77,3 +77,9 @@
 ### 14.7 Core Engine Test Infrastructure
 - [x] Integrate embedded Lua runtime (`lupa`) for cross-language logic validation.
 - [x] Generate unit tests for `FitnessDifficulties.lua` validating heart-rate and MET algorithms.
+
+### 14.8 Global Operations Consolidation & Tray Manager (v9.3.0)
+- [x] Consolidated single-page Global Operations Center (`/admin/unified-dashboard`) grouping high-value enterprise pipeline, fleet telemetry, pilot ROI, and automation health.
+- [x] System tray process manager (`system_tray_manager.py`) with server start/stop/restart/log tailing capabilities.
+- [x] Integrated `bridge_nps_to_intensity` Python-Lua bridge and `/ws/telemetry` socket loop in `app.py`.
+- [x] Nondestructive script organization and backup archiving into `backups/scripts/`.
