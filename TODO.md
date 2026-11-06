@@ -84,3 +84,9 @@
 - [x] Implement System Tray & Server Process Manager (`system_tray_manager.py`) with start/stop/restart/logs and GUI tray hooks.
 - [x] Bridge StepMania Lua fitness logic via `bridge_nps_to_intensity` and WebSocket telemetry endpoint in `app.py`.
 - [x] Non-destructively organize scripts and create backups in `backups/scripts/`.
+
+### 📡 Telemetry Ingestion & Predictive Maintenance (v9.4.0)
+- [x] Build `ingest_telemetry_packet.py` to ingest real-time session duration, step scans, and uptime metrics.
+- [x] Implement autonomous Andamiro Service Dispatch ticketing for hardware units reporting degraded uptime (<95%) or predictive health anomalies.
+- [x] Add automated test coverage in `tests/integration/test_telemetry_ingestion.py`.
+- [x] Implement proactive fleet diagnostics tool in `/home/jules/self_created_tools/fleet_diagnostics.py`.

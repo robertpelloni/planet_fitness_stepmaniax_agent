@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.4.0] - 2026-11-06
+### Added
+- Real-time Hardware Telemetry Ingestion Engine & Autonomous Maintenance Dispatcher (`ingest_telemetry_packet.py`).
+- Automated predictive health score recalculation and dynamic threshold checks generating automated Andamiro Field Service SLA tickets.
+- Integration test suite (`tests/integration/test_telemetry_ingestion.py`) validating hardware telemetry packet processing and anomaly SLA dispatches.
+- Dedicated diagnostic tooling (`fleet_diagnostics.py`) for fleet hardware monitoring and status inspections.
+
 ## [9.3.0] - 2026-11-04
 ### Added
 - **Global Operations Center (`/admin/unified-dashboard`)**: Consolidated multi-regional cockpit consolidating enterprise outreach pipeline, Path A & Path B hardware telemetry, real-time ROI pacing, system daemons, and engagement analytics onto a singular wallboard.

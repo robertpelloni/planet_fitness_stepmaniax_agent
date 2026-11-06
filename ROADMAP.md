@@ -83,3 +83,8 @@
 - [x] System tray process manager (`system_tray_manager.py`) with server start/stop/restart/log tailing capabilities.
 - [x] Integrated `bridge_nps_to_intensity` Python-Lua bridge and `/ws/telemetry` socket loop in `app.py`.
 - [x] Nondestructive script organization and backup archiving into `backups/scripts/`.
+
+### 14.9 Telemetry Ingestion & Autonomous SLA Ticketing (v9.4.0)
+- [x] Hardware telemetry ingestion loop (`ingest_telemetry_packet.py`) connecting real-time kiosk session stats with backend `EquipmentMetric` and `TelemetryHistory`.
+- [x] Autonomous Andamiro field service ticketing for anomaly detection (uptime < 95% or health score < 70).
+- [x] Integration testing and verification (`tests/integration/test_telemetry_ingestion.py`).
