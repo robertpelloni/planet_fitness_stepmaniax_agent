@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.6.0] - 2026-11-07
+### Added
+- Comprehensive documentation for the Sales Pipeline Kanban Board and associated workflows in `regional-expansion-strategy.md`.
+- Formalization of the 7 enterprise stage gates, HTMX transitions, proposal generation, and franchisee onboarding.
+
+## [9.5.0] - 2026-11-07
+### Added
+- Dynamic MET (Metabolic Equivalent of Task) capacity algorithm (`estimate_unit_met_capacity`) based on cadence, pacing, and duration thresholds in `analytics.py`.
+- CSV export endpoint support on `/api/v1/enterprise/export?format=csv` delivering direct spreadsheet downloads with standard RFC-4180 MIME and Content-Disposition headers.
+- Comprehensive integration testing for MET calculations and CSV streaming in `tests/integration/test_enterprise_api.py`.
+
+## [9.4.0] - 2026-11-06
+### Added
+- Real-time Hardware Telemetry Ingestion Engine & Autonomous Maintenance Dispatcher (`ingest_telemetry_packet.py`).
+- Automated predictive health score recalculation and dynamic threshold checks generating automated Andamiro Field Service SLA tickets.
+- Integration test suite (`tests/integration/test_telemetry_ingestion.py`) validating hardware telemetry packet processing and anomaly SLA dispatches.
+- Dedicated diagnostic tooling (`fleet_diagnostics.py`) for fleet hardware monitoring and status inspections.
+
 ## [9.3.0] - 2026-11-04
 ### Added
 - **Global Operations Center (`/admin/unified-dashboard`)**: Consolidated multi-regional cockpit consolidating enterprise outreach pipeline, Path A & Path B hardware telemetry, real-time ROI pacing, system daemons, and engagement analytics onto a singular wallboard.

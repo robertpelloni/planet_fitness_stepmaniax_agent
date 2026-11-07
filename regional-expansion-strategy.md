@@ -29,6 +29,26 @@
 - Establish a long-term service and software license agreement with the manufacturer (Step Revolution).
 
 ---
+
+## 5. Visual Sales Pipeline & Kanban Operations (v9.6.0)
+The enterprise sales lifecycle is orchestrated visually via the **Sales Pipeline Kanban Board** accessible at `/admin/pipeline` and integrated directly into the **Global Operations Center** (`/admin/unified-dashboard`).
+
+### 5.1 Pipeline Stage Gates
+The pipeline tracks franchise targets across seven explicit enterprise stages:
+1. **Researching**: Target franchise group identified and profile scraped into CRM (e.g., club count, geographic density, ownership structure).
+2. **Ready for Outreach**: Decision-maker verified (Regional VP / Owner email and contact verified).
+3. **Outreach Active**: Multi-tier automated cadence initiated (Day 1 email, Day 3 follow-up, Day 7 executive nudge).
+4. **Discovery Call Scheduled**: Prospect engaged; discovery call booked using `discovery-call-script.md`.
+5. **Pilot MOU Signed**: 90-day pilot agreement executed using `pilot-mou.md` with zero upfront equipment cost.
+6. **Pilot Operational**: Kiosk hardware deployed on gym floor, telemetry actively transmitting to `/ws/telemetry`.
+7. **Corporate Vendor Approval**: Successful pilot metrics leveraged to secure multi-club rollout contracts and corporate vendor authorization (Path B Andamiro pipeline).
+
+### 5.2 Automated Enablement & Workflow Actions
+- **HTMX Stage Transitions**: Leads can be advanced or transitioned across stages in real-time without page reload.
+- **Dynamic Commercial Proposal Generation**: Generates customized PDF/Markdown commercial proposals based on live pilot engagement and LTV retention lift projections.
+- **Lead-to-Franchisee Conversion**: Directly converts qualified leads with signed MOUs into authenticated franchisee portal accounts with assigned unit licenses.
+
+---
 ## Key Success Metrics for Expansion
 1. **Pilot Satisfaction Score:** > 8.5/10.
 2. **Usage Frequency:** > 40 unique scans per day per unit.

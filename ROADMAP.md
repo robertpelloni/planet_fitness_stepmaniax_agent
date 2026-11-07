@@ -83,3 +83,17 @@
 - [x] System tray process manager (`system_tray_manager.py`) with server start/stop/restart/log tailing capabilities.
 - [x] Integrated `bridge_nps_to_intensity` Python-Lua bridge and `/ws/telemetry` socket loop in `app.py`.
 - [x] Nondestructive script organization and backup archiving into `backups/scripts/`.
+
+### 14.9 Telemetry Ingestion & Autonomous SLA Ticketing (v9.4.0)
+- [x] Hardware telemetry ingestion loop (`ingest_telemetry_packet.py`) connecting real-time kiosk session stats with backend `EquipmentMetric` and `TelemetryHistory`.
+- [x] Autonomous Andamiro field service ticketing for anomaly detection (uptime < 95% or health score < 70).
+- [x] Integration testing and verification (`tests/integration/test_telemetry_ingestion.py`).
+
+### 14.10 Enterprise Biometrics & Dynamic MET Export (v9.5.0)
+- [x] Real-time ACSM MET capacity estimation engine (`estimate_unit_met_capacity`) based on live session durations and step pacing.
+- [x] Dual-format Enterprise Reporting API (`/api/v1/enterprise/export` supporting JSON and RFC-4180 CSV attachment exports).
+- [x] Robust automated integration test coverage in `tests/integration/test_enterprise_api.py`.
+
+### 14.11 Sales Operations & Stage Gate Governance (v9.6.0)
+- [x] Comprehensive documentation of the 7 enterprise stage gates and Kanban workflows in `regional-expansion-strategy.md`.
+- [x] Formalization of dynamic proposal generation and lead-to-franchisee conversion procedures.

@@ -460,19 +460,51 @@ def api_book_session():
 @api_bp.route('/v1/enterprise/export', methods=['GET'])
 @require_api_or_role(['Admin'])
 def api_enterprise_export():
-    """Enterprise Data Exchange (v4.8.0)"""
+    """Enterprise Data Exchange (v9.5.0)"""
+    import io
+    import csv
+    from flask import Response
+    import analytics
+
     units = EquipmentMetric.query.all()
-    telemetry_data = [{
-        "unit_id": u.id,
-        "name": u.equipment_name,
-        "location": u.location,
-        "uptime": u.uptime_percent,
-        "scans": u.total_scans,
-        "avg_session_duration": u.avg_session_duration,
-        "estimated_met_capacity": 6.5, # Static fallback; would use raw Lua telemetry in production
-        "health_score": u.predictive_health_score,
-        "status": u.maintenance_status
-    } for u in units]
+    telemetry_data = []
+    for u in units:
+        scans_per_session = (u.total_scans / u.total_sessions) if (u.total_sessions and u.total_sessions > 0) else 0
+        met_est = analytics.estimate_unit_met_capacity(u.avg_session_duration, scans_per_session)
+        telemetry_data.append({
+            "unit_id": u.id,
+            "name": u.equipment_name,
+            "location": u.location,
+            "uptime": u.uptime_percent,
+            "scans": u.total_scans,
+            "avg_session_duration": u.avg_session_duration,
+            "estimated_met_capacity": met_est,
+            "health_score": u.predictive_health_score,
+            "status": u.maintenance_status
+        })
+
+    # CSV format requested for direct corporate export
+    export_format = request.args.get('format', 'json').lower()
+    if export_format == 'csv':
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow([
+            "Unit ID", "Name", "Location", "Uptime %", "Total Scans",
+            "Avg Session (min)", "Estimated MET Capacity", "Health Score", "Status"
+        ])
+        for row in telemetry_data:
+            writer.writerow([
+                row["unit_id"], row["name"], row["location"], row["uptime"],
+                row["scans"], row["avg_session_duration"], row["estimated_met_capacity"],
+                row["health_score"], row["status"]
+            ])
+        csv_data = output.getvalue()
+        output.close()
+        return Response(
+            csv_data,
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment; filename=enterprise_telemetry_export.csv"}
+        )
 
     members = Member.query.all()
     engagement_data = [{
@@ -501,8 +533,18 @@ def api_enterprise_export():
         "duration_minutes": h.duration_minutes
     } for h in history]
 
+    # Read version dynamically from VERSION.md if present
+    version_str = "9.6.0"
+    version_file = os.path.join(os.path.dirname(__file__), "..", "VERSION.md")
+    if os.path.exists(version_file):
+        try:
+            with open(version_file, "r") as vf:
+                version_str = vf.read().strip()
+        except Exception:
+            pass
+
     return {
-        "version": "4.8.1",
+        "version": version_str,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "telemetry": telemetry_data,
         "engagement": engagement_data,

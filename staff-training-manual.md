@@ -46,5 +46,13 @@ For any hardware failures or persistent software issues:
 - **Contact:** [Agent/Initiative Email]
 - **SLA:** We guarantee on-site service within **48 hours**.
 
+### 6.1 Automated Telemetry Ingestion & Autonomous Dispatch (v9.4.0)
+The hardware fleet transmits real-time telemetry packets via `ingest_telemetry_packet.py` or the `/ws/telemetry` socket. If a unit experiences uptime degradation below 95% or an anomalous predictive health score below 70, the system automatically opens an Andamiro Field Service SLA dispatch (`AUTO-DISP-...`) with pending status and tags the hardware as `Service Dispatched`. Field technicians can inspect and resolve these dispatches directly from the Global Operations Center (`/admin/unified-dashboard`).
+
+### 6.2 Enterprise Telemetry & MET Data Export (v9.5.0)
+Franchise directors can export live fleet biomechanics and operational telemetry directly via the Enterprise API endpoint:
+- **JSON Format**: `GET /api/v1/enterprise/export` (Returns full telemetry, engagement, sentiment, and session histories with dynamically modeled ACSM MET estimations).
+- **CSV Spreadsheet**: `GET /api/v1/enterprise/export?format=csv` (Downloads `enterprise_telemetry_export.csv` containing Unit ID, Name, Location, Uptime %, Total Scans, Average Session Duration, Estimated MET Capacity, Health Score, and Maintenance Status).
+
 ---
 **Remember:** You are the face of this pilot. Your enthusiasm and assistance will directly impact the data we collect on member retention.
