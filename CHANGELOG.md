@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.5.0] - 2026-11-07
+### Added
+- Dynamic MET (Metabolic Equivalent of Task) capacity algorithm (`estimate_unit_met_capacity`) based on cadence, pacing, and duration thresholds in `analytics.py`.
+- CSV export endpoint support on `/api/v1/enterprise/export?format=csv` delivering direct spreadsheet downloads with standard RFC-4180 MIME and Content-Disposition headers.
+- Comprehensive integration testing for MET calculations and CSV streaming in `tests/integration/test_enterprise_api.py`.
+
 ## [9.4.0] - 2026-11-06
 ### Added
 - Real-time Hardware Telemetry Ingestion Engine & Autonomous Maintenance Dispatcher (`ingest_telemetry_packet.py`).

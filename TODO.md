@@ -90,3 +90,8 @@
 - [x] Implement autonomous Andamiro Service Dispatch ticketing for hardware units reporting degraded uptime (<95%) or predictive health anomalies.
 - [x] Add automated test coverage in `tests/integration/test_telemetry_ingestion.py`.
 - [x] Implement proactive fleet diagnostics tool in `/home/jules/self_created_tools/fleet_diagnostics.py`.
+
+### 📊 Enterprise Reporting & Biomechanics Engine (v9.5.0)
+- [x] Dynamic MET calculation (`estimate_unit_met_capacity`) based on ACSM exergaming regression model.
+- [x] Add CSV export support to `/api/v1/enterprise/export?format=csv` for executive reporting.
+- [x] Comprehensive test coverage in `tests/integration/test_enterprise_api.py`.

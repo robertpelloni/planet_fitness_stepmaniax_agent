@@ -88,3 +88,8 @@
 - [x] Hardware telemetry ingestion loop (`ingest_telemetry_packet.py`) connecting real-time kiosk session stats with backend `EquipmentMetric` and `TelemetryHistory`.
 - [x] Autonomous Andamiro field service ticketing for anomaly detection (uptime < 95% or health score < 70).
 - [x] Integration testing and verification (`tests/integration/test_telemetry_ingestion.py`).
+
+### 14.10 Enterprise Biometrics & Dynamic MET Export (v9.5.0)
+- [x] Real-time ACSM MET capacity estimation engine (`estimate_unit_met_capacity`) based on live session durations and step pacing.
+- [x] Dual-format Enterprise Reporting API (`/api/v1/enterprise/export` supporting JSON and RFC-4180 CSV attachment exports).
+- [x] Robust automated integration test coverage in `tests/integration/test_enterprise_api.py`.

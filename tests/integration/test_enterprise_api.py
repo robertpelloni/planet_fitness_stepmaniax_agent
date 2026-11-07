@@ -20,7 +20,7 @@ def test_enterprise_leads_unauthorized(client):
     assert response.status_code == 401
 
 def test_enterprise_export_success(client):
-    """Test successful enterprise data export with API key."""
+    """Test successful enterprise data export with API key and dynamic MET estimation."""
     headers = {'X-API-KEY': API_KEY}
     response = client.get('/api/v1/enterprise/export', headers=headers)
     assert response.status_code == 200
@@ -28,8 +28,24 @@ def test_enterprise_export_success(client):
     assert "telemetry" in data
     assert "engagement" in data
     assert "sentiment" in data
-    assert data["version"] == "4.8.1"
+    assert data["version"] == "9.5.0"
     assert "pilot_session_logs" in data
+    assert len(data["telemetry"]) > 0
+    # Ensure dynamic MET calculation is present and populated
+    first_unit = data["telemetry"][0]
+    assert "estimated_met_capacity" in first_unit
+    assert isinstance(first_unit["estimated_met_capacity"], (int, float))
+    assert first_unit["estimated_met_capacity"] > 0
+
+def test_enterprise_export_csv_format(client):
+    """Test enterprise export returning CSV formatted attachment."""
+    headers = {'X-API-KEY': API_KEY}
+    response = client.get('/api/v1/enterprise/export?format=csv', headers=headers)
+    assert response.status_code == 200
+    assert "text/csv" in response.content_type
+    assert "attachment; filename=enterprise_telemetry_export.csv" in response.headers.get("Content-Disposition", "")
+    csv_text = response.get_data(as_text=True)
+    assert "Unit ID,Name,Location,Uptime %,Total Scans,Avg Session (min),Estimated MET Capacity,Health Score,Status" in csv_text
 
 def test_enterprise_leads_success(client):
     """Test successful enterprise lead sync with API key."""
