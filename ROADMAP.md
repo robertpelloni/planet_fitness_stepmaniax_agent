@@ -101,3 +101,7 @@
 ### 14.12 Bare-Metal Kiosk Display Layer (v9.7.0)
 - [x] Openbox X11 kiosk display layer (`deployment_assets/x11_kiosk/kiosk_boot.sh`) disabling DPMS/screen blanking and hiding cursor.
 - [x] Watchdog auto-restart service template (`deployment_assets/x11_kiosk/smx-kiosk.service.example`) for ARM64 Linux systems.
+
+### 14.13 Corporate Procurement Alignment & Vendor Approval (v9.8.0)
+- [x] Comprehensive National Corporate Vendor Approval Blueprint (`technical_docs/national_vendor_approval_deck.md`).
+- [x] Complete UL, CE, and ADA compliance certification blueprints for custom Andamiro 9-panel matrix hardware.
