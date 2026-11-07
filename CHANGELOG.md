@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.6.0] - 2026-11-07
+### Added
+- Comprehensive documentation for the Sales Pipeline Kanban Board and associated workflows in `regional-expansion-strategy.md`.
+- Formalization of the 7 enterprise stage gates, HTMX transitions, proposal generation, and franchisee onboarding.
+
 ## [9.5.0] - 2026-11-07
 ### Added
 - Dynamic MET (Metabolic Equivalent of Task) capacity algorithm (`estimate_unit_met_capacity`) based on cadence, pacing, and duration thresholds in `analytics.py`.

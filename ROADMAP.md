@@ -93,3 +93,7 @@
 - [x] Real-time ACSM MET capacity estimation engine (`estimate_unit_met_capacity`) based on live session durations and step pacing.
 - [x] Dual-format Enterprise Reporting API (`/api/v1/enterprise/export` supporting JSON and RFC-4180 CSV attachment exports).
 - [x] Robust automated integration test coverage in `tests/integration/test_enterprise_api.py`.
+
+### 14.11 Sales Operations & Stage Gate Governance (v9.6.0)
+- [x] Comprehensive documentation of the 7 enterprise stage gates and Kanban workflows in `regional-expansion-strategy.md`.
+- [x] Formalization of dynamic proposal generation and lead-to-franchisee conversion procedures.

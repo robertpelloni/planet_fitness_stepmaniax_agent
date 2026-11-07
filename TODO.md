@@ -95,3 +95,7 @@
 - [x] Dynamic MET calculation (`estimate_unit_met_capacity`) based on ACSM exergaming regression model.
 - [x] Add CSV export support to `/api/v1/enterprise/export?format=csv` for executive reporting.
 - [x] Comprehensive test coverage in `tests/integration/test_enterprise_api.py`.
+
+### 📋 Sales Process & Kanban Documentation (v9.6.0)
+- [x] Update `regional-expansion-strategy.md` with Sales Pipeline Kanban stages, HTMX transitions, and conversion workflows.
+- [x] Synchronize sales enablement process documentation with the unified operations cockpit.

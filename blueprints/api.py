@@ -514,8 +514,18 @@ def api_enterprise_export():
         "duration_minutes": h.duration_minutes
     } for h in history]
 
+    # Read version dynamically from VERSION.md if present
+    version_str = "9.6.0"
+    version_file = os.path.join(os.path.dirname(__file__), "..", "VERSION.md")
+    if os.path.exists(version_file):
+        try:
+            with open(version_file, "r") as vf:
+                version_str = vf.read().strip()
+        except Exception:
+            pass
+
     return {
-        "version": "9.5.0",
+        "version": version_str,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "telemetry": telemetry_data,
         "engagement": engagement_data,
