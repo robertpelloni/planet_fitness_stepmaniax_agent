@@ -70,10 +70,21 @@ def start_web_server():
 
     log_path = os.path.join(LOG_DIR, "server.log")
     logger.info("Starting Gunicorn web server on http://127.0.0.1:5000...")
+    env = os.environ.copy()
+    env_file = os.path.join(PROJECT_ROOT, ".env")
+    if os.path.exists(env_file):
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    env[k.strip()] = v.strip()
+
     with open(log_path, "a") as out:
         subprocess.Popen(
             ["gunicorn", "--config", "gunicorn_config.py", "app:app"],
             cwd=PROJECT_ROOT,
+            env=env,
             stdout=out,
             stderr=subprocess.STDOUT
         )
@@ -124,10 +135,21 @@ def start_health_monitor():
 
     log_path = os.path.join(LOG_DIR, "health_monitor.log")
     logger.info("Starting health monitor daemon...")
+    env = os.environ.copy()
+    env_file = os.path.join(PROJECT_ROOT, ".env")
+    if os.path.exists(env_file):
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    env[k.strip()] = v.strip()
+
     with open(log_path, "a") as out:
         subprocess.Popen(
             [sys.executable, "health_monitor.py"],
             cwd=PROJECT_ROOT,
+            env=env,
             stdout=out,
             stderr=subprocess.STDOUT
         )
