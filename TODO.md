@@ -99,3 +99,7 @@
 ### 📋 Sales Process & Kanban Documentation (v9.6.0)
 - [x] Update `regional-expansion-strategy.md` with Sales Pipeline Kanban stages, HTMX transitions, and conversion workflows.
 - [x] Synchronize sales enablement process documentation with the unified operations cockpit.
+
+### 🖥️ Kiosk Display Layer & ARM64 Automation (v9.7.0)
+- [x] Implement `deployment_assets/x11_kiosk/kiosk_boot.sh` for Openbox bare-metal X11 kiosk display sessions.
+- [x] Provide `deployment_assets/x11_kiosk/smx-kiosk.service.example` systemd unit for headless ARM64 kiosk deployments.

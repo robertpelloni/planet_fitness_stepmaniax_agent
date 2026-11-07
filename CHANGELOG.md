@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.7.0] - 2026-11-07
+### Added
+- Bare-Metal Openbox X11 Kiosk Display Layer bootloader (`deployment_assets/x11_kiosk/kiosk_boot.sh`) for Linux ARM64 hardware running the StepMania Fitness Fork.
+- Systemd kiosk service descriptor template (`deployment_assets/x11_kiosk/smx-kiosk.service.example`) with watchdog autorestart and screen blanking inhibitor.
+
 ## [9.6.0] - 2026-11-07
 ### Added
 - Comprehensive documentation for the Sales Pipeline Kanban Board and associated workflows in `regional-expansion-strategy.md`.

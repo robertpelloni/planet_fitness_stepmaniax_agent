@@ -28,7 +28,9 @@ def test_enterprise_export_success(client):
     assert "telemetry" in data
     assert "engagement" in data
     assert "sentiment" in data
-    assert data["version"] == "9.6.0"
+    with open("VERSION.md") as vf:
+        current_version = vf.read().strip()
+    assert data["version"] == current_version
     assert "pilot_session_logs" in data
     assert len(data["telemetry"]) > 0
     # Ensure dynamic MET calculation is present and populated
