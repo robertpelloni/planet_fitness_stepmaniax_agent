@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.8.0] - 2026-11-07
+### Added
+- National Corporate Vendor Approval Blueprint (`technical_docs/national_vendor_approval_deck.md`) for Path B procurement alignment with Planet Fitness Corporate and the Franchise Advisory Council.
+- Formalized empirical pilot retention lift (+3.4%), Andamiro 9-panel matrix commercial economics ($6,000 / 500 MOQ), and UL/CE/ADA compliance engineering specs.
+
+## [9.7.0] - 2026-11-07
+### Added
+- Bare-Metal Openbox X11 Kiosk Display Layer bootloader (`deployment_assets/x11_kiosk/kiosk_boot.sh`) for Linux ARM64 hardware running the StepMania Fitness Fork.
+- Systemd kiosk service descriptor template (`deployment_assets/x11_kiosk/smx-kiosk.service.example`) with watchdog autorestart and screen blanking inhibitor.
+
 ## [9.6.0] - 2026-11-07
 ### Added
 - Comprehensive documentation for the Sales Pipeline Kanban Board and associated workflows in `regional-expansion-strategy.md`.

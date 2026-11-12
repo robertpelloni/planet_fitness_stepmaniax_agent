@@ -99,3 +99,11 @@
 ### 📋 Sales Process & Kanban Documentation (v9.6.0)
 - [x] Update `regional-expansion-strategy.md` with Sales Pipeline Kanban stages, HTMX transitions, and conversion workflows.
 - [x] Synchronize sales enablement process documentation with the unified operations cockpit.
+
+### 🖥️ Kiosk Display Layer & ARM64 Automation (v9.7.0)
+- [x] Implement `deployment_assets/x11_kiosk/kiosk_boot.sh` for Openbox bare-metal X11 kiosk display sessions.
+- [x] Provide `deployment_assets/x11_kiosk/smx-kiosk.service.example` systemd unit for headless ARM64 kiosk deployments.
+
+### 🏢 Corporate Procurement & Path B Vendor Blueprint (v9.8.0)
+- [x] Formulate `technical_docs/national_vendor_approval_deck.md` synthesizing empirical pilot ROI, retention economics, Andamiro hardware specs, and compliance certifications.
+- [x] Complete Path B corporate procurement alignment and FAC presentation deck.

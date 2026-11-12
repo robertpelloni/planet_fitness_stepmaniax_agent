@@ -1,0 +1,17 @@
+[Unit]
+Description=StepMania Fitness Fork Bare-Metal Kiosk Display Service
+After=network.target sound.target systemd-user-sessions.service
+
+[Service]
+Type=simple
+User=kiosk
+Group=kiosk
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/kiosk/.Xauthority
+WorkingDirectory=/opt/smx-agent/deployment_assets/x11_kiosk
+ExecStart=/bin/bash /opt/smx-agent/deployment_assets/x11_kiosk/kiosk_boot.sh
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target
